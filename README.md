@@ -1,225 +1,441 @@
 # Portify AI
 
-AI-powered SaaS portfolio builder that transforms resumes into professional, customizable portfolio websites.
+An AI-powered SaaS platform for building professional developer portfolios with customizable themes, analytics, media management, and AI-assisted content generation.
+
+---
 
 ## Overview
 
-Portify AI helps students, developers, and professionals create modern portfolio websites without manually designing or coding them.
+Portify AI enables students, developers, and professionals to create modern portfolio websites without manually designing or coding them.
 
-Users can build portfolios, manage projects, upload resumes, add media, track analytics, customize themes, and use AI-assisted content generation.
+Users can build portfolios, manage projects, upload resumes, add media, track analytics, customize themes, and leverage AI-powered content generation to showcase their work professionally.
 
-The platform is designed as a scalable SaaS application using Next.js, TypeScript, MongoDB, Prisma, Auth.js, Cloudinary, Gemini AI, and modern DevOps practices.
+The platform is designed as a scalable SaaS application using modern technologies including Next.js, TypeScript, MongoDB, Prisma, Auth.js, Cloudinary, Gemini AI, and industry-standard DevOps practices.
 
 ---
 
 ## Core Features
 
-### Authentication
-- User registration
-- Login and logout
-- Email verification
-- Password reset
-- Protected routes
-- Role-based access control
+### Authentication & Security
+
+- User Registration
+- Secure Login & Logout
+- Email Verification
+- Password Reset
+- Protected Routes
+- Role-Based Access Control (RBAC)
+- Session Management
 
 ### Portfolio Builder
-- Public portfolio pages
-- Custom username URLs
-- About section
-- Education section
-- Experience section
-- Projects section
-- Skills section
-- Achievements section
-- Coding profiles
-- Social links
-- Custom sections
+
+- Public Portfolio Pages
+- Custom Username URLs
+- About Section
+- Education Section
+- Experience Section
+- Projects Section
+- Skills Section
+- Achievements Section
+- Coding Profiles
+- Social Links
+- Custom Portfolio Sections
 
 ### Resume Management
-- Resume upload
-- Resume replacement
-- Resume download
-- AI-assisted resume parsing
+
+- Resume Upload
+- Resume Replacement
+- Resume Download
+- Resume Parsing
+- AI Resume Enhancement
 
 ### Media Management
-- Image uploads
-- Video uploads
-- Cloudinary integration
-- Portfolio galleries
+
+- Image Uploads
+- Video Uploads
+- Cloudinary Integration
+- Portfolio Galleries
+- Media Optimization
 
 ### Themes & Customization
-- Multiple portfolio themes
-- Theme switching
-- Color customization
-- Responsive layouts
+
+- Multiple Portfolio Themes
+- Theme Switching
+- Custom Color Schemes
+- Responsive Layouts
+- Dark / Light Mode
 
 ### Analytics
-- Portfolio views
-- Visitor tracking
-- Device statistics
-- Geographic insights
-- Traffic analytics
+
+- Portfolio Views
+- Visitor Tracking
+- Device Statistics
+- Traffic Insights
+- Engagement Metrics
 
 ### Admin Panel
-- User management
-- Portfolio approvals
-- Featured users
-- Platform analytics
-- Theme management
-- Content moderation
+
+- User Management
+- Portfolio Approvals
+- Featured Users
+- Platform Analytics
+- Theme Management
+- Content Moderation
 
 ### AI Features
-- Gemini integration
-- AI content generation
-- Resume enhancement
-- Portfolio suggestions
+
+- Gemini AI Integration
+- Content Generation
+- Portfolio Suggestions
+- Resume Enhancement
+- Smart Recommendations
 
 ---
 
 ## Tech Stack
 
 ### Frontend
+
 - Next.js 16
 - React 19
 - TypeScript
-- Tailwind CSS
+- Tailwind CSS 4
 - Shadcn UI
 - Framer Motion
 
 ### Backend
+
 - Next.js App Router
 - Server Actions
-- REST APIs
+- Route Handlers (API Routes)
 
 ### Database
+
 - MongoDB Atlas
 - Prisma ORM
 
 ### Authentication
-- Auth.js
+
+- Auth.js (NextAuth)
 - Prisma Adapter
 - JWT
 
 ### Storage
+
 - Cloudinary
 - UploadThing
 
 ### AI
-- Google Gemini
 
-### Email
+- Google Gemini AI
+
+### Email Services
+
 - Resend
 
 ### State Management
+
 - Zustand
 
 ### Validation
+
 - Zod
 - React Hook Form
 
 ### Testing
+
 - Jest
 - React Testing Library
 - Playwright
 
 ### DevOps
+
 - Docker
 - GitHub Actions
 - CI/CD Pipelines
+- Husky
+- Lint-Staged
 
 ---
 
 ## Project Structure
 
-src/
-├── app/
-├── actions/
-├── components/
-├── services/
-├── repositories/
-├── hooks/
-├── store/
-├── providers/
-├── validators/
-├── types/
-├── config/
-└── lib/
+```text
+portify-ai/
+├── .github/
+├── docs/
+├── emails/
+├── monitoring/
+├── prisma/
+├── public/
+├── scripts/
+├── src/
+│   ├── actions/
+│   ├── app/
+│   ├── cache/
+│   ├── components/
+│   ├── config/
+│   ├── constants/
+│   ├── context/
+│   ├── db/
+│   ├── events/
+│   ├── generated/
+│   ├── hooks/
+│   ├── jobs/
+│   ├── lib/
+│   ├── providers/
+│   ├── repositories/
+│   ├── services/
+│   ├── store/
+│   ├── templates/
+│   ├── types/
+│   ├── utils/
+│   └── validators/
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+├── Dockerfile
+├── docker-compose.yml
+├── jest.config.ts
+├── playwright.config.ts
+├── next.config.ts
+├── tsconfig.json
+└── package.json
+```
+
+---
+
+## Architecture Overview
+
+Portify AI follows a scalable layered architecture.
+
+### Presentation Layer
+
+- Next.js App Router
+- React Components
+- Tailwind CSS
+- Shadcn UI
+
+### Application Layer
+
+- Server Actions
+- Route Handlers
+- Feature Modules
+
+### Business Layer
+
+- Services
+- Repositories
+- Domain Logic
+
+### Data Layer
+
+- Prisma ORM
+- MongoDB Atlas
+
+### Infrastructure Layer
+
+- Cloudinary
+- Gemini AI
+- Resend
+- Docker
+- GitHub Actions
 
 ---
 
 ## Installation
 
-bash git clone https://github.com/RAj26-luj/portify-ai.git cd portify-ai  npm install 
+### Clone Repository
 
-Create environment variables:
+```bash
+git clone https://github.com/RAj26-luj/portify-ai.git
+cd portify-ai
+```
 
-bash cp .env.example .env 
+### Install Dependencies
 
-Run development server:
+```bash
+npm install
+```
 
-bash npm run dev 
+### Environment Variables
+
+```bash
+cp .env.example .env
+```
+
+Configure all required environment variables.
+
+### Start Development Server
+
+```bash
+npm run dev
+```
+
+Application will be available at:
+
+```text
+http://localhost:3000
+```
 
 ---
 
 ## Quality Checks
 
-bash npm run build npm run lint npm run test npm run e2e 
+### Build
+
+```bash
+npm run build
+```
+
+### Lint
+
+```bash
+npm run lint
+```
+
+### Unit Tests
+
+```bash
+npm run test
+```
+
+### End-to-End Tests
+
+```bash
+npm run e2e
+```
+
+---
+
+## CI/CD Pipeline
+
+The project includes automated workflows for:
+
+- Build Validation
+- Lint Checks
+- Automated Testing
+- Deployment Automation
+- Pull Request Verification
+
+GitHub Actions are configured inside:
+
+```text
+.github/workflows/
+```
+
+---
+
+## Deployment
+
+### Vercel
+
+Production deployments are automatically triggered from the `main` branch.
+
+### Docker
+
+```bash
+docker-compose up --build
+```
 
 ---
 
 ## Roadmap
 
 ### Phase 1
-- Infrastructure setup
-- CI/CD
-- Testing framework
+
+- Infrastructure Setup
+- CI/CD Configuration
+- Testing Framework
 
 ### Phase 2
-- Database architecture
-- Prisma models
-- MongoDB integration
+
+- Database Architecture
+- Prisma Models
+- MongoDB Integration
 
 ### Phase 3
-- Authentication system
+
+- Authentication System
 
 ### Phase 4
-- Portfolio CRUD
+
+- Portfolio Management
 
 ### Phase 5
-- Resume & Media management
+
+- Resume & Media Management
 
 ### Phase 6
-- AI-powered features
+
+- AI-Powered Features
 
 ### Phase 7
-- Analytics dashboard
+
+- Analytics Dashboard
 
 ### Phase 8
-- Admin approval workflow
+
+- Admin Approval Workflow
 
 ### Phase 9
-- Production deployment
+
+- Production Release
 
 ---
 
 ## Status
 
-Current Version: v0.1.0-infra
+**Current Version:** `v0.1.0-infra`
 
-Infrastructure phase completed successfully.
+Infrastructure setup completed successfully.
+
+### Completed
+
+- Next.js 16 Setup
+- TypeScript Configuration
+- Project Architecture
+- GitHub Repository
+- GitHub Actions Workflows
+- Docker Configuration
+- Jest Configuration
+- Playwright Configuration
+- Vercel Deployment
+- Initial E2E Testing
+- Repository Documentation
+
+### Next Milestone
+
+- Database Design
+- Prisma Models
+- MongoDB Integration
+- Authentication System
+- Portfolio CRUD Operations
+
+---
+
+## Contributing
+
+Contributions, suggestions, and feature requests are welcome.
+
+Please create an issue or submit a pull request.
 
 ---
 
 ## License
 
-MIT License
+This project is licensed under the MIT License.
 
 ---
 
 ## Author
 
-Raj Kumar Nath Sharma
+**Raj Kumar Nath Sharma**
 
-NIT Rourkela — Electrical Engineering
+B.Tech, Electrical Engineering  
+National Institute of Technology Rourkela
 
-Full Stack Developer | MERN Stack | AI Applications | Competitive Programmer
+- Full Stack Development
+- MERN Stack
+- AI Applications
+- Competitive Programming
