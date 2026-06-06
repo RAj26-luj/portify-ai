@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 
 import {
-  parseResume,
+  parseResumeText,
 } from "@/services/ai";
 
-export async function POST() {
-  const result =
-    await parseResume();
+export async function POST(
+  req: Request
+) {
+  const body = await req.json();
 
-  return NextResponse.json(
-    result
-  );
+  const result =
+    await parseResumeText(
+      body.text ?? ""
+    );
+
+  return NextResponse.json({
+    result,
+  });
 }
