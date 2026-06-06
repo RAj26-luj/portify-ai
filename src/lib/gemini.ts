@@ -1,9 +1,18 @@
 import OpenAI from "openai";
 
-export const ai = new OpenAI({
-  apiKey:
-    process.env.OPENROUTER_API_KEY!,
+export function getAI() {
+  const apiKey =
+    process.env.OPENROUTER_API_KEY;
 
-  baseURL:
-    "https://openrouter.ai/api/v1",
-});
+  if (!apiKey) {
+    throw new Error(
+      "OPENROUTER_API_KEY is missing"
+    );
+  }
+
+  return new OpenAI({
+    apiKey,
+    baseURL:
+      "https://openrouter.ai/api/v1",
+  });
+}

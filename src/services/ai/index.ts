@@ -1,9 +1,11 @@
-import { ai } from "@/lib/gemini";
+import { getAI } from "@/lib/gemini";
 import { aiConfig } from "@/config/ai";
 
 export async function improveBio(
   bio: string
 ) {
+  const ai = getAI();
+
   const response =
     await ai.chat.completions.create({
       model:
@@ -32,6 +34,8 @@ export async function generateProjectDescription(
   title: string,
   techStack: string[]
 ) {
+  const ai = getAI();
+
   const response =
     await ai.chat.completions.create({
       model:
@@ -64,15 +68,17 @@ ${techStack.join(", ")}
 export async function parseResumeText(
   text: string
 ) {
+  const ai = getAI();
+
   const response =
     await ai.chat.completions.create({
       model:
         aiConfig.defaultModel,
 
       messages: [
-  {
-    role: "system",
-    content: `
+        {
+          role: "system",
+          content: `
 Return ONLY valid JSON.
 
 {
@@ -95,12 +101,12 @@ Rules:
 - Education must be array
 - Experience must be array
 `,
-  },
-  {
-    role: "user",
-    content: text,
-  },
-],
+        },
+        {
+          role: "user",
+          content: text,
+        },
+      ],
     });
 
   return (
