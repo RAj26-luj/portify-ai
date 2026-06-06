@@ -1,5 +1,3 @@
-import { MongoClient } from "mongodb";
+import { prisma } from "./prisma";
 
-const uri = process.env.DATABASE_URL!;
-
-export const client = new MongoClient(uri);
+export { prisma };
