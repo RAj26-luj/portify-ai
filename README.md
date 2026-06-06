@@ -45,7 +45,7 @@ The platform is designed as a scalable SaaS application using modern technologie
 - Resume Upload
 - Resume Replacement
 - Resume Download
-- Resume Parsing
+- AI Resume Parsing
 - AI Resume Enhancement
 
 ### Media Management
@@ -70,7 +70,7 @@ The platform is designed as a scalable SaaS application using modern technologie
 - Visitor Tracking
 - Device Statistics
 - Traffic Insights
-- Engagement Metrics
+- Google Analytics Integration
 
 ### Admin Panel
 
@@ -79,14 +79,13 @@ The platform is designed as a scalable SaaS application using modern technologie
 - Featured Users
 - Platform Analytics
 - Theme Management
-- Content Moderation
 
 ### AI Features
 
 - Gemini AI Integration
 - Content Generation
-- Portfolio Suggestions
 - Resume Enhancement
+- Portfolio Suggestions
 - Smart Recommendations
 
 ---
@@ -106,7 +105,7 @@ The platform is designed as a scalable SaaS application using modern technologie
 
 - Next.js App Router
 - Server Actions
-- Route Handlers (API Routes)
+- Route Handlers
 
 ### Database
 
@@ -115,14 +114,12 @@ The platform is designed as a scalable SaaS application using modern technologie
 
 ### Authentication
 
-- Auth.js (NextAuth)
+- Auth.js
 - Prisma Adapter
-- JWT
 
 ### Storage
 
 - Cloudinary
-- UploadThing
 
 ### AI
 
@@ -130,7 +127,12 @@ The platform is designed as a scalable SaaS application using modern technologie
 
 ### Email Services
 
-- Resend
+- Nodemailer
+- Gmail SMTP
+
+### Analytics
+
+- Google Analytics 4
 
 ### State Management
 
@@ -154,6 +156,7 @@ The platform is designed as a scalable SaaS application using modern technologie
 - CI/CD Pipelines
 - Husky
 - Lint-Staged
+- Vercel
 
 ---
 
@@ -162,6 +165,9 @@ The platform is designed as a scalable SaaS application using modern technologie
 ```text
 portify-ai/
 ├── .github/
+│   ├── workflows/
+│   ├── ISSUE_TEMPLATE/
+│   └── PULL_REQUEST_TEMPLATE.md
 ├── docs/
 ├── emails/
 ├── monitoring/
@@ -200,7 +206,8 @@ portify-ai/
 ├── playwright.config.ts
 ├── next.config.ts
 ├── tsconfig.json
-└── package.json
+├── package.json
+└── README.md
 ```
 
 ---
@@ -237,9 +244,10 @@ Portify AI follows a scalable layered architecture.
 
 - Cloudinary
 - Gemini AI
-- Resend
+- Gmail SMTP
 - Docker
 - GitHub Actions
+- Vercel
 
 ---
 
@@ -249,6 +257,7 @@ Portify AI follows a scalable layered architecture.
 
 ```bash
 git clone https://github.com/RAj26-luj/portify-ai.git
+
 cd portify-ai
 ```
 
@@ -257,6 +266,14 @@ cd portify-ai
 ```bash
 npm install
 ```
+
+### Required Services
+
+- MongoDB Atlas
+- Cloudinary
+- Google Gemini API
+- Gmail SMTP
+- Vercel
 
 ### Environment Variables
 
@@ -395,7 +412,7 @@ Infrastructure setup completed successfully.
 - Next.js 16 Setup
 - TypeScript Configuration
 - Project Architecture
-- GitHub Repository
+- GitHub Repository Setup
 - GitHub Actions Workflows
 - Docker Configuration
 - Jest Configuration
@@ -407,8 +424,8 @@ Infrastructure setup completed successfully.
 ### Next Milestone
 
 - Database Design
-- Prisma Models
-- MongoDB Integration
+- Prisma Schema Creation
+- MongoDB Atlas Integration
 - Authentication System
 - Portfolio CRUD Operations
 
@@ -439,3 +456,7 @@ National Institute of Technology Rourkela
 - MERN Stack
 - AI Applications
 - Competitive Programming
+
+---
+
+⭐ If you found this project useful, consider giving it a star.
