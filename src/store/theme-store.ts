@@ -6,6 +6,8 @@ interface ThemeStore {
   setTheme: (
     theme: string
   ) => void;
+
+  resetTheme: () => void;
 }
 
 export const useThemeStore =
@@ -13,5 +15,12 @@ export const useThemeStore =
     theme: "default",
 
     setTheme: (theme) =>
-      set({ theme }),
+      set({
+        theme,
+      }),
+
+    resetTheme: () =>
+      set({
+        theme: "default",
+      }),
   }));

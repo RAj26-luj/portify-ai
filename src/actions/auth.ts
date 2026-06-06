@@ -9,7 +9,7 @@ import { registerSchema } from "@/validators/auth/register";
 import { loginSchema } from "@/validators/auth/login";
 import { forgotPasswordSchema } from "@/validators/auth/forgot-password";
 import { resetPasswordSchema } from "@/validators/auth/reset-password";
-
+import { sendAdminNotification } from "@/services/email/send-admin-notification";
 import {
   sendVerificationEmail,
   sendResetPasswordEmail,
@@ -57,6 +57,38 @@ export async function registerUser(
         password: hashedPassword,
       },
     });
+    const baseUsername =
+  email
+    .split("@")[0]
+    .toLowerCase()
+    .replace(/\s+/g, "");
+
+const existingPortfolio =
+  await prisma.portfolio.findUnique({
+    where: {
+      username:
+        baseUsername,
+    },
+  });
+
+const username =
+  existingPortfolio
+    ? `${baseUsername}-${Date.now()}`
+    : baseUsername;
+
+await prisma.portfolio.create({
+  data: {
+    userId: user.id,
+
+    username,
+
+    title: `${name}'s Portfolio`,
+
+    bio: "",
+
+    status: "DRAFT",
+  },
+});
 
   const token = randomUUID();
 
@@ -75,6 +107,10 @@ export async function registerUser(
     email,
     token
   );
+  await sendAdminNotification(
+  "New User Registration",
+  `${name} (${email}) has registered and is awaiting approval.`
+);
 
   return {
     success: true,
@@ -165,15 +201,12 @@ export async function resetPassword(
     };
   }
 
-  const verification =
-    await prisma.verificationToken.findUnique({
-      where: {
-        identifier_token: {
-          identifier: "",
-          token: parsed.data.token,
-        },
-      },
-    });
+const verification =
+  await prisma.verificationToken.findFirst({
+    where: {
+      token: parsed.data.token,
+    },
+  });
 
   if (!verification) {
     return {

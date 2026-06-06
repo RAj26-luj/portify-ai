@@ -1,15 +1,42 @@
 "use server";
 
-import { v2 as cloudinary } from "cloudinary";
+import { cloudinary } from "@/lib/cloudinary";
 
-cloudinary.config({
-  cloud_name:
-    process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:
-    process.env.CLOUDINARY_API_KEY,
-  api_secret:
-    process.env.CLOUDINARY_API_SECRET,
-});
+export async function uploadMedia(
+  file: string,
+  folder: string
+) {
+  const result =
+    await cloudinary.uploader.upload(
+      file,
+      {
+        folder,
+        resource_type: "auto",
+      }
+    );
+
+  return {
+    publicId:
+      result.public_id,
+
+    secureUrl:
+      result.secure_url,
+
+    format:
+      result.format,
+
+    bytes:
+      result.bytes,
+
+    width:
+      result.width,
+
+    height:
+      result.height,
+    createdAt:
+      result.created_at,
+  };
+}
 
 export async function deleteMedia(
   publicId: string

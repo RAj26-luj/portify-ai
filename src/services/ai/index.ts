@@ -70,16 +70,37 @@ export async function parseResumeText(
         aiConfig.defaultModel,
 
       messages: [
-        {
-          role: "system",
-          content:
-            "Extract portfolio information and return JSON only.",
-        },
-        {
-          role: "user",
-          content: text,
-        },
-      ],
+  {
+    role: "system",
+    content: `
+Return ONLY valid JSON.
+
+{
+  "name":"",
+  "email":"",
+  "phone":"",
+  "bio":"",
+  "skills":[],
+  "education":[],
+  "experience":[],
+  "projects":[]
+}
+
+Rules:
+- No markdown
+- No explanation
+- No text outside JSON
+- Skills must be string array
+- Projects must be array
+- Education must be array
+- Experience must be array
+`,
+  },
+  {
+    role: "user",
+    content: text,
+  },
+],
     });
 
   return (

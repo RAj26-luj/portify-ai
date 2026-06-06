@@ -26,9 +26,48 @@ export async function recordView(
 export async function getAnalytics(
   portfolioId: string
 ) {
-  return prisma.analytics.findUnique({
-    where: {
-      portfolioId,
-    },
-  });
+  const portfolio =
+    await prisma.portfolio.findUnique({
+      where: {
+        id: portfolioId,
+      },
+      select: {
+        totalViews: true,
+        uniqueVisitors: true,
+      },
+    });
+
+  const messages =
+    await prisma.contactMessage.count(
+      {
+        where: {
+          portfolioId,
+        },
+      }
+    );
+
+  const views =
+    await prisma.portfolioView.count(
+      {
+        where: {
+          portfolioId,
+        },
+      }
+    );
+
+  return {
+    totalViews:
+      portfolio?.totalViews ??
+      0,
+
+    uniqueVisitors:
+      portfolio?.uniqueVisitors ??
+      0,
+
+    contactMessages:
+      messages,
+
+    portfolioViews:
+      views,
+  };
 }

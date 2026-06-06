@@ -1,9 +1,14 @@
+import { themes } from "@/constants/themes";
+
 export async function getThemes() {
-  return [
-    "default",
-    "modern",
-    "minimal",
-    "developer",
-    "dark",
-  ];
+  return themes;
+}
+
+export async function getThemeById(
+  id: string
+) {
+  return themes.find(
+    (theme) =>
+      theme.id === id
+  );
 }

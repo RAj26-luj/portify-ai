@@ -21,7 +21,8 @@ export const authConfig: NextAuthConfig = {
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      clientSecret:
+        process.env.AUTH_GOOGLE_SECRET!,
     }),
 
     Credentials({
@@ -33,33 +34,70 @@ export const authConfig: NextAuthConfig = {
       },
 
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (
+          !credentials?.email ||
+          !credentials?.password
+        ) {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: String(credentials.email).toLowerCase(),
-          },
-        });
+        const user =
+          await prisma.user.findUnique({
+            where: {
+              email: String(
+                credentials.email
+              ).toLowerCase(),
+            },
+          });
 
-        if (!user || !user.password) {
+        if (
+          !user ||
+          !user.password
+        ) {
           return null;
         }
 
-        const valid = await bcrypt.compare(
-          String(credentials.password),
-          user.password
-        );
+        const valid =
+          await bcrypt.compare(
+            String(
+              credentials.password
+            ),
+            user.password
+          );
 
         if (!valid) {
           return null;
         }
 
-        if (user.isBlocked) {
-          throw new Error("ACCOUNT_BLOCKED");
-        }
+if (!user.emailVerified) {
+  throw new Error(
+    "EMAIL_NOT_VERIFIED"
+  );
+}
 
+if (
+  user.status ===
+  "REJECTED"
+) {
+  throw new Error(
+    "ACCOUNT_REJECTED"
+  );
+}
+
+if (
+  user.status !==
+  "APPROVED"
+) {
+  throw new Error(
+    "ACCOUNT_PENDING"
+  );
+}
+
+if (user.isBlocked) {
+  throw new Error(
+    "ACCOUNT_BLOCKED"
+  );
+}
         return {
           id: user.id,
           name: user.name,
@@ -67,62 +105,133 @@ export const authConfig: NextAuthConfig = {
           image: user.image,
           role: user.role,
           status: user.status,
-          isBlocked: user.isBlocked,
+          isBlocked:
+            user.isBlocked,
         };
       },
     }),
   ],
 
   callbacks: {
-    async signIn({ user }) {
-      if (user.isBlocked) {
-        return false;
+    async signIn({
+      user,
+      account,
+    }) {
+      if (
+        account?.provider ===
+        "google"
+      ) {
+        await prisma.user.update({
+          where: {
+            email:
+              user.email!,
+          },
+          data: {
+            emailVerified:
+              new Date(),
+          },
+        });
       }
 
-      return true;
+ const dbUser =
+  await prisma.user.findUnique({
+    where: {
+      email: user.email!,
+    },
+  });
+
+if (!dbUser) {
+  return false;
+}
+
+if (dbUser.isBlocked) {
+  return false;
+}
+
+if (
+  dbUser.status ===
+  "REJECTED"
+) {
+  return false;
+}
+
+if (
+  dbUser.status !==
+  "APPROVED"
+) {
+  return false;
+}
+
+return true;
     },
 
-    async jwt({ token, user }) {
+    async jwt({
+      token,
+      user,
+    }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
-        token.status = user.status;
-        token.isBlocked = user.isBlocked;
+        token.role =
+          user.role;
+        token.status =
+          user.status;
+        token.isBlocked =
+          user.isBlocked;
       }
 
       if (token.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: {
-            email: token.email,
-          },
-        });
+        const dbUser =
+          await prisma.user.findUnique(
+            {
+              where: {
+                email:
+                  token.email,
+              },
+            }
+          );
 
         if (dbUser) {
-          token.id = dbUser.id;
-          token.role = dbUser.role;
-          token.status = dbUser.status;
-          token.isBlocked = dbUser.isBlocked;
+          token.id =
+            dbUser.id;
+          token.role =
+            dbUser.role;
+          token.status =
+            dbUser.status;
+          token.isBlocked =
+            dbUser.isBlocked;
         }
       }
 
       return token;
     },
 
-    async session({ session, token }) {
+    async session({
+      session,
+      token,
+    }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as "USER" | "ADMIN";
-        session.user.status = token.status as
-          | "PENDING"
-          | "APPROVED"
-          | "REJECTED";
+        session.user.id =
+          token.id as string;
 
-        session.user.isBlocked = token.isBlocked as boolean;
+        session.user.role =
+          token.role as
+            | "USER"
+            | "ADMIN";
+
+        session.user.status =
+          token.status as
+            | "PENDING"
+            | "APPROVED"
+            | "REJECTED";
+
+        session.user.isBlocked =
+          token.isBlocked as boolean;
       }
 
       return session;
     },
   },
 
-  secret: process.env.AUTH_SECRET,
+  secret:
+    process.env.AUTH_SECRET,
 };

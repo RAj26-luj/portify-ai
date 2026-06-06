@@ -1,17 +1,57 @@
-import { auth } from "@/auth";
+import { getPendingUsers } from "@/actions/admin";
 
 export default async function AdminPage() {
-  const session = await auth();
+  const users =
+    await getPendingUsers();
 
   return (
-    <main className="p-6">
+    <main className="space-y-6 p-6">
       <h1 className="text-3xl font-bold">
-        Admin Panel
+        Admin Dashboard
       </h1>
 
-      <p className="mt-4">
-        Welcome {session?.user?.name}
-      </p>
+      <div className="rounded-lg border">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b">
+              <th className="p-4 text-left">
+                Name
+              </th>
+
+              <th className="p-4 text-left">
+                Email
+              </th>
+
+              <th className="p-4 text-left">
+                Status
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {users.map(
+              (user) => (
+                <tr
+                  key={user.id}
+                  className="border-b"
+                >
+                  <td className="p-4">
+                    {user.name}
+                  </td>
+
+                  <td className="p-4">
+                    {user.email}
+                  </td>
+
+                  <td className="p-4">
+                    {user.status}
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
     </main>
   );
 }
