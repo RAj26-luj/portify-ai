@@ -131,7 +131,19 @@ The platform is designed as a scalable SaaS application using Next.js, TypeScrip
 
 ## Project Structure
 
-text src/ ├── app/ ├── actions/ ├── components/ ├── services/ ├── repositories/ ├── hooks/ ├── store/ ├── providers/ ├── validators/ ├── types/ ├── config/ └── lib/ 
+src/
+├── app/
+├── actions/
+├── components/
+├── services/
+├── repositories/
+├── hooks/
+├── store/
+├── providers/
+├── validators/
+├── types/
+├── config/
+└── lib/
 
 ---
 
