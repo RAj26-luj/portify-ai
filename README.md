@@ -1,36 +1,213 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portify AI
 
-## Getting Started
+AI-powered SaaS portfolio builder that transforms resumes into professional, customizable portfolio websites.
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Portify AI helps students, developers, and professionals create modern portfolio websites without manually designing or coding them.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Users can build portfolios, manage projects, upload resumes, add media, track analytics, customize themes, and use AI-assisted content generation.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The platform is designed as a scalable SaaS application using Next.js, TypeScript, MongoDB, Prisma, Auth.js, Cloudinary, Gemini AI, and modern DevOps practices.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Core Features
 
-To learn more about Next.js, take a look at the following resources:
+### Authentication
+- User registration
+- Login and logout
+- Email verification
+- Password reset
+- Protected routes
+- Role-based access control
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Portfolio Builder
+- Public portfolio pages
+- Custom username URLs
+- About section
+- Education section
+- Experience section
+- Projects section
+- Skills section
+- Achievements section
+- Coding profiles
+- Social links
+- Custom sections
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Resume Management
+- Resume upload
+- Resume replacement
+- Resume download
+- AI-assisted resume parsing
 
-## Deploy on Vercel
+### Media Management
+- Image uploads
+- Video uploads
+- Cloudinary integration
+- Portfolio galleries
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Themes & Customization
+- Multiple portfolio themes
+- Theme switching
+- Color customization
+- Responsive layouts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Analytics
+- Portfolio views
+- Visitor tracking
+- Device statistics
+- Geographic insights
+- Traffic analytics
+
+### Admin Panel
+- User management
+- Portfolio approvals
+- Featured users
+- Platform analytics
+- Theme management
+- Content moderation
+
+### AI Features
+- Gemini integration
+- AI content generation
+- Resume enhancement
+- Portfolio suggestions
+
+---
+
+## Tech Stack
+
+### Frontend
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Shadcn UI
+- Framer Motion
+
+### Backend
+- Next.js App Router
+- Server Actions
+- REST APIs
+
+### Database
+- MongoDB Atlas
+- Prisma ORM
+
+### Authentication
+- Auth.js
+- Prisma Adapter
+- JWT
+
+### Storage
+- Cloudinary
+- UploadThing
+
+### AI
+- Google Gemini
+
+### Email
+- Resend
+
+### State Management
+- Zustand
+
+### Validation
+- Zod
+- React Hook Form
+
+### Testing
+- Jest
+- React Testing Library
+- Playwright
+
+### DevOps
+- Docker
+- GitHub Actions
+- CI/CD Pipelines
+
+---
+
+## Project Structure
+
+text src/ ├── app/ ├── actions/ ├── components/ ├── services/ ├── repositories/ ├── hooks/ ├── store/ ├── providers/ ├── validators/ ├── types/ ├── config/ └── lib/ 
+
+---
+
+## Installation
+
+bash git clone https://github.com/RAj26-luj/portify-ai.git cd portify-ai  npm install 
+
+Create environment variables:
+
+bash cp .env.example .env 
+
+Run development server:
+
+bash npm run dev 
+
+---
+
+## Quality Checks
+
+bash npm run build npm run lint npm run test npm run e2e 
+
+---
+
+## Roadmap
+
+### Phase 1
+- Infrastructure setup
+- CI/CD
+- Testing framework
+
+### Phase 2
+- Database architecture
+- Prisma models
+- MongoDB integration
+
+### Phase 3
+- Authentication system
+
+### Phase 4
+- Portfolio CRUD
+
+### Phase 5
+- Resume & Media management
+
+### Phase 6
+- AI-powered features
+
+### Phase 7
+- Analytics dashboard
+
+### Phase 8
+- Admin approval workflow
+
+### Phase 9
+- Production deployment
+
+---
+
+## Status
+
+Current Version: v0.1.0-infra
+
+Infrastructure phase completed successfully.
+
+---
+
+## License
+
+MIT License
+
+---
+
+## Author
+
+Raj Kumar Nath Sharma
+
+NIT Rourkela — Electrical Engineering
+
+Full Stack Developer | MERN Stack | AI Applications | Competitive Programmer
