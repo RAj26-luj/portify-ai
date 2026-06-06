@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  portify-ai:
+    build: .
+    container_name: portify-ai
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    env_file:
+      - .env.local
