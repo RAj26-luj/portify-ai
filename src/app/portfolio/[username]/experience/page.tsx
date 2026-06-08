@@ -24,7 +24,7 @@ export default async function ExperiencePage({
       </h1>
 
       {portfolio?.experiences.map(
-        (item) => (
+        (item: { id: string; company: string; position: string }) => (
           <div
             key={item.id}
             className="mb-4 rounded-xl border p-4"

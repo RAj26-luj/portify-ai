@@ -29,6 +29,13 @@ enum NotificationType {
   WARNING
   ERROR
 }
+enum PortfolioCategory {
+  STUDENT
+  WORKING_PROFESSIONAL
+  FREELANCER
+  RESEARCHER
+  STARTUP_FOUNDER
+}
 
 model User {
   id              String       @id @default(auto()) @map("_id") @db.ObjectId
@@ -77,6 +84,18 @@ model Portfolio {
 
   allowContactForm      Boolean           @default(true)
   allowResumeDownload   Boolean           @default(true)
+  showSkills          Boolean   @default(true)
+  showProjects        Boolean   @default(true)
+  showEducation       Boolean   @default(true)
+  showExperience      Boolean   @default(true)
+  showAchievements    Boolean   @default(true)
+
+  showSocialLinks     Boolean   @default(true)
+  showCodingProfiles  Boolean   @default(true)
+
+showCustomSections  Boolean @default(true)
+
+showAnalytics       Boolean @default(false)
 
   totalViews            Int               @default(0)
   uniqueVisitors        Int               @default(0)
@@ -85,6 +104,9 @@ model Portfolio {
   seoDescription        String?
   seoKeywords           String?
   seoImage              String?
+  ogTitle         String?
+ogSubtitle      String?
+ogDescription   String?
 
   activeThemeId         String?           @db.ObjectId
 
@@ -104,12 +126,24 @@ model Portfolio {
 
   analytics             Analytics?
   views                 PortfolioView[]
-
+  resumeDownloads     ResumeDownload[]
   contactMessages       ContactMessage[]
 
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
   slug                  String?           @unique
+  category              PortfolioCategory @default(STUDENT)
+  pendingFields       String[]
+pendingQuestions    String[]
+
+completionScore     Int      @default(0)
+portfolioScore      Int      @default(0)
+
+profileCompleted    Boolean  @default(false)
+
+lastAnalyzedAt      DateTime?
+
+
 }
 
 model Resume {
@@ -384,4 +418,18 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+model ResumeDownload {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+
+  portfolioId   String     @db.ObjectId
+  portfolio     Portfolio  @relation(fields: [portfolioId], references: [id])
+
+  ipHash        String?
+  country       String?
+  city          String?
+
+  downloadedAt  DateTime   @default(now())
+
+  @@index([downloadedAt])
 }

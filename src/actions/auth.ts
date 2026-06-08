@@ -228,7 +228,16 @@ export async function resetPassword(
       error: "Invalid token",
     };
   }
-
+if (
+  verification.expires <
+  new Date()
+) {
+  return {
+    success: false,
+    error:
+      "Token expired",
+  };
+}
   const hashedPassword =
     await bcrypt.hash(
       parsed.data.password,

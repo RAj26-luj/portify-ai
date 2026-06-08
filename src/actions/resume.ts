@@ -110,3 +110,48 @@ export async function deleteResume(
 
   return result;
 }
+export async function trackResumeDownload(
+  portfolioId: string,
+  ipHash?: string,
+  country?: string,
+  city?: string
+) {
+  return prisma.resumeDownload.create({
+    data: {
+      portfolioId,
+      ipHash,
+      country,
+      city,
+    },
+  });
+}
+
+export async function getResumeDownloadStats(
+  portfolioId: string
+) {
+  const totalDownloads =
+    await prisma.resumeDownload.count({
+      where: {
+        portfolioId,
+      },
+    });
+
+  const recentDownloads =
+    await prisma.resumeDownload.findMany({
+      where: {
+        portfolioId,
+      },
+
+      orderBy: {
+        downloadedAt:
+          "desc",
+      },
+
+      take: 20,
+    });
+
+  return {
+    totalDownloads,
+    recentDownloads,
+  };
+}

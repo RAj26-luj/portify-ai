@@ -1,6 +1,10 @@
 import { getPortfolioByUsername } from "@/actions/portfolio";
 import { getActiveTheme } from "@/actions/theme";
+import type {
+  Metadata,
+} from "next";
 export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{
     username: string;
@@ -56,7 +60,15 @@ export default async function PortfolioPage({
       <p className="mt-6">
         {portfolio.bio}
       </p>
-
+      {portfolio.resume &&
+  portfolio.allowResumeDownload && (
+    <a
+      href={`/api/resume/download?portfolioId=${portfolio.id}`}
+      className="mt-6 inline-block rounded bg-blue-600 px-4 py-2 text-white"
+    >
+      Download Resume
+    </a>
+)}
       <div className="mt-10">
         <h2 className="mb-4 text-2xl font-semibold">
           Active Theme
@@ -69,4 +81,69 @@ export default async function PortfolioPage({
       </div>
     </main>
   );
+}
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { username } =
+    await params;
+
+  const portfolio =
+    await getPortfolioByUsername(
+      username
+    );
+
+  if (!portfolio) {
+    return {
+      title:
+        "Portfolio Not Found",
+    };
+  }
+
+  const title =
+    portfolio.seoTitle ??
+    portfolio.title ??
+    portfolio.username;
+
+  const description =
+    portfolio.seoDescription ??
+    portfolio.bio ??
+    "Professional portfolio";
+
+ const image =
+  portfolio.seoImage ??
+  `/portfolio/${username}/opengraph-image`;
+  
+
+  return {
+    title,
+
+    description,
+
+    keywords:
+      portfolio.seoKeywords
+        ?.split(",")
+       .map((k: string) =>
+  k.trim()
+) ?? [],
+
+    openGraph: {
+      title,
+      description,
+      images: image
+        ? [image]
+        : [],
+      type: "website",
+    },
+
+    twitter: {
+      card:
+        "summary_large_image",
+      title,
+      description,
+      images: image
+        ? [image]
+        : [],
+    },
+  };
 }

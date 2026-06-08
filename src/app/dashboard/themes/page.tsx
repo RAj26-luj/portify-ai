@@ -9,7 +9,7 @@ export default function ThemesPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         {themes.map(
-          (theme) => (
+          (theme: { id: string; name: string; description: string }) => (
             <div
               key={theme.id}
               className="rounded-lg border p-4"

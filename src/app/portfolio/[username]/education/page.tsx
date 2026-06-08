@@ -24,7 +24,7 @@ export default async function EducationPage({
       </h1>
 
       {portfolio?.educations.map(
-        (item) => (
+        (item: { id: string; institution: string; degree: string }) => (
           <div
             key={item.id}
             className="mb-4 rounded-xl border p-4"

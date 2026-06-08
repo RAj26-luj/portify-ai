@@ -30,7 +30,14 @@ export default async function AdminPage() {
 
           <tbody>
             {users.map(
-              (user) => (
+  (
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      status: string;
+    }
+  ) => (
                 <tr
                   key={user.id}
                   className="border-b"

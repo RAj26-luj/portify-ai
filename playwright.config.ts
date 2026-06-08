@@ -5,29 +5,60 @@ export default defineConfig({
 
   timeout: 30000,
 
+  fullyParallel: true,
+
+  retries:
+    process.env.CI ? 2 : 0,
+
+  reporter: [
+    ["html"],
+  ],
+
   use: {
-    baseURL: "http://localhost:3000",
-    trace: "on-first-retry",
+    baseURL:
+      "http://localhost:3000",
+
+    trace:
+      "on-first-retry",
+
+    screenshot:
+      "only-on-failure",
+
+    video:
+      "retain-on-failure",
   },
 
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+      },
     },
+
     {
       name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
+      use: {
+        ...devices["Desktop Firefox"],
+      },
     },
+
     {
       name: "webkit",
-      use: { ...devices["Desktop Safari"] },
+      use: {
+        ...devices["Desktop Safari"],
+      },
     },
   ],
 
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: true,
+    command:
+      "npm run dev",
+
+    url:
+      "http://localhost:3000",
+
+    reuseExistingServer:
+      true,
   },
 });

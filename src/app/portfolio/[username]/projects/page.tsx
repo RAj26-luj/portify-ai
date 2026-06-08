@@ -25,7 +25,7 @@ export default async function ProjectsPage({
 
       <div className="grid gap-4">
         {portfolio?.projects.map(
-          (project) => (
+          (project: { id: string; title: string; description: string }) => (
             <div
               key={project.id}
               className="rounded-xl border p-4"

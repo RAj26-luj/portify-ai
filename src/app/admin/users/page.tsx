@@ -35,7 +35,15 @@ export default async function UsersPage() {
 
           <tbody>
             {users.map(
-              (user) => (
+              (
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    status: string;
+    role: string;
+  }
+) => (
                 <tr
                   key={user.id}
                   className="border-b"

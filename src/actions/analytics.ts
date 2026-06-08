@@ -92,92 +92,87 @@ export async function getAnalytics(
       }
     );
 
-  const [
-    messages,
-    views,
-    countries,
-    devices,
-    browsers,
-    referrers,
-  ] = await Promise.all([
-    prisma.contactMessage.count(
-      {
-        where: {
-          portfolioId,
-        },
-      }
-    ),
+const [
+  messages,
+  views,
+  resumeDownloads,
+  countries,
+  devices,
+  browsers,
+  referrers,
+] = await Promise.all([
+  prisma.contactMessage.count({
+    where: {
+      portfolioId,
+    },
+  }),
 
-    prisma.portfolioView.count(
-      {
-        where: {
-          portfolioId,
-        },
-      }
-    ),
+  prisma.portfolioView.count({
+    where: {
+      portfolioId,
+    },
+  }),
 
-    prisma.portfolioView.groupBy(
-      {
-        by: ["country"],
-        where: {
-          portfolioId,
-        },
-        _count: true,
-      }
-    ),
+  prisma.resumeDownload.count({
+    where: {
+      portfolioId,
+    },
+  }),
 
-    prisma.portfolioView.groupBy(
-      {
-        by: ["device"],
-        where: {
-          portfolioId,
-        },
-        _count: true,
-      }
-    ),
+  prisma.portfolioView.groupBy({
+    by: ["country"],
+    where: {
+      portfolioId,
+    },
+    _count: true,
+  }),
 
-    prisma.portfolioView.groupBy(
-      {
-        by: ["browser"],
-        where: {
-          portfolioId,
-        },
-        _count: true,
-      }
-    ),
+  prisma.portfolioView.groupBy({
+    by: ["device"],
+    where: {
+      portfolioId,
+    },
+    _count: true,
+  }),
 
-    prisma.portfolioView.groupBy(
-      {
-        by: ["referrer"],
-        where: {
-          portfolioId,
-        },
-        _count: true,
-      }
-    ),
-  ]);
+  prisma.portfolioView.groupBy({
+    by: ["browser"],
+    where: {
+      portfolioId,
+    },
+    _count: true,
+  }),
+
+  prisma.portfolioView.groupBy({
+    by: ["referrer"],
+    where: {
+      portfolioId,
+    },
+    _count: true,
+  }),
+]);
 
   return {
-    totalViews:
-      portfolio?.totalViews ??
-      0,
+  totalViews:
+    portfolio?.totalViews ?? 0,
 
-    uniqueVisitors:
-      portfolio?.uniqueVisitors ??
-      0,
+  uniqueVisitors:
+    portfolio?.uniqueVisitors ?? 0,
 
-    contactMessages:
-      messages,
+  contactMessages:
+    messages,
 
-    portfolioViews:
-      views,
+  portfolioViews:
+    views,
 
-    countries,
+  resumeDownloads,
 
-    devices,
+  countries,
 
-    browsers,
+  devices,
 
-    referrers,
-  };
+  browsers,
+
+  referrers,
+};
 }

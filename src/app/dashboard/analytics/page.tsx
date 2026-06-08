@@ -42,11 +42,12 @@ export default async function AnalyticsPage() {
       value:
         analytics.uniqueVisitors,
     },
-    {
-      title:
-        "Resume Downloads",
-      value: 0,
-    },
+ {
+  title:
+    "Resume Downloads",
+  value:
+    analytics.resumeDownloads,
+},
     {
       title:
         "Contact Messages",
@@ -62,7 +63,7 @@ export default async function AnalyticsPage() {
       </h1>
 
       <div className="grid gap-4 md:grid-cols-4">
-        {stats.map((stat) => (
+        {stats.map((stat: { title: string; value: number }) => (
           <div
             key={stat.title}
             className="rounded-lg border p-4"
@@ -83,10 +84,27 @@ export default async function AnalyticsPage() {
           Visitor Insights
         </h2>
 
-        <p>
-          Real analytics data is
-          now connected.
-        </p>
+      <div className="space-y-2 text-sm">
+  <p>
+    Countries:
+    {analytics.countries.length}
+  </p>
+
+  <p>
+    Devices:
+    {analytics.devices.length}
+  </p>
+
+  <p>
+    Browsers:
+    {analytics.browsers.length}
+  </p>
+
+  <p>
+    Referrers:
+    {analytics.referrers.length}
+  </p>
+</div>
       </div>
     </main>
   );

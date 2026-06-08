@@ -4,6 +4,10 @@ import { rateLimit } from "@/lib/rate-limit";
 
 import { extractPdfText } from "@/services/resume";
 import { parseResumeWithAI } from "@/services/resume/parser";
+import {
+  analyzeResume,
+} from "@/services/resume/analyze";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(
   req: Request
@@ -71,20 +75,55 @@ export async function POST(
       );
     }
 
-    const result =
-      await parseResumeWithAI(
-        text
-      );
+const parsedData =
+  await parseResumeWithAI(
+    text
+  );
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: result,
-      },
-      {
-        status: 200,
-      }
-    );
+const analysis =
+  analyzeResume(
+    parsedData
+  );
+if (
+  body.portfolioId
+) {
+  await prisma.portfolio.update({
+    where: {
+      id: body.portfolioId,
+    },
+
+    data: {
+      completionScore:
+        analysis.completionScore,
+
+      portfolioScore:
+        analysis.portfolioScore,
+
+      pendingFields:
+        analysis.missingFields,
+
+      pendingQuestions:
+        analysis.questions,
+
+      profileCompleted:
+        analysis.missingFields
+          .length === 0,
+
+      lastAnalyzedAt:
+        new Date(),
+    },
+  });
+}
+return NextResponse.json(
+  {
+    success: true,
+    data: parsedData,
+    analysis,
+  },
+  {
+    status: 200,
+  }
+);
   } catch (error) {
     return NextResponse.json(
       {

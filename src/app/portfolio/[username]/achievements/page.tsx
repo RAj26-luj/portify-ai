@@ -24,7 +24,15 @@ export default async function AchievementsPage({
       </h1>
 
       {portfolio?.achievements.map(
-        (item) => (
+        (
+  item: {
+    id: string;
+    title: string;
+    description?: string | null;
+    issuer?: string | null;
+    url?: string | null;
+  }
+) => (
           <div
             key={item.id}
             className="mb-4 rounded-xl border p-4"
