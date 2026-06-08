@@ -1,12 +1,16 @@
 "use server";
 
-import { cloudinary } from "@/lib/cloudinary";
+import {
+  getCloudinary,
+} from "@/lib/cloudinary";
 
 export async function uploadMedia(
   file: string,
   folder: string
-) {
+) {const cloudinary =
+  getCloudinary();
   const result =
+    
     await cloudinary.uploader.upload(
       file,
       {
@@ -41,6 +45,7 @@ export async function uploadMedia(
 export async function deleteMedia(
   publicId: string
 ) {
+  const cloudinary = getCloudinary();
   return cloudinary.uploader.destroy(
     publicId
   );

@@ -1,4 +1,6 @@
-import { cloudinary } from "@/lib/cloudinary";
+import {
+  getCloudinary,
+} from "@/lib/cloudinary";
 
 const IMAGE_TYPES = [
   "jpg",
@@ -46,7 +48,8 @@ function validateFile(
 export async function uploadImage(
   file: string,
   folder: string
-) {
+) {const cloudinary =
+  getCloudinary();
   const result =
     await cloudinary.uploader.upload(
       file,
@@ -94,7 +97,8 @@ try {
 export async function uploadDocument(
   file: string,
   folder: string
-) {
+) {const cloudinary =
+  getCloudinary();
   const result =
     await cloudinary.uploader.upload(
       file,
@@ -141,6 +145,7 @@ export async function uploadVideo(
   file: string,
   folder: string
 ) {
+  const cloudinary = getCloudinary();
   const result =
     await cloudinary.uploader.upload(
       file,
@@ -188,6 +193,7 @@ export async function deleteFile(
     | "video"
     | "raw" = "image"
 ) {
+  const cloudinary = getCloudinary();
   return cloudinary.uploader.destroy(
     publicId,
     {
