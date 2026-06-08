@@ -1,6 +1,6 @@
 import { getPortfolioByUsername } from "@/actions/portfolio";
 import { getActiveTheme } from "@/actions/theme";
-
+export const dynamic = "force-dynamic";
 interface Props {
   params: Promise<{
     username: string;

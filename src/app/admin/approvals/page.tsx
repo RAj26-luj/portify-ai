@@ -1,4 +1,5 @@
 import { getPendingUsers } from "@/actions/admin";
+export const dynamic = "force-dynamic";
 
 export default async function ApprovalsPage() {
   const users =

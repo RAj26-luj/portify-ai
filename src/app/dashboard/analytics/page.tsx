@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 
 import { getAnalytics } from "@/actions/analytics";
 import { getPortfolioByUserId } from "@/actions/portfolio";
-
+export const dynamic = "force-dynamic";
 export default async function AnalyticsPage() {
   const session =
     await auth();
