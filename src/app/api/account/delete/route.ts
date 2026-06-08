@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-
-import { saveResume } from "@/actions/resume";
 import { rateLimit } from "@/lib/rate-limit";
 
-export async function POST(
+import { deleteAccount } from "@/actions/delete-account";
+
+export async function DELETE(
   req: Request
 ) {
   try {
@@ -34,9 +34,9 @@ export async function POST(
 
     const limit =
       rateLimit(
-        `resume-save:${ip}`,
-        10,
-        60_000
+        `delete-account:${ip}`,
+        3,
+        60 * 60 * 1000
       );
 
     if (!limit.success) {
@@ -52,57 +52,12 @@ export async function POST(
       );
     }
 
-    const body =
-      await req.json();
-
-    if (
-      !body.portfolioId ||
-      !body.fileName ||
-      !body.fileUrl
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Missing required fields",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    if (
-      body.fileSize &&
-      body.fileSize >
-        20 *
-          1024 *
-          1024
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "File too large",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-  const resume =
-  await saveResume(
-    session.user.id,
-    body.portfolioId,
-    body.fileName,
-    body.fileUrl,
-    body.fileSize
-  );
+    await deleteAccount(
+      session.user.id
+    );
 
     return NextResponse.json({
       success: true,
-      data: resume,
     });
   } catch (error) {
     return NextResponse.json(
@@ -111,7 +66,7 @@ export async function POST(
         error:
           error instanceof Error
             ? error.message
-            : "Resume save failed",
+            : "Failed to delete account",
       },
       {
         status: 500,

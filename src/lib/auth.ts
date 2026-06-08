@@ -5,6 +5,9 @@ import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 
 import { prisma } from "./prisma";
+import {
+  logLogin,
+} from "@/lib/audit-log";
 
 export const authConfig: NextAuthConfig = {
   adapter: PrismaAdapter(prisma),
@@ -98,6 +101,15 @@ if (user.isBlocked) {
     "ACCOUNT_BLOCKED"
   );
 }
+await logLogin(
+  user.id,
+  {
+    email:
+      user.email,
+    provider:
+      "credentials",
+  }
+);
         return {
           id: user.id,
           name: user.name,
@@ -161,7 +173,17 @@ if (
 ) {
   return false;
 }
-
+await logLogin(
+  dbUser.id,
+  {
+    email:
+      dbUser.email,
+    provider:
+      "google",
+    role:
+      dbUser.role,
+  }
+);
 return true;
     },
 

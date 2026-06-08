@@ -56,12 +56,24 @@ export async function uploadImage(
       }
     );
 
+try {
   validateFile(
     result.bytes,
     result.format,
     IMAGE_TYPES,
     MAX_IMAGE_SIZE
   );
+} catch (error) {
+  await cloudinary.uploader.destroy(
+    result.public_id,
+    {
+      resource_type:
+        "image",
+    }
+  );
+
+  throw error;
+}
 
   return {
     publicId:
@@ -92,12 +104,24 @@ export async function uploadDocument(
       }
     );
 
+try {
   validateFile(
     result.bytes,
     result.format,
     DOCUMENT_TYPES,
     MAX_FILE_SIZE
   );
+} catch (error) {
+  await cloudinary.uploader.destroy(
+    result.public_id,
+    {
+      resource_type:
+        "raw",
+    }
+  );
+
+  throw error;
+}
 
   return {
     publicId:
@@ -127,13 +151,21 @@ export async function uploadVideo(
     );
 
   if (
-    result.bytes >
-    100 * 1024 * 1024
-  ) {
-    throw new Error(
-      "Video size limit exceeded"
-    );
-  }
+  result.bytes >
+  100 * 1024 * 1024
+) {
+  await cloudinary.uploader.destroy(
+    result.public_id,
+    {
+      resource_type:
+        "video",
+    }
+  );
+
+  throw new Error(
+    "Video size limit exceeded"
+  );
+}
 
   return {
     publicId:

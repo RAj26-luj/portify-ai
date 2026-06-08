@@ -7,6 +7,11 @@ import {
   sendRejectionEmail,
 } from "@/services/email";
 
+import {
+  logUserApproval,
+  logUserBlocked,
+} from "@/lib/audit-log";
+
 export async function approveUser(
   userId: string
 ) {
@@ -22,6 +27,13 @@ export async function approveUser(
 
   await sendApprovalEmail(
     user.email
+  );
+
+  await logUserApproval(
+    user.id,
+    {
+      email: user.email,
+    }
   );
 
   return {
@@ -44,6 +56,15 @@ export async function rejectUser(
 
   await sendRejectionEmail(
     user.email
+  );
+
+  await logUserBlocked(
+    user.id,
+    {
+      email: user.email,
+      status:
+        "REJECTED",
+    }
   );
 
   return {

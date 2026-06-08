@@ -1,12 +1,7 @@
 import {
-  cleanupExpiredTokens,
-  cleanupOldViews,
+  runCleanupJobs,
 } from "./cleanup";
 
 export async function runJobs() {
-  await cleanupExpiredTokens();
-
-  await cleanupOldViews();
-
-  return true;
+  return runCleanupJobs();
 }

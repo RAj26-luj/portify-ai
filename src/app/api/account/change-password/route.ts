@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-
-import { saveResume } from "@/actions/resume";
 import { rateLimit } from "@/lib/rate-limit";
+
+import { changePassword } from "@/actions/change-password";
 
 export async function POST(
   req: Request
@@ -34,9 +34,9 @@ export async function POST(
 
     const limit =
       rateLimit(
-        `resume-save:${ip}`,
-        10,
-        60_000
+        `change-password:${ip}`,
+        5,
+        15 * 60 * 1000
       );
 
     if (!limit.success) {
@@ -55,54 +55,14 @@ export async function POST(
     const body =
       await req.json();
 
-    if (
-      !body.portfolioId ||
-      !body.fileName ||
-      !body.fileUrl
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Missing required fields",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    if (
-      body.fileSize &&
-      body.fileSize >
-        20 *
-          1024 *
-          1024
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "File too large",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-  const resume =
-  await saveResume(
-    session.user.id,
-    body.portfolioId,
-    body.fileName,
-    body.fileUrl,
-    body.fileSize
-  );
+    await changePassword(
+      session.user.id,
+      body.currentPassword,
+      body.newPassword
+    );
 
     return NextResponse.json({
       success: true,
-      data: resume,
     });
   } catch (error) {
     return NextResponse.json(
@@ -111,7 +71,7 @@ export async function POST(
         error:
           error instanceof Error
             ? error.message
-            : "Resume save failed",
+            : "Failed to change password",
       },
       {
         status: 500,

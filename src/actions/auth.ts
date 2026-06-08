@@ -14,6 +14,10 @@ import {
   sendVerificationEmail,
   sendResetPasswordEmail,
 } from "@/services/email";
+import {
+  logRegistration,
+  logPasswordReset,
+} from "@/lib/audit-log";
 
 export async function registerUser(
   data: unknown
@@ -57,6 +61,13 @@ export async function registerUser(
         password: hashedPassword,
       },
     });
+    await logRegistration(
+  user.id,
+  {
+    email:
+      user.email,
+  }
+);
     const baseUsername =
   email
     .split("@")[0]
@@ -201,12 +212,15 @@ export async function resetPassword(
     };
   }
 
-const verification =
-  await prisma.verificationToken.findFirst({
-    where: {
-      token: parsed.data.token,
-    },
-  });
+  const verification =
+    await prisma.verificationToken.findFirst(
+      {
+        where: {
+          token:
+            parsed.data.token,
+        },
+      }
+    );
 
   if (!verification) {
     return {
@@ -221,20 +235,34 @@ const verification =
       12
     );
 
-  await prisma.user.update({
-    where: {
-      email: verification.identifier,
-    },
-    data: {
-      password: hashedPassword,
-    },
-  });
+  const user =
+    await prisma.user.update({
+      where: {
+        email:
+          verification.identifier,
+      },
+      data: {
+        password:
+          hashedPassword,
+      },
+    });
 
-  await prisma.verificationToken.delete({
-    where: {
-      id: verification.id,
-    },
-  });
+  await logPasswordReset(
+    user.id,
+    {
+      email:
+        user.email,
+    }
+  );
+
+  await prisma.verificationToken.delete(
+    {
+      where: {
+        id:
+          verification.id,
+      },
+    }
+  );
 
   return {
     success: true,

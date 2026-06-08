@@ -1,5 +1,5 @@
 import {
-  uploadFile as uploadCloudFile,
+  uploadDocument as uploadCloudFile,
   uploadImage as uploadCloudImage,
   deleteFile,
 } from "@/lib/upload";
