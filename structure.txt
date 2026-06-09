@@ -1,0 +1,302 @@
+.
+├── AGENTS.md
+├── CLAUDE.md
+├── Dockerfile
+├── README.md
+├── commitlint.config.js
+├── components.json
+├── docker-compose.yml
+├── eslint.config.mjs
+├── jest.config.ts
+├── jest.setup.ts
+├── lint-staged.config.js
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── playwright.config.ts
+├── postcss.config.mjs
+├── prisma
+│   └── schema.prisma
+├── prisma.config.ts
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── src
+│   ├── actions
+│   │   ├── achievement.ts
+│   │   ├── admin.ts
+│   │   ├── analytics.ts
+│   │   ├── approval.ts
+│   │   ├── auth.ts
+│   │   ├── change-password.ts
+│   │   ├── coding-profile.ts
+│   │   ├── delete-account.ts
+│   │   ├── education.ts
+│   │   ├── experience.ts
+│   │   ├── media.ts
+│   │   ├── notification.ts
+│   │   ├── portfolio.ts
+│   │   ├── project.ts
+│   │   ├── resend-verification.ts
+│   │   ├── resume-import.ts 
+│   │   ├── resume-parser.ts
+│   │   ├── resume.ts
+│   │   ├── skill.ts
+│   │   ├── social-link.ts
+│   │   ├── theme.ts
+│   │   └── user.ts
+│   ├── app
+│   │   ├── (auth)
+│   │   │   ├── forgot-password
+│   │   │   │   └── page.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── login
+│   │   │   │   └── page.tsx
+│   │   │   ├── register
+│   │   │   │   └── page.tsx
+│   │   │   ├── reset-password
+│   │   │   │   └── page.tsx
+│   │   │   ├── verify
+│   │   │   │   └── page.tsx
+│   │   │   └── verify-email
+│   │   │       └── page.tsx
+│   │   ├── admin
+│   │   │   ├── approvals
+│   │   │   │   └── page.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx
+│   │   │   └── users
+│   │   │       └── page.tsx
+│   │   ├── api
+│   │   │   ├── account
+│   │   │   │   ├── change-password
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── delete
+│   │   │   │       └── route.ts
+│   │   │   ├── admin
+│   │   │   │   └── route.ts
+│   │   │   ├── ai
+│   │   │   │   └── route.ts
+│   │   │   ├── analytics
+│   │   │   │   └── route.ts
+│   │   │   ├── approval
+│   │   │   │   └── route.ts
+│   │   │   ├── auth
+│   │   │   │   ├── [...nextauth]
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── forgot-password
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── resend-verification
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── reset-password
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── verify-email
+│   │   │   │       └── route.ts
+│   │   │   ├── contact
+│   │   │   │   └── route.ts
+│   │   │   ├── cron
+│   │   │   │   └── route.ts
+│   │   │   ├── media
+│   │   │   │   └── route.ts
+│   │   │   ├── portfolio
+│   │   │   │   └── route.ts
+│   │   │   ├── project
+│   │   │   │   └── route.ts
+│   │   │   ├── resume
+│   │   │   │   ├── download
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── import
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── parse
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── route.ts
+│   │   │   ├── skills
+│   │   │   │   └── route.ts
+│   │   │   ├── themes
+│   │   │   │   ├── activate
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── route.ts
+│   │   │   ├── upload
+│   │   │   │   └── route.ts
+│   │   │   ├── users
+│   │   │   │   └── route.ts
+│   │   │   └── webhooks
+│   │   │       └── routes.ts
+│   │   ├── dashboard
+│   │   │   ├── achievements
+│   │   │   │   └── page.tsx
+│   │   │   ├── analytics
+│   │   │   │   └── page.tsx
+│   │   │   ├── coding-profiles
+│   │   │   │   └── page.tsx
+│   │   │   ├── education
+│   │   │   │   └── page.tsx
+│   │   │   ├── experience
+│   │   │   │   └── page.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx
+│   │   │   ├── profile
+│   │   │   │   └── page.tsx
+│   │   │   ├── projects
+│   │   │   │   └── page.tsx
+│   │   │   ├── settings
+│   │   │   │   └── page.tsx
+│   │   │   ├── skills
+│   │   │   │   └── page.tsx
+│   │   │   └── themes
+│   │   │       └── page.tsx
+│   │   ├── error.tsx
+│   │   ├── layout.tsx
+│   │   ├── loading.tsx
+│   │   ├── not-found.tsx
+│   │   ├── page.tsx
+│   │   ├── pending-approval
+│   │   │   └── page.tsx
+│   │   ├── portfolio
+│   │   │   └── [username]
+│   │   │       ├── achievements
+│   │   │       │   └── page.tsx
+│   │   │       ├── certificates
+│   │   │       │   └── page.tsx
+│   │   │       ├── education
+│   │   │       │   └── page.tsx
+│   │   │       ├── experience
+│   │   │       │   └── page.tsx
+│   │   │       ├── media
+│   │   │       │   └── page.tsx
+│   │   │       ├── opengraph-image.tsx
+│   │   │       ├── page.tsx
+│   │   │       └── projects
+│   │   │           └── page.tsx
+│   │   ├── robots.ts
+│   │   └── sitemap.ts
+│   ├── auth.ts
+│   ├── components
+│   │   ├── cards
+│   │   │   ├── achievement-card.tsx
+│   │   │   ├── project-card.tsx
+│   │   │   └── skill-card.tsx
+│   │   ├── forms
+│   │   │   ├── coding-profile-form.tsx
+│   │   │   ├── education-form.tsx
+│   │   │   ├── experience-form.tsx
+│   │   │   ├── profile-form.tsx
+│   │   │   ├── project-form.tsx
+│   │   │   ├── skill-form.tsx
+│   │   │   └── social-link-form.tsx
+│   │   ├── layout
+│   │   │   ├── footer.tsx
+│   │   │   ├── header.tsx
+│   │   │   └── sidebar.tsx
+│   │   ├── navigation
+│   │   │   ├── mobile-nav.tsx
+│   │   │   └── navbar.tsx
+│   │   ├── providers
+│   │   │   ├── session-provider.tsx
+│   │   │   └── toast-provider.tsx
+│   │   ├── shared
+│   │   │   ├── empty-state.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page-header.tsx
+│   │   └── uploaders
+│   │       ├── cloudinary-upload.tsx
+│   │       ├── cover-image-uploader.tsx
+│   │       ├── file-uploader.tsx
+│   │       ├── image-uploader.tsx
+│   │       ├── index.ts
+│   │       ├── profile-image-uploader.tsx
+│   │       ├── project-image-uploader.tsx
+│   │       ├── resume-uploader.tsx
+│   │       └── utils.ts
+│   ├── config
+│   │   ├── ai.ts
+│   │   ├── auth.ts
+│   │   ├── cloudinary.ts
+│   │   ├── database.ts
+│   │   └── security.ts
+│   ├── constants
+│   │   ├── roles.ts
+│   │   ├── routes.ts
+│   │   └── themes.ts
+│   ├── hooks
+│   │   ├── use-analytics.ts
+│   │   ├── use-auth.ts
+│   │   ├── use-portfolio.ts
+│   │   ├── use-theme.ts
+│   │   └── use-upload.ts
+│   ├── jobs
+│   │   ├── cleanup.ts
+│   │   └── index.ts
+│   ├── lib
+│   │   ├── analytics.ts
+│   │   ├── audit-log.ts
+│   │   ├── auth.ts
+│   │   ├── cloudinary.ts
+│   │   ├── db.ts
+│   │   ├── gemini.ts
+│   │   ├── mail.ts
+│   │   ├── nodemailer.ts
+│   │   ├── prisma.ts
+│   │   ├── rate-limit.ts
+│   │   ├── seo.ts
+│   │   ├── theme-presets.ts
+│   │   └── upload.ts
+│   ├── providers
+│   │   ├── auth-provider.tsx
+│   │   └── theme-provider.tsx
+│   ├── proxy.ts
+│   ├── services
+│   │   ├── ai
+│   │   │   └── index.ts
+│   │   ├── email
+│   │   │   ├── index.ts
+│   │   │   ├── send-admin-notification.ts
+│   │   │   ├── send-contact-email.ts
+│   │   │   ├── send-forgot-password-email.ts
+│   │   │   ├── send-verification-email.ts
+│   │   │   └── templates.ts
+│   │   ├── resume
+│   │   │   ├── analyze.ts
+│   │   │   ├── fill-portfolio.ts
+│   │   │   ├── importer.ts
+│   │   │   ├── index.ts
+│   │   │   └── parser.ts
+│   │   ├── theme
+│   │   │   └── index.ts
+│   │   └── upload
+│   │       └── index.ts
+│   ├── store
+│   │   ├── auth-store.ts
+│   │   └── theme-store.ts
+│   ├── types
+│   │   ├── api.ts
+│   │   ├── auth.ts
+│   │   ├── media.ts
+│   │   ├── next-auth.d.ts
+│   │   ├── resume-analysis.ts
+│   │   ├── resume.ts
+│   │   ├── upload.ts
+│   │   └── user.ts
+│   └── validators
+│       └── auth
+│           ├── forgot-password.ts
+│           ├── login.ts
+│           ├── register.ts
+│           └── reset-password.ts
+├── structure.txt
+├── tests
+│   ├── e2e
+│   │   ├── auth.spec.ts
+│   │   ├── home.spec.ts
+│   │   ├── portfolio.spec.ts
+│   │   └── public-portfolio.spec.ts
+│   └── unit
+│       └── analyze.test.ts
+├── tsconfig.json
+└── tsconfig.tsbuildinfo
+
+92 directories, 208 files
