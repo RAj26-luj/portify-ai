@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Layers, ExternalLink, Download, HelpCircle, X, Workflow, Cpu, Radio, Terminal, Box } from "lucide-react";
 
@@ -11,34 +11,19 @@ interface CustomSectionProps {
 }
 
 export default function CustomSection({ sections = [] }: CustomSectionProps) {
-  if (!sections?.length) return null;
-
+  // 1. Declare all Hooks unconditionally at the top level
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
 
-  return (
-    <>
-      <style jsx global>{`
-        @keyframes cyber-scan-custom {
-          0% { top: 0%; }
-          50% { top: 100%; }
-          100% { top: 0%; }
-        }
-        .cyber-custom-scanline {
-          animation: cyber-scan-custom 8s linear infinite;
-        }
-        .cyber-grid-dense {
-          background-image: linear-gradient(rgba(0, 229, 255, 0.01) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(0, 229, 255, 0.01) 1px, transparent 1px);
-          background-size: 2rem 2rem;
-        }
-      `}</style>
+  // 2. Safely pre-filter and derive animation loop streams in a top-level useMemo block
+  const processedSections = useMemo(() => {
+    if (!sections?.length) return [];
 
-      {sections.map((section: any, sectionIdx: number) => {
-        const rawItems = section?.items || [];
-        if (!rawItems.length) return null;
-
+    return sections
+      .filter((section: any) => section?.items && section.items.length > 0)
+      .map((section: any, sectionIdx: number) => {
+        const rawItems = section.items;
         const isScrollable = rawItems.length >= 4;
         const isMobileScrollable = rawItems.length > 1;
 
@@ -62,10 +47,45 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             })()
           : rawItems;
 
+        return {
+          ...section,
+          sectionIdx,
+          isScrollable,
+          isMobileScrollable,
+          mobileMarqueeItems,
+          marqueeItems,
+        };
+      });
+  }, [sections]);
+
+  // 3. Early conditional return statements placed safely AFTER all Hook declarations
+  if (!sections?.length || processedSections.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <style jsx global>{`
+        @keyframes cyber-scan-custom {
+          0% { top: 0%; }
+          50% { top: 100%; }
+          100% { top: 0%; }
+        }
+        .cyber-custom-scanline {
+          animation: cyber-scan-custom 8s linear infinite;
+        }
+        .cyber-grid-dense {
+          background-image: linear-gradient(rgba(0, 229, 255, 0.01) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(0, 229, 255, 0.01) 1px, transparent 1px);
+          background-size: 2rem 2rem;
+        }
+      `}</style>
+
+      {processedSections.map((section: any) => {
         return (
           <section
-            key={section.id || sectionIdx}
-            id={section.title?.toLowerCase().replace(/\s+/g, "") || `custom-${sectionIdx}`}
+            key={section.id || section.sectionIdx}
+            id={section.title?.toLowerCase().replace(/\s+/g, "") || `custom-${section.sectionIdx}`}
             className="relative w-full py-20 md:py-40 overflow-hidden bg-[#050816] text-[#F8FAFC] selection:bg-[#00E5FF]/30"
           >
             {/* Cyberpunk Decorative Underlays */}
@@ -79,7 +99,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                 <div className="text-left">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#0B1120] border border-[#7C3AED]/30 text-[10px] font-mono text-[#7C3AED] tracking-[0.2em] uppercase mb-4 shadow-[0_0_10px_rgba(124,58,237,0.1)]">
                     <Layers className="w-3.5 h-3.5 text-[#00E5FF]" />
-                    EXT_MODULE // {String(sectionIdx + 1).padStart(2, '0')}
+                    EXT_MODULE // {String(section.sectionIdx + 1).padStart(2, '0')}
                   </div>
                   <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white font-mono uppercase drop-shadow-[0_0_10px_rgba(0,229,255,0.2)]">
                     // {section.title?.toUpperCase().replace(/\s+/g, "_")}
@@ -96,10 +116,10 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             <div 
               className="block md:hidden w-full max-w-md mx-auto px-4 h-[260px] overflow-hidden relative bg-[#0B1120]/40 border-y border-neutral-800/80"
-              onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-              onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-              onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-              onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
+              onTouchStart={() => section.isMobileScrollable && setIsMobilePaused(true)}
+              onTouchEnd={() => section.isMobileScrollable && setIsMobilePaused(false)}
+              onMouseEnter={() => section.isMobileScrollable && setIsMobilePaused(true)}
+              onMouseLeave={() => section.isMobileScrollable && setIsMobilePaused(false)}
             >
               {/* Terminal scanline shader bars */}
               <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#050816] to-transparent z-20 pointer-events-none" />
@@ -107,7 +127,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
 
               <motion.div
                 className="flex flex-col gap-3 py-3"
-                animate={isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -420] } : false}
+                animate={section.isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -420] } : false}
                 transition={{
                   y: {
                     repeat: Infinity,
@@ -117,7 +137,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                   }
                 }}
               >
-                {mobileMarqueeItems.map((item: any, idx: number) => (
+                {section.mobileMarqueeItems.map((item: any, idx: number) => (
                   <div
                     key={`mob-${item.id || idx}-${idx}`}
                     onClick={() => setSelectedItem(item)}
@@ -149,11 +169,11 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* 2. DESKTOP VIEW: CYBERPUNK LAB SYSTEM CELLS */}
             {/* ========================================== */}
             <div
-              className={`hidden md:block relative w-full overflow-hidden py-6 ${isScrollable ? "group/track cursor-none" : ""}`}
-              onMouseEnter={() => isScrollable && setIsPaused(true)}
-              onMouseLeave={() => isScrollable && setIsPaused(false)}
+              className={`hidden md:block relative w-full overflow-hidden py-6 ${section.isScrollable ? "group/track cursor-none" : ""}`}
+              onMouseEnter={() => section.isScrollable && setIsPaused(true)}
+              onMouseLeave={() => section.isScrollable && setIsPaused(false)}
             >
-              {isScrollable && (
+              {section.isScrollable && (
                 <>
                   <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#050816] to-transparent z-20 pointer-events-none" />
                   <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#050816] to-transparent z-20 pointer-events-none" />
@@ -162,11 +182,11 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
 
               <motion.div
                 className={
-                  isScrollable 
+                  section.isScrollable 
                     ? "flex gap-8 whitespace-nowrap min-w-full w-max px-4" 
                     : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center"
                 }
-                animate={isScrollable && !isPaused && !selectedItem ? { x: [0, -2000] } : false}
+                animate={section.isScrollable && !isPaused && !selectedItem ? { x: [0, -2000] } : false}
                 transition={{
                   x: {
                     repeat: Infinity,
@@ -176,12 +196,12 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                   }
                 }}
               >
-                {marqueeItems.map((item: any, idx: number) => (
+                {section.marqueeItems.map((item: any, idx: number) => (
                   <div
                     key={`desk-${item.id}-${idx}`}
                     onClick={() => setSelectedItem(item)}
                     className={`bg-[#0B1120] border border-neutral-800 hover:border-[#00E5FF]/50 p-6 rounded-none backdrop-blur-xl transition-all duration-300 shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer hover:-translate-y-2 overflow-hidden relative group/card ${
-                      isScrollable ? "w-[360px] shrink-0 inline-block" : "w-full"
+                      section.isScrollable ? "w-[360px] shrink-0 inline-block" : "w-full"
                     }`}
                   >
                     {/* Tech Trim Frame Lines */}

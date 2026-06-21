@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Layers, ExternalLink, Download, HelpCircle, X, Workflow } from "lucide-react";
 
@@ -11,18 +11,19 @@ interface CustomSectionProps {
 }
 
 export default function CustomSection({ sections = [] }: CustomSectionProps) {
-  if (!sections?.length) return null;
-
+  // 1. Declare all React Hooks unconditionally at the top level
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
 
-  return (
-    <>
-      {sections.map((section: any, sectionIdx: number) => {
-        const rawItems = section?.items || [];
-        if (!rawItems.length) return null;
+  // 2. Pre-filter and structure loop track items safely inside an unconditional useMemo block
+  const processedSections = useMemo(() => {
+    if (!sections?.length) return [];
 
+    return sections
+      .filter((section: any) => section?.items && section.items.length > 0)
+      .map((section: any, sectionIdx: number) => {
+        const rawItems = section.items;
         const isScrollable = rawItems.length >= 4;
         const isMobileScrollable = rawItems.length > 1;
 
@@ -46,10 +47,29 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             })()
           : rawItems;
 
+        return {
+          ...section,
+          sectionIdx,
+          isScrollable,
+          isMobileScrollable,
+          mobileMarqueeItems,
+          marqueeItems,
+        };
+      });
+  }, [sections]);
+
+  // 3. Early conditional return statements placed safely AFTER all Hook declarations
+  if (!sections?.length || processedSections.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      {processedSections.map((section: any) => {
         return (
           <section
-            key={section.id || sectionIdx}
-            id={section.title?.toLowerCase().replace(/\s+/g, "") || `custom-${sectionIdx}`}
+            key={section.id || section.sectionIdx}
+            id={section.title?.toLowerCase().replace(/\s+/g, "") || `custom-${section.sectionIdx}`}
             className="relative w-full py-16 md:py-24 overflow-hidden bg-white text-[#111827] selection:bg-gray-200"
           >
             {/* Section Header */}
@@ -58,7 +78,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                 <div>
                   <div className="inline-flex items-center gap-2 text-xs font-mono font-bold text-gray-400 tracking-widest uppercase mb-2">
                     <Layers className="w-3.5 h-3.5" />
-                    Extension Block // {String(sectionIdx + 1).padStart(2, '0')}
+                    Extension Block // {String(section.sectionIdx + 1).padStart(2, '0')}
                   </div>
                   <h2 className="text-3xl md:text-5xl font-black tracking-tight text-[#111827] font-sans uppercase">
                     {section.title}.
@@ -72,10 +92,10 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             <div 
               className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative"
-              onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-              onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-              onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-              onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
+              onTouchStart={() => section.isMobileScrollable && setIsMobilePaused(true)}
+              onTouchEnd={() => section.isMobileScrollable && setIsMobilePaused(false)}
+              onMouseEnter={() => section.isMobileScrollable && setIsMobilePaused(true)}
+              onMouseLeave={() => section.isMobileScrollable && setIsMobilePaused(false)}
             >
               {/* Fade masks overlay to smooth scrolling edge transitions */}
               <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-white to-transparent z-20 pointer-events-none" />
@@ -83,7 +103,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
 
               <motion.div
                 className="flex flex-col gap-3"
-                animate={isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -420] } : false}
+                animate={section.isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -420] } : false}
                 transition={{
                   y: {
                     repeat: Infinity,
@@ -93,7 +113,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                   }
                 }}
               >
-                {mobileMarqueeItems.map((item: any, idx: number) => (
+                {section.mobileMarqueeItems.map((item: any, idx: number) => (
                   <div
                     key={`mob-${item.id || idx}-${idx}`}
                     onClick={() => setSelectedItem(item)}
@@ -121,17 +141,17 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* 2. DESKTOP VIEW: HORIZONTAL TIMELINE RIBBON */}
             {/* ========================================== */}
             <div
-              className={`hidden md:block relative w-full overflow-hidden py-2 ${isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}
-              onMouseEnter={() => isScrollable && setIsPaused(true)}
-              onMouseLeave={() => isScrollable && setIsPaused(false)}
+              className={`hidden md:block relative w-full overflow-hidden py-2 ${section.isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}
+              onMouseEnter={() => section.isScrollable && setIsPaused(true)}
+              onMouseLeave={() => section.isScrollable && setIsPaused(false)}
             >
               <motion.div
                 className={
-                  isScrollable 
+                  section.isScrollable 
                     ? "flex gap-8 whitespace-nowrap min-w-full w-max px-6" 
                     : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center"
                 }
-                animate={isScrollable && !isPaused && !selectedItem ? { x: [0, -2000] } : false}
+                animate={section.isScrollable && !isPaused && !selectedItem ? { x: [0, -2000] } : false}
                 transition={{
                   x: {
                     repeat: Infinity,
@@ -141,12 +161,12 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                   }
                 }}
               >
-                {marqueeItems.map((item: any, idx: number) => (
+                {section.marqueeItems.map((item: any, idx: number) => (
                   <div
                     key={`desk-${item.id}-${idx}`}
                     onClick={() => setSelectedItem(item)}
                     className={`bg-white border-b-2 border-gray-100 hover:border-[#111827] p-5 rounded-none transition-all duration-300 cursor-pointer text-left ${
-                      isScrollable ? "w-[340px] shrink-0 inline-block" : "w-full"
+                      section.isScrollable ? "w-[340px] shrink-0 inline-block" : "w-full"
                     }`}
                   >
                     <div className="w-full h-44 rounded-none overflow-hidden bg-[#FAFAFA] mb-4 border border-gray-100">

@@ -11,8 +11,6 @@ interface CodingProfilesProps {
 }
 
 export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesProps) {
-  if (!codingProfiles?.length) return null;
-
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
@@ -34,6 +32,9 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
     }
     return items;
   }, [sortedProfiles, isMobileScrollable]);
+     if (!codingProfiles?.length) return null;
+  // Early return executed *after* all Hook initializations
+ 
 
   const marqueeItems = isScrollable
     ? (() => {

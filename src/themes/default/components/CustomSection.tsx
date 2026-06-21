@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Layers, ExternalLink, Download, HelpCircle, X, Workflow } from "lucide-react";
 
@@ -11,22 +11,23 @@ interface CustomSectionProps {
 }
 
 export default function CustomSection({ sections = [] }: CustomSectionProps) {
-  if (!sections?.length) return null;
-
+  // 1. Initialize all top-level React Hooks unconditionally
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
 
-  return (
-    <>
-      {sections.map((section: any, sectionIdx: number) => {
-        const rawItems = section?.items || [];
-        if (!rawItems.length) return null;
+  // 2. Pre-process and filter sections array unconditionally to remove loops and internal conditional returns
+  const processedSections = useMemo(() => {
+    if (!sections?.length) return [];
 
+    return sections
+      .filter((section: any) => section?.items && section.items.length > 0)
+      .map((section: any, sectionIdx: number) => {
+        const rawItems = section.items;
         const isScrollable = rawItems.length >= 4;
         const isMobileScrollable = rawItems.length > 1;
 
-        // Loop replication mappings for continuous animation transitions
+        // Loop replication mappings for continuous animation transitions calculated here
         const mobileMarqueeItems = (() => {
           if (!isMobileScrollable) return rawItems;
           let items = [...rawItems];
@@ -46,10 +47,29 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             })()
           : rawItems;
 
+        return {
+          ...section,
+          sectionIdx,
+          isScrollable,
+          isMobileScrollable,
+          mobileMarqueeItems,
+          marqueeItems,
+        };
+      });
+  }, [sections]);
+
+  // 3. Early return block moved safely after all React Hooks
+  if (!sections?.length || processedSections.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      {processedSections.map((section: any) => {
         return (
           <section
-            key={section.id || sectionIdx}
-            id={section.title?.toLowerCase().replace(/\s+/g, "") || `custom-${sectionIdx}`}
+            key={section.id || section.sectionIdx}
+            id={section.title?.toLowerCase().replace(/\s+/g, "") || `custom-${section.sectionIdx}`}
             className="relative w-full py-16 md:py-36 overflow-hidden bg-black text-white selection:bg-purple-500/30"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(139,92,246,0.03),transparent_50%)] pointer-events-none" />
@@ -60,7 +80,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                 <div>
                   <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] md:text-xs text-purple-400 tracking-wider uppercase mb-3 md:mb-4 backdrop-blur-md">
                     <Layers className="w-3.5 h-3.5" />
-                    Extension Block // {String(sectionIdx + 1).padStart(2, '0')}
+                    Extension Block // {String(section.sectionIdx + 1).padStart(2, '0')}
                   </div>
                   <h2 className="text-3xl md:text-5xl lg:text-5xl font-bold tracking-tight bg-gradient-to-b from-white via-neutral-200 to-neutral-500 bg-clip-text text-transparent">
                     {section.title}.
@@ -74,10 +94,10 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             <div 
               className="block md:hidden w-full max-w-md mx-auto px-4 h-[240px] overflow-hidden relative"
-              onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-              onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-              onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-              onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
+              onTouchStart={() => section.isMobileScrollable && setIsMobilePaused(true)}
+              onTouchEnd={() => section.isMobileScrollable && setIsMobilePaused(false)}
+              onMouseEnter={() => section.isMobileScrollable && setIsMobilePaused(true)}
+              onMouseLeave={() => section.isMobileScrollable && setIsMobilePaused(false)}
             >
               {/* Fade masks overlay to smooth scrolling edge transitions */}
               <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-black to-transparent z-20 pointer-events-none" />
@@ -85,7 +105,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
 
               <motion.div
                 className="flex flex-col gap-2.5"
-                animate={isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -400] } : false}
+                animate={section.isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -400] } : false}
                 transition={{
                   y: {
                     repeat: Infinity,
@@ -95,7 +115,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                   }
                 }}
               >
-                {mobileMarqueeItems.map((item: any, idx: number) => (
+                {section.mobileMarqueeItems.map((item: any, idx: number) => (
                   <div
                     key={`mob-${item.id || idx}-${idx}`}
                     onClick={() => setSelectedItem(item)}
@@ -125,11 +145,11 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* 2. DESKTOP VIEW: HORIZONTAL TIMELINE RIBBON */}
             {/* ========================================== */}
             <div
-              className={`hidden md:block relative w-full overflow-hidden py-4 ${isScrollable ? "cursor-grab active:cursor-grabbing" : ""}`}
-              onMouseEnter={() => isScrollable && setIsPaused(true)}
-              onMouseLeave={() => isScrollable && setIsPaused(false)}
+              className={`hidden md:block relative w-full overflow-hidden py-4 ${section.isScrollable ? "cursor-grab active:cursor-grabbing" : ""}`}
+              onMouseEnter={() => section.isScrollable && setIsPaused(true)}
+              onMouseLeave={() => section.isScrollable && setIsPaused(false)}
             >
-              {isScrollable && (
+              {section.isScrollable && (
                 <>
                   <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-48 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none" />
                   <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-48 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none" />
@@ -138,11 +158,11 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
 
               <motion.div
                 className={
-                  isScrollable 
+                  section.isScrollable 
                     ? "flex gap-6 whitespace-nowrap min-w-full w-max px-4" 
                     : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center"
                 }
-                animate={isScrollable && !isPaused && !selectedItem ? { x: [0, -2000] } : false}
+                animate={section.isScrollable && !isPaused && !selectedItem ? { x: [0, -2000] } : false}
                 transition={{
                   x: {
                     repeat: Infinity,
@@ -152,12 +172,12 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                   }
                 }}
               >
-                {marqueeItems.map((item: any, idx: number) => (
+                {section.marqueeItems.map((item: any, idx: number) => (
                   <div
                     key={`desk-${item.id}-${idx}`}
                     onClick={() => setSelectedItem(item)}
                     className={`bg-[#07070b]/90 border border-white/5 hover:border-purple-500/40 p-5 rounded-2xl backdrop-blur-xl transition-all duration-300 shadow-xl cursor-pointer hover:-translate-y-0.5 overflow-hidden ${
-                      isScrollable ? "w-[320px] sm:w-[380px] shrink-0 inline-block" : "w-full"
+                      section.isScrollable ? "w-[320px] sm:w-[380px] shrink-0 inline-block" : "w-full"
                     }`}
                   >
                     <div className="w-full h-44 rounded-xl overflow-hidden bg-neutral-900 mb-4 border border-white/5 relative">

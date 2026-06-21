@@ -11,13 +11,14 @@ interface CodingProfilesProps {
 }
 
 export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesProps) {
-  if (!codingProfiles?.length) return null;
-
+  // 1. Declare all Hooks unconditionally at the top level
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
 
+  // 2. Perform all derivations inside top-level, unconditional useMemo Hooks
   const sortedProfiles = React.useMemo(() => {
+    if (!codingProfiles?.length) return [];
     return [...codingProfiles].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
   }, [codingProfiles]);
 
@@ -35,15 +36,21 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
     return items;
   }, [sortedProfiles, isMobileScrollable]);
 
-  const marqueeItems = isScrollable
-    ? (() => {
-        let items = [...sortedProfiles];
-        while (items.length < 5) {
-          items = [...items, ...sortedProfiles];
-        }
-        return items;
-      })()
-    : sortedProfiles;
+  // Derive desktop marquee items safely inside a top-level useMemo Hook
+  const marqueeItems = React.useMemo(() => {
+    if (sortedProfiles.length === 0) return [];
+    if (isScrollable) {
+      let items = [...sortedProfiles];
+      while (items.length < 5) {
+        items = [...items, ...sortedProfiles];
+      }
+      return items;
+    }
+    return sortedProfiles;
+  }, [sortedProfiles, isScrollable]);
+
+  // 3. Early conditional return clauses moved safely AFTER all Hook declarations
+  if (!codingProfiles?.length) return null;
 
   return (
     <>

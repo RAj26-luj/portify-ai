@@ -69,63 +69,7 @@ export default function ProfileForm({
   // Dynamic structural baseline snapshot for tracking deltas accurately
   const [baselineSnapshot, setBaselineSnapshot] = useState<string>("");
 
-  useEffect(() => {
-    let populatedForm = { ...form };
-    if (initialData) {
-      populatedForm = {
-        name: initialData.name || "",
-        email: initialData.email || "",
-        username: initialData.username || "",
-        phone: initialData.phone || "",
-        image: initialData.image || "",
-        coverImage: initialData.coverImage || "",
-        website: initialData.website || "",
-        country: initialData.country || "",
-        state: initialData.state || "",
-        city: initialData.city || "", 
-        title: initialData.portfolio?.title || "",
-        tagline: initialData.portfolio?.tagline || "",
-        bio: initialData.portfolio?.bio || "",
-        profileImage: initialData.portfolio?.profileImage || "",
-        coverPortfolioImage: initialData.portfolio?.coverImage || "",
-        resumeHeadline: initialData.portfolio?.resumeHeadline || "",
-        currentRole: initialData.portfolio?.currentRole || "",
-        phonePortfolio: initialData.portfolio?.phone || "",
-        emailPortfolio: initialData.portfolio?.email || "",
-        websitePortfolio: initialData.portfolio?.website || "",
-        countryPortfolio: initialData.portfolio?.country || "",
-        statePortfolio: initialData.portfolio?.state || "",
-        cityPortfolio: initialData.portfolio?.city || "",
-        timezone: initialData.portfolio?.timezone || "",
-        allowContactForm: initialData.portfolio?.allowContactForm ?? true,
-        allowResumeDownload: initialData.portfolio?.allowResumeDownload ?? true,
-        seoTitle: initialData.portfolio?.seoTitle || "",
-        seoDescription: initialData.portfolio?.seoDescription || "",
-        seoKeywords: initialData.portfolio?.seoKeywords || "",
-        seoImage: initialData.portfolio?.seoImage || "",
-        ogTitle: initialData.portfolio?.ogTitle || "",
-        ogSubtitle: initialData.portfolio?.ogSubtitle || "",
-        ogDescription: initialData.portfolio?.ogDescription || "",
-        ogImage: initialData.portfolio?.ogImage || "",
-        primaryButtonText: initialData.portfolio?.primaryButtonText || "",
-        primaryButtonUrl: initialData.portfolio?.primaryButtonUrl || "",
-        secondaryButtonText: initialData.portfolio?.secondaryButtonText || "",
-        secondaryButtonUrl: initialData.portfolio?.secondaryButtonUrl || "",
-        currentFocus: initialData.portfolio?.currentFocus || "",
-        availabilityStatus: initialData.portfolio?.availabilityStatus || "",
-        aboutImage: initialData.portfolio?.aboutImage || "",
-        contactAvailability: initialData.portfolio?.contactAvailability || "",
-        twitterImage: initialData.portfolio?.twitterImage || "",
-        description: initialData.portfolio?.description || "",
-        heroIntroduction: initialData.portfolio?.heroIntroduction || "",
-      };
-      setForm(populatedForm);
-      setBaselineSnapshot(JSON.stringify(populatedForm));
-    } else {
-      loadProfile();
-    }
-  }, [initialData]);
-
+  // Declared cleanly before usage in the subsequent useEffect hook
   async function loadProfile() {
     const result = await getProfile();
     if (!result.success) return;
@@ -183,6 +127,63 @@ export default function ProfileForm({
     setForm(fetchedForm);
     setBaselineSnapshot(JSON.stringify(fetchedForm));
   }
+
+  useEffect(() => {
+    let populatedForm = { ...form };
+    if (initialData) {
+      populatedForm = {
+        name: initialData.name || "",
+        email: initialData.email || "",
+        username: initialData.username || "",
+        phone: initialData.phone || "",
+        image: initialData.image || "",
+        coverImage: initialData.coverImage || "",
+        website: initialData.website || "",
+        country: initialData.country || "",
+        state: initialData.state || "",
+        city: initialData.city || "", 
+        title: initialData.portfolio?.title || "",
+        tagline: initialData.portfolio?.tagline || "",
+        bio: initialData.portfolio?.bio || "",
+        profileImage: initialData.portfolio?.profileImage || "",
+        coverPortfolioImage: initialData.portfolio?.coverImage || "",
+        resumeHeadline: initialData.portfolio?.resumeHeadline || "",
+        currentRole: initialData.portfolio?.currentRole || "",
+        phonePortfolio: initialData.portfolio?.phone || "",
+        emailPortfolio: initialData.portfolio?.email || "",
+        websitePortfolio: initialData.portfolio?.website || "",
+        countryPortfolio: initialData.portfolio?.country || "",
+        statePortfolio: initialData.portfolio?.state || "",
+        cityPortfolio: initialData.portfolio?.city || "",
+        timezone: initialData.portfolio?.timezone || "",
+        allowContactForm: initialData.portfolio?.allowContactForm ?? true,
+        allowResumeDownload: initialData.portfolio?.allowResumeDownload ?? true,
+        seoTitle: initialData.portfolio?.seoTitle || "",
+        seoDescription: initialData.portfolio?.seoDescription || "",
+        seoKeywords: initialData.portfolio?.seoKeywords || "",
+        seoImage: initialData.portfolio?.seoImage || "",
+        ogTitle: initialData.portfolio?.ogTitle || "",
+        ogSubtitle: initialData.portfolio?.ogSubtitle || "",
+        ogDescription: initialData.portfolio?.ogDescription || "",
+        ogImage: initialData.portfolio?.ogImage || "",
+        primaryButtonText: initialData.portfolio?.primaryButtonText || "",
+        primaryButtonUrl: initialData.portfolio?.primaryButtonUrl || "",
+        secondaryButtonText: initialData.portfolio?.secondaryButtonText || "",
+        secondaryButtonUrl: initialData.portfolio?.secondaryButtonUrl || "",
+        currentFocus: initialData.portfolio?.currentFocus || "",
+        availabilityStatus: initialData.portfolio?.availabilityStatus || "",
+        aboutImage: initialData.portfolio?.aboutImage || "",
+        contactAvailability: initialData.portfolio?.contactAvailability || "",
+        twitterImage: initialData.portfolio?.twitterImage || "",
+        description: initialData.portfolio?.description || "",
+        heroIntroduction: initialData.portfolio?.heroIntroduction || "",
+      };
+      setForm(populatedForm);
+      setBaselineSnapshot(JSON.stringify(populatedForm));
+    } else {
+      loadProfile();
+    }
+  }, [initialData]);
 
   // Evaluates string state snapshot profiles dynamically on value changes
   useEffect(() => {
