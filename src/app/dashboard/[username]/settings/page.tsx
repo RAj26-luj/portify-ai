@@ -55,7 +55,7 @@ export default async function SettingsPage({
   }
 
   const isPublic = dbUser.portfolio?.isPublic ?? false;
-  const publicPortfolioUrl = `portify.ai/${username}`;
+  const publicPortfolioUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portfolio/${username}`;
 
   return (
     <div className="space-y-4 sm:space-y-6 text-white max-w-4xl mx-auto p-3 sm:p-6 lg:p-8 font-sans antialiased animate-fadeIn overflow-x-hidden">

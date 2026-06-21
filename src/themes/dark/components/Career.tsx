@@ -2,25 +2,61 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Briefcase, GraduationCap, Zap, Activity } from "lucide-react";
+import { Briefcase, GraduationCap, Zap } from "lucide-react";
 
 import Experience from "./Experience";
 import Education from "./Education";
 
+// Defined structured contracts for deep nested structures instead of using implicitly loose 'any' definitions
+export interface ExperienceData {
+  id?: string | number;
+  role?: string;
+  company?: string;
+  duration?: string;
+  description?: string[];
+  [key: string]: any;
+}
+
+export interface EducationData {
+  id?: string | number;
+  degree?: string;
+  institution?: string;
+  duration?: string;
+  description?: string[];
+  [key: string]: any;
+}
+
 interface CareerProps {
-  experiences?: any[];
-  educations?: any[];
+  experiences?: ExperienceData[];
+  educations?: EducationData[];
   portfolio?: {
     title?: string;
     user?: {
       name?: string;
     };
   };
+  showExperience?: boolean;
+  showEducation?: boolean;
 }
 
-export default function Career({ experiences = [], educations = [], portfolio }: CareerProps) {
-  const [activeTab, setActiveTab] = useState<"experience" | "education">("experience");
+export default function Career({ 
+  experiences = [], 
+  educations = [], 
+  portfolio,
+  showExperience = true,
+  showEducation = true
+}: CareerProps) {
+  // Determine default active tab based on explicit visibility configurations
+  const [activeTab, setActiveTab] = useState<"experience" | "education">(
+    showExperience ? "experience" : "education"
+  );
+  
   const identityName = portfolio?.title || portfolio?.user?.name || "IDENTITY_NODE";
+
+  // Critical visibility guard rule: if both are disabled, do not render at all
+  if (!showExperience && !showEducation) {
+    return null;
+  }
 
   return (
     <section
@@ -53,78 +89,80 @@ export default function Career({ experiences = [], educations = [], portfolio }:
           </h2>
         </div>
 
-        {/* Premium Ergonomic Centered Tab Switcher Bar Docks */}
-        <div className="flex justify-center mb-12 md:mb-16 relative z-20">
-          <div className="flex sm:inline-flex w-full sm:w-auto p-1.5 bg-[#0B1120] border border-neutral-800 relative rounded-none shadow-[0_15px_35px_rgba(0,0,0,0.4)]">
-            {/* HUD Corner Tech Accents */}
-            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-neutral-700" />
-            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-neutral-700" />
-            
-            {/* Experience Tab Selection Node Anchor */}
-            <button
-              onClick={() => setActiveTab("experience")}
-              className={`relative flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-none flex items-center justify-center gap-2.5 text-xs font-mono font-bold tracking-[0.15em] transition-all select-none z-10 ${
-                activeTab === "experience" ? "text-[#050816]" : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              <Briefcase className="w-4 h-4 shrink-0" />
-              MISSION_HISTORY
-              {activeTab === "experience" && (
-                <motion.div
-                  layoutId="activeCareerTabBg"
-                  className="absolute inset-0 bg-[#00E5FF] rounded-none shadow-[0_0_15px_rgba(0,229,255,0.4)]"
-                  style={{ zIndex: -1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-            </button>
+        {/* Premium Ergonomic Centered Tab Switcher Bar Docks - Rendered only when both views are active */}
+        {showExperience && showEducation && (
+          <div className="flex justify-center mb-12 md:mb-16 relative z-20">
+            <div className="flex sm:inline-flex w-full sm:w-auto p-1.5 bg-[#0B1120] border border-neutral-800 relative rounded-none shadow-[0_15px_35px_rgba(0,0,0,0.4)]">
+              {/* HUD Corner Tech Accents */}
+              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-neutral-700" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-neutral-700" />
+              
+              {/* Experience Tab Selection Node Anchor */}
+              <button
+                onClick={() => setActiveTab("experience")}
+                className={`relative flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-none flex items-center justify-center gap-2.5 text-xs font-mono font-bold tracking-[0.15em] transition-all select-none z-10 ${
+                  activeTab === "experience" ? "text-[#050816]" : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                <Briefcase className="w-4 h-4 shrink-0" />
+                MISSION_HISTORY
+                {activeTab === "experience" && (
+                  <motion.div
+                    layoutId="activeCareerTabBg"
+                    className="absolute inset-0 bg-[#00E5FF] rounded-none shadow-[0_0_15px_rgba(0,229,255,0.4)]"
+                    style={{ zIndex: -1 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </button>
 
-            {/* Education Tab Selection Node Anchor */}
-            <button
-              onClick={() => setActiveTab("education")}
-              className={`relative flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-none flex items-center justify-center gap-2.5 text-xs font-mono font-bold tracking-[0.15em] transition-all select-none z-10 ${
-                activeTab === "education" ? "text-[#050816]" : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              <GraduationCap className="w-4 h-4 shrink-0" />
-              TRAINING_LOG
-              {activeTab === "education" && (
-                <motion.div
-                  layoutId="activeCareerTabBg"
-                  className="absolute inset-0 bg-[#00E5FF] rounded-none shadow-[0_0_15px_rgba(0,229,255,0.4)]"
-                  style={{ zIndex: -1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-            </button>
+              {/* Education Tab Selection Node Anchor */}
+              <button
+                onClick={() => setActiveTab("education")}
+                className={`relative flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-none flex items-center justify-center gap-2.5 text-xs font-mono font-bold tracking-[0.15em] transition-all select-none z-10 ${
+                  activeTab === "education" ? "text-[#050816]" : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                <GraduationCap className="w-4 h-4 shrink-0" />
+                TRAINING_LOG
+                {activeTab === "education" && (
+                  <motion.div
+                    layoutId="activeCareerTabBg"
+                    className="absolute inset-0 bg-[#00E5FF] rounded-none shadow-[0_0_15px_rgba(0,229,255,0.4)]"
+                    style={{ zIndex: -1 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Frame Sub-Canvas Target Rendering Block using Cross-Fading Animation Anchors */}
       <div className="relative w-full z-10 pb-16 md:pb-24 px-4 sm:px-0">
         <AnimatePresence mode="wait">
-          {activeTab === "experience" ? (
+          {activeTab === "experience" && showExperience ? (
             <motion.div
               key="experience-tab"
-              initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-              exit={{ opacity: 0, filter: "blur(6px)", y: -15 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
             >
               <Experience experiences={experiences} />
             </motion.div>
-          ) : (
+          ) : activeTab === "education" && showEducation ? (
             <motion.div
               key="education-tab"
-              initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-              exit={{ opacity: 0, filter: "blur(6px)", y: -15 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
             >
               <Education educations={educations} />
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </section>

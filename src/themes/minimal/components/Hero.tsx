@@ -161,11 +161,7 @@ export default function Hero({ portfolio }: HeroProps) {
                     {tagline}
                   </h4>
                 )}
-                {description && (
-                  <p className="text-gray-600 font-sans text-sm sm:text-base font-normal leading-relaxed">
-                    {description}
-                  </p>
-                )}
+            
                 {location && (
                   <div className="inline-flex items-center gap-1.5 text-[11px] text-gray-400 font-mono font-bold tracking-wider uppercase bg-[#FAFAFA] border border-gray-200 px-2.5 py-1">
                     <MapPin size={12} className="text-gray-400" />

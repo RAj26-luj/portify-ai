@@ -2,7 +2,7 @@
 
 import  { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Briefcase, GraduationCap, Zap, Terminal, Cpu } from "lucide-react";
+import { Briefcase, GraduationCap, Zap, Terminal } from "lucide-react";
 
 import Experience from "./Experience";
 import Education from "./Education";
@@ -16,11 +16,28 @@ interface CareerProps {
       name?: string;
     };
   };
+  showExperience?: boolean;
+  showEducation?: boolean;
 }
 
-export default function Career({ experiences = [], educations = [], portfolio }: CareerProps) {
-  const [activeTab, setActiveTab] = useState<"experience" | "education">("experience");
+export default function Career({ 
+  experiences = [], 
+  educations = [], 
+  portfolio,
+  showExperience = true,
+  showEducation = true
+}: CareerProps) {
+  // Determine default active tab based on explicit visibility configurations
+  const [activeTab, setActiveTab] = useState<"experience" | "education">(
+    showExperience ? "experience" : "education"
+  );
+  
   const identityName = portfolio?.title || portfolio?.user?.name || "IDENTITY_NODE";
+
+  // Critical visibility guard rule: if both are disabled, do not render at all
+  if (!showExperience && !showEducation) {
+    return null;
+  }
 
   return (
     <section
@@ -49,51 +66,53 @@ export default function Career({ experiences = [], educations = [], portfolio }:
             <span className="text-[#F78166]">$</span> trace-history --node={identityName.toLowerCase().replace(/\s+/g, "-")}
           </div>
 
-          {/* Premium Ergonomic Tab Switcher Bar Docks */}
-          <div className="flex p-0.5 rounded bg-[#0D1117] border border-[#30363D] relative shrink-0">
-            {/* Experience Tab Button */}
-            <button
-              onClick={() => setActiveTab("experience")}
-              className={`relative px-3 py-1.5 rounded text-xs font-bold tracking-tight transition-colors select-none z-10 flex items-center gap-1.5 ${
-                activeTab === "experience" ? "text-white" : "text-neutral-500 hover:text-neutral-300"
-              }`}
-            >
-              <Briefcase className="w-3.5 h-3.5 shrink-0" />
-              commit_history
-              {activeTab === "experience" && (
-                <motion.div
-                  layoutId="activeCareerTabBg"
-                  className="absolute inset-0 bg-[#21262D] border border-[#30363D] rounded -z-10 shadow-sm"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-            </button>
+          {/* Premium Ergonomic Tab Switcher Bar Docks - Rendered only when both views are active */}
+          {showExperience && showEducation && (
+            <div className="flex p-0.5 rounded bg-[#0D1117] border border-[#30363D] relative shrink-0">
+              {/* Experience Tab Button */}
+              <button
+                onClick={() => setActiveTab("experience")}
+                className={`relative px-3 py-1.5 rounded text-xs font-bold tracking-tight transition-colors select-none z-10 flex items-center gap-1.5 ${
+                  activeTab === "experience" ? "text-white" : "text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                <Briefcase className="w-3.5 h-3.5 shrink-0" />
+                commit_history
+                {activeTab === "experience" && (
+                  <motion.div
+                    layoutId="activeCareerTabBg"
+                    className="absolute inset-0 bg-[#21262D] border border-[#30363D] rounded -z-10 shadow-sm"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </button>
 
-            {/* Education Tab Button */}
-            <button
-              onClick={() => setActiveTab("education")}
-              className={`relative px-3 py-1.5 rounded text-xs font-bold tracking-tight transition-colors select-none z-10 flex items-center gap-1.5 ${
-                activeTab === "education" ? "text-white" : "text-neutral-500 hover:text-neutral-300"
-              }`}
-            >
-              <GraduationCap className="w-3.5 h-3.5 shrink-0" />
-              academic_tree
-              {activeTab === "education" && (
-                <motion.div
-                  layoutId="activeCareerTabBg"
-                  className="absolute inset-0 bg-[#21262D] border border-[#30363D] rounded -z-10 shadow-sm"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-            </button>
-          </div>
+              {/* Education Tab Button */}
+              <button
+                onClick={() => setActiveTab("education")}
+                className={`relative px-3 py-1.5 rounded text-xs font-bold tracking-tight transition-colors select-none z-10 flex items-center gap-1.5 ${
+                  activeTab === "education" ? "text-white" : "text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+                academic_tree
+                {activeTab === "education" && (
+                  <motion.div
+                    layoutId="activeCareerTabBg"
+                    className="absolute inset-0 bg-[#21262D] border border-[#30363D] rounded -z-10 shadow-sm"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Content Stream Display Sub-Canvas */}
       <div className="relative w-full z-10 pb-12">
         <AnimatePresence mode="wait">
-          {activeTab === "experience" ? (
+          {activeTab === "experience" && showExperience ? (
             <motion.div
               key="experience-tab"
               initial={{ opacity: 0 }}
@@ -103,7 +122,7 @@ export default function Career({ experiences = [], educations = [], portfolio }:
             >
               <Experience experiences={experiences} />
             </motion.div>
-          ) : (
+          ) : activeTab === "education" && showEducation ? (
             <motion.div
               key="education-tab"
               initial={{ opacity: 0 }}
@@ -113,7 +132,7 @@ export default function Career({ experiences = [], educations = [], portfolio }:
             >
               <Education educations={educations} />
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </section>

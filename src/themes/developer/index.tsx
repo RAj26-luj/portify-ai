@@ -22,6 +22,15 @@ import Career from "./components/Career";
 export default function DeveloperTheme({ portfolio }: any) {
   const data = portfolio;
 
+  // Determine actual visibility from configuration sectionSettings arrays
+  const isExperienceEnabled = data?.sectionSettings?.length
+    ? data.sectionSettings.some((s: any) => s.sectionKey?.toLowerCase() === "experience" && s.isEnabled)
+    : true;
+
+  const isEducationEnabled = data?.sectionSettings?.length
+    ? data.sectionSettings.some((s: any) => s.sectionKey?.toLowerCase() === "education" && s.isEnabled)
+    : true;
+
   const sectionMap: Record<string, React.ReactNode> = {
     hero: (
       <Hero
@@ -58,6 +67,8 @@ export default function DeveloperTheme({ portfolio }: any) {
         experiences={data?.experiences || []}
         educations={data?.educations || []}
         portfolio={data}
+        showExperience={isExperienceEnabled}
+        showEducation={isEducationEnabled}
       />
     ),
 
