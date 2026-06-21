@@ -1,11 +1,9 @@
 node_modules
 .next
 .git
-playwright-report
-test-results
-coverage
-logs
-backups
-docs
+.gitignore
 .env
 .env.local
+coverage
+playwright-report
+test-results
