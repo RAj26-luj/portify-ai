@@ -60,22 +60,27 @@ export default function SettingsForm({
   const [verifyingPasswordCode, setVerifyingPasswordCode] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
 
-  const publicPortfolioUrl = `portify.ai/${username}`;
+
 
   function showFeedback(text: string, type: "success" | "error" | "info" = "success") {
     setMessage(text);
     setMessageType(type);
   }
+const publicPortfolioUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portfolio/${username}`;
 
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(`https://${publicPortfolioUrl}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      showFeedback("Failed to copy path configuration to clipboard matrix.", "error");
-    }
-  };
+const handleCopyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(publicPortfolioUrl);
+
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  } catch (err) {
+    showFeedback(
+      "Failed to copy path configuration to clipboard matrix.",
+      "error"
+    );
+  }
+};
 
   async function handleSignOut() {
     await signOut({
