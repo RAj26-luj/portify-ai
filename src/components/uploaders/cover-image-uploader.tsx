@@ -3,9 +3,7 @@
 import FileUploader from "./file-uploader";
 
 interface CoverImageUploaderProps {
-  onUpload: (
-    file: File
-  ) => void;
+  onUpload: (file: File) => void;
 }
 
 export default function CoverImageUploader({
@@ -14,7 +12,8 @@ export default function CoverImageUploader({
   return (
     <FileUploader
       accept="image/*"
-      onUpload={onUpload}
+      multiple={false}
+      onUpload={(file) => onUpload(file as File)}
     />
   );
 }

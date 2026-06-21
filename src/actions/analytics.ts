@@ -1,178 +1,307 @@
 "use server";
 
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getPortfolioId } from "@/lib/get-portfolio-id";
+
+/**
+ * Standard server exception handler translating structural database and analytics exceptions
+ * into resilient, friendly user interface response payload signatures.
+ */
+function handleAnalyticsServerError(error: any, fallbackMessage: string) {
+  console.error("Analytics Service Server Action Exception:", error);
+  const errorMessage = error instanceof Error ? error.message : String(error);
+
+  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+    return { 
+      success: false, 
+      error: "The analytical data sync failed. Database logging engine is temporarily busy." 
+    };
+  }
+  return { success: false, error: fallbackMessage };
+}
 
 export async function recordView(
   portfolioId: string,
-  data?: {
-    ipHash?: string;
-    country?: string;
-    city?: string;
-    browser?: string;
-    device?: string;
-    referrer?: string;
-  }
+  data?: { visitorHash?: string }
 ) {
-  const existing =
-    data?.ipHash
-      ? await prisma.portfolioView.findFirst(
-          {
-            where: {
-              portfolioId,
-              ipHash:
-                data.ipHash,
-            },
-          }
-        )
+  try {
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    const resolvedPortfolioId =
+      portfolioId ||
+      (
+        await prisma.user.findUnique({
+          where: { id: userId },
+          select: { portfolio: { select: { id: true } } },
+        })
+      )?.portfolio?.id;
+
+    if (!resolvedPortfolioId) {
+      return { success: false, error: "Identification target profile could not be verified to log metrics." };
+    }
+
+    const existing = data?.visitorHash
+      ? await prisma.portfolioView.findFirst({
+          where: {
+            portfolioId: resolvedPortfolioId,
+            visitorHash: data.visitorHash,
+          },
+        })
       : null;
 
-  await prisma.portfolioView.create(
-    {
+    await prisma.portfolioView.create({
       data: {
-        portfolioId,
-        ipHash:
-          data?.ipHash,
-        country:
-          data?.country,
-        city:
-          data?.city,
-        browser:
-          data?.browser,
-        device:
-          data?.device,
-        referrer:
-          data?.referrer,
-        expiresAt:
-          new Date(
-            Date.now() +
-              1000 *
-                60 *
-                60 *
-                24 *
-                30
-          ),
+        portfolioId: resolvedPortfolioId,
+        visitorHash: data?.visitorHash ?? null,
       },
-    }
-  );
+    });
 
-  await prisma.portfolio.update({
-    where: {
-      id: portfolioId,
-    },
-    data: {
-      totalViews: {
-        increment: 1,
+    await prisma.analytics.upsert({
+      where: {
+        portfolioId: resolvedPortfolioId,
       },
-      ...(existing
-        ? {}
-        : {
-            uniqueVisitors:
-              {
+      update: {
+        totalViews: {
+          increment: 1,
+        },
+        ...(data?.visitorHash && !existing
+          ? {
+              uniqueVisitors: {
                 increment: 1,
               },
-          }),
-    },
-  });
+            }
+          : {}),
+      },
+      create: {
+        portfolioId: resolvedPortfolioId,
+        totalViews: 1,
+        uniqueVisitors:
+          data?.visitorHash && !existing ? 1 : 0,
+        resumeDownloads: 0,
+        contactRequests: 0,
+        projectClicks: 0,
+      },
+    });
+
+    await prisma.portfolio.update({
+      where: {
+        id: resolvedPortfolioId,
+      },
+      data: {
+        lastViewedAt: new Date(),
+      },
+    });
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return handleAnalyticsServerError(error, "Failed to capture portfolio visitation statistics.");
+  }
 }
 
-export async function getAnalytics(
-  portfolioId: string
-) {
-  const portfolio =
-    await prisma.portfolio.findUnique(
-      {
+export async function getAnalytics(portfolioId: string) {
+  try {
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    const resolvedPortfolioId = portfolioId || (await getPortfolioId());
+
+    if (!resolvedPortfolioId) {
+      return {
+        success: true,
+        data: {
+          totalViews: 0,
+          uniqueVisitors: 0,
+          resumeDownloads: 0,
+          contactRequests: 0,
+          projectClicks: 0,
+          recentViews: [],
+        }
+      };
+    }
+
+    const analytics = await prisma.analytics.findUnique({
+      where: {
+        portfolioId: resolvedPortfolioId,
+      },
+    });
+
+    const [
+      messages,
+      views,
+      resumeDownloads,
+      projectClicks,
+      recentViews,
+    ] = await Promise.all([
+      prisma.contactMessage.count({
         where: {
-          id: portfolioId,
+          portfolioId: resolvedPortfolioId,
         },
-        select: {
-          totalViews: true,
-          uniqueVisitors:
-            true,
+      }),
+
+      prisma.portfolioView.count({
+        where: {
+          portfolioId: resolvedPortfolioId,
         },
+      }),
+
+      prisma.resumeDownload.count({
+        where: {
+          portfolioId: resolvedPortfolioId,
+        },
+      }),
+
+      prisma.projectClick.count({
+        where: {
+          portfolioId: resolvedPortfolioId,
+        },
+      }),
+
+      prisma.portfolioView.findMany({
+        where: {
+          portfolioId: resolvedPortfolioId,
+        },
+        orderBy: {
+          viewedAt: "desc",
+        },
+        take: 20,
+      }),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        totalViews: analytics?.totalViews ?? views,
+        uniqueVisitors: analytics?.uniqueVisitors ?? 0,
+        resumeDownloads: analytics?.resumeDownloads ?? resumeDownloads,
+        contactRequests: analytics?.contactRequests ?? messages,
+        projectClicks: analytics?.projectClicks ?? projectClicks,
+        recentViews,
       }
-    );
+    };
+  } catch (error) {
+    console.error("Failed to load historical charts insight metrics:", error);
+    return {
+      success: false,
+      error: "Unable to aggregate traffic logs dashboard. Please pull to refresh dashboard.",
+      data: {
+        totalViews: 0,
+        uniqueVisitors: 0,
+        resumeDownloads: 0,
+        contactRequests: 0,
+        projectClicks: 0,
+        recentViews: [],
+      }
+    };
+  }
+}
 
-const [
-  messages,
-  views,
-  resumeDownloads,
-  countries,
-  devices,
-  browsers,
-  referrers,
-] = await Promise.all([
-  prisma.contactMessage.count({
-    where: {
-      portfolioId,
-    },
-  }),
+export async function trackProjectClick(
+  portfolioId: string,
+  projectId: string
+) {
+  try {
+    const session = await auth();
+    const userId = session?.user?.id;
 
-  prisma.portfolioView.count({
-    where: {
-      portfolioId,
-    },
-  }),
+    const resolvedPortfolioId =
+      portfolioId ||
+      (
+        await prisma.user.findUnique({
+          where: { id: userId },
+          select: { portfolio: { select: { id: true } } },
+        })
+      )?.portfolio?.id;
 
-  prisma.resumeDownload.count({
-    where: {
-      portfolioId,
-    },
-  }),
+    if (!resolvedPortfolioId || !projectId) {
+      return { success: false, error: "Required tracking targets missing. Click registration abort." };
+    }
 
-  prisma.portfolioView.groupBy({
-    by: ["country"],
-    where: {
-      portfolioId,
-    },
-    _count: true,
-  }),
+    await prisma.projectClick.create({
+      data: {
+        portfolioId: resolvedPortfolioId,
+        projectId,
+      },
+    });
 
-  prisma.portfolioView.groupBy({
-    by: ["device"],
-    where: {
-      portfolioId,
-    },
-    _count: true,
-  }),
+    await prisma.analytics.upsert({
+      where: {
+        portfolioId: resolvedPortfolioId,
+      },
+      update: {
+        projectClicks: {
+          increment: 1,
+        },
+      },
+      create: {
+        portfolioId: resolvedPortfolioId,
+        totalViews: 0,
+        uniqueVisitors: 0,
+        resumeDownloads: 0,
+        contactRequests: 0,
+        projectClicks: 1,
+      },
+    });
 
-  prisma.portfolioView.groupBy({
-    by: ["browser"],
-    where: {
-      portfolioId,
-    },
-    _count: true,
-  }),
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return handleAnalyticsServerError(error, "Failed to compile background interaction click records.");
+  }
+}
 
-  prisma.portfolioView.groupBy({
-    by: ["referrer"],
-    where: {
-      portfolioId,
-    },
-    _count: true,
-  }),
-]);
+export async function getPortfolioStats(portfolioId: string) {
+  try {
+    const session = await auth();
+    const userId = session?.user?.id;
 
-  return {
-  totalViews:
-    portfolio?.totalViews ?? 0,
+    const resolvedPortfolioId = portfolioId || (await getPortfolioId());
 
-  uniqueVisitors:
-    portfolio?.uniqueVisitors ?? 0,
+    if (!resolvedPortfolioId) {
+      return {
+        success: true,
+        data: {
+          totalViews: 0,
+          uniqueVisitors: 0,
+          resumeDownloads: 0,
+          contactRequests: 0,
+          projectClicks: 0,
+        }
+      };
+    }
 
-  contactMessages:
-    messages,
+    const analytics = await prisma.analytics.findUnique({
+      where: {
+        portfolioId: resolvedPortfolioId,
+      },
+    });
 
-  portfolioViews:
-    views,
-
-  resumeDownloads,
-
-  countries,
-
-  devices,
-
-  browsers,
-
-  referrers,
-};
+    return {
+      success: true,
+      data: {
+        totalViews: analytics?.totalViews ?? 0,
+        uniqueVisitors: analytics?.uniqueVisitors ?? 0,
+        resumeDownloads: analytics?.resumeDownloads ?? 0,
+        contactRequests: analytics?.contactRequests ?? 0,
+        projectClicks: analytics?.projectClicks ?? 0,
+      }
+    };
+  } catch (error) {
+    console.error("Failed to query baseline counters stream stats:", error);
+    return {
+      success: false,
+      error: "Could not fetch platform performance overview records counter grid.",
+      data: {
+        totalViews: 0,
+        uniqueVisitors: 0,
+        resumeDownloads: 0,
+        contactRequests: 0,
+        projectClicks: 0,
+      }
+    };
+  }
 }

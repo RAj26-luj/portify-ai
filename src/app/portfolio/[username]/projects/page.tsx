@@ -1,48 +1,174 @@
 import { getPortfolioByUsername } from "@/actions/portfolio";
-export const dynamic = "force-dynamic";
+import { notFound } from "next/navigation";
+
 interface Props {
-  params: Promise<{
+  params: {
     username: string;
-  }>;
+  };
 }
 
 export default async function ProjectsPage({
   params,
 }: Props) {
-  const { username } =
-    await params;
+  const result = await getPortfolioByUsername(
+    params.username
+  );
 
-  const portfolio =
-    await getPortfolioByUsername(
-      username
-    );
+  if (
+    !result ||
+    !result.success ||
+    !result.data ||
+    !result.data.isPublic
+  ) {
+    return notFound();
+  }
+
+  const portfolio = result.data;
+  const projects =
+    (portfolio as any).projects ?? [];
 
   return (
-    <main className="p-8">
-      <h1 className="mb-6 text-4xl font-bold">
+    <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
+      <h1 className="text-2xl font-bold">
         Projects
       </h1>
 
-      <div className="grid gap-4">
-        {portfolio?.projects.map(
-          (project: { id: string; title: string; description: string }) => (
+      {projects.length === 0 ? (
+        <p className="text-sm text-gray-500">
+          No projects added
+        </p>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2">
+          {projects.map((project: any) => (
             <div
               key={project.id}
-              className="rounded-xl border p-4"
+              className="border rounded-xl p-5 space-y-4"
             >
-              <h2 className="font-bold">
-                {project.title}
-              </h2>
+              {project.coverImage && (
+                <img
+                  src={project.coverImage}
+                  alt={project.title}
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+              )}
 
-              <p>
-                {
-                  project.description
-                }
-              </p>
+              <div>
+                <h2 className="text-lg font-semibold">
+                  {project.title}
+                </h2>
+
+                {project.shortDescription && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    {
+                      project.shortDescription
+                    }
+                  </p>
+                )}
+              </div>
+
+              {project.description && (
+                <p className="text-sm text-gray-500">
+                  {project.description}
+                </p>
+              )}
+
+              {project.techStack?.length >
+                0 && (
+                <div className="flex flex-wrap gap-2">
+                  {project.techStack.map(
+                    (
+                      tech: string,
+                      index: number
+                    ) => (
+                      <span
+                        key={index}
+                        className="text-xs px-2 py-1 rounded bg-gray-100"
+                      >
+                        {tech}
+                      </span>
+                    )
+                  )}
+                </div>
+              )}
+
+              <div className="flex gap-4 text-sm">
+                {project.githubUrl && (
+                  <a
+                    href={
+                      project.githubUrl
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600"
+                  >
+                    GitHub
+                  </a>
+                )}
+
+                {project.liveUrl && (
+                  <a
+                    href={
+                      project.liveUrl
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600"
+                  >
+                    Live
+                  </a>
+                )}
+
+                {project.demoUrl && (
+                  <a
+                    href={
+                      project.demoUrl
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600"
+                  >
+                    Demo
+                  </a>
+                )}
+              </div>
+
+              {project.metrics?.length >
+                0 && (
+                <div className="border-t pt-3">
+                  <h3 className="text-sm font-medium mb-2">
+                    Metrics
+                  </h3>
+
+                  <div className="space-y-2">
+                    {project.metrics.map(
+                      (metric: any) => (
+                        <div
+                          key={
+                            metric.id
+                          }
+                          className="flex justify-between text-xs"
+                        >
+                          <span>
+                            {
+                              metric.label
+                            }
+                          </span>
+
+                          <span className="font-medium">
+                            {
+                              metric.value
+                            }
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          )
-        )}
-      </div>
-    </main>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

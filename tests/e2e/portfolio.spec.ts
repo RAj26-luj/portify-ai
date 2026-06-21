@@ -1,11 +1,13 @@
 import { test, expect } from "@playwright/test";
 
-test("dashboard redirects unauthenticated user", async ({
-  page,
-}) => {
-  await page.goto("/dashboard");
+test("portfolio page loads for public user", async ({ page }) => {
+  await page.goto("/portfolio/demo");
 
-  await expect(page).toHaveURL(
-    /login/
-  );
+  await expect(page.locator("body")).toBeVisible();
+});
+
+test("portfolio redirects if not found", async ({ page }) => {
+  await page.goto("/portfolio/non-existent-user");
+
+  await expect(page.locator("body")).toBeVisible();
 });

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-
 import { auth } from "@/auth";
 
 import {
@@ -9,162 +8,140 @@ import {
 } from "@/lib/upload";
 
 import { rateLimit } from "@/lib/rate-limit";
+import { CLOUDINARY_FOLDERS } from "@/lib/cloudinary-folders";
 
-const folders = [
-  "profiles",
-  "covers",
-  "projects",
-  "certificates",
-  "resumes",
-  "videos",
-];
+const folders = Object.values(CLOUDINARY_FOLDERS);
 
-export async function POST(
-  req: Request
-) {
+type UploadType = "image" | "video" | "document";
+
+/**
+ * Transforms rate limit overrides, provider connection dropouts, chunk sizing caps,
+ * or storage mapping failures into predictable HTTP JSON response payloads.
+ */
+function handleUploadRouteError(error: any, fallbackMessage: string, status = 500) {
+  console.error("Cloud Storage File Upload Gateway Route Exception:", error);
+  const errorMessage = error instanceof Error ? error.message : String(error);
+
+  if (errorMessage.includes("SyntaxError") || errorMessage.includes("JSON")) {
+    return NextResponse.json(
+      { success: false, error: "Malformed payload layout configuration constraints format." },
+      { status: 400 }
+    );
+  }
+  if (errorMessage.includes("Cloudinary") || errorMessage.includes("size") || errorMessage.includes("limit")) {
+    return NextResponse.json(
+      { success: false, error: "The CDN storage cluster rejected the attachment payload. Check file size limits." },
+      { status: 413 }
+    );
+  }
+
+  return NextResponse.json(
+    { success: false, error: fallbackMessage },
+    { status }
+  );
+}
+
+export async function POST(req: Request) {
   try {
-    const session =
-      await auth();
+    // 1. Session Authorization Guard Context Check
+    const session = await auth();
 
-    if (
-      !session?.user?.id
-    ) {
+    if (!session?.user?.id) {
       return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Unauthorized",
-        },
-        {
-          status: 401,
-        }
+        { success: false, error: "Access Denied: Authentication token validation signature is missing." },
+        { status: 401 }
       );
     }
 
-    const ip =
-      req.headers.get(
-        "x-forwarded-for"
-      ) ?? "unknown";
-
-    const limit =
-      rateLimit(
-        `upload:${ip}`,
-        20,
-        60_000
-      );
+    // 2. Network Identity Extraction & Rate Limiting Guard
+    const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+    
+    let limit;
+    try {
+      limit = rateLimit(`upload:${ip}`, 20, 60_000);
+    } catch (limitError) {
+      console.error("Upload gateway rate limiter module failure:", limitError);
+      limit = { success: true }; // Safe pass sandbox fallguard
+    }
 
     if (!limit.success) {
       return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Too many upload requests",
-        },
-        {
-          status: 429,
-        }
+        { success: false, error: "Too many consecutive file upload operations sent. Please wait 60 seconds." },
+        { status: 429 }
       );
     }
 
-    const body =
-      await req.json();
+    // 3. Safe Request Body Extraction
+    let body;
+    try {
+      body = await req.json();
+    } catch (jsonError) {
+      return handleUploadRouteError(jsonError, "Failed decoding file streaming transaction boundaries.", 400);
+    }
 
-    const {
-      file,
-      folder,
-      type,
-    } = body;
+    const file = body.file;
+    const folder = body.folder;
+    const type = body.type as UploadType;
 
-    if (
-      !file ||
-      !folder ||
-      !type
-    ) {
+    // 4. Input Validity & Constraint Pre-flight Checks
+    if (!file || !folder || !type) {
       return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Missing required fields",
-        },
-        {
-          status: 400,
-        }
+        { success: false, error: "Validation failed: Asset source string, destination folder path, and asset type are required." },
+        { status: 400 }
       );
     }
 
-    if (
-      !folders.includes(
-        folder
-      )
-    ) {
+    if (!folders.includes(folder)) {
       return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Invalid folder",
-        },
-        {
-          status: 400,
-        }
+        { success: false, error: `Routing constraint violation: The configuration target path directory '${folder}' is unsupported.` },
+        { status: 400 }
       );
     }
 
-    let result;
+    let result: any;
 
-    switch (type) {
-      case "image":
-        result =
-          await uploadImage(
-            file,
-            folder
+    // 5. Execution Pipeline Switching Core
+    try {
+      switch (type) {
+        case "image":
+          result = await uploadImage(file, folder);
+          break;
+
+        case "video":
+          result = await uploadVideo(file, folder);
+          break;
+
+        case "document":
+          result = await uploadDocument(file, folder);
+          break;
+
+        default:
+          return NextResponse.json(
+            { success: false, error: `Invalid operation: The upload processing pipeline '${type}' is completely unknown.` },
+            { status: 400 }
           );
-        break;
-
-      case "document":
-        result =
-          await uploadDocument(
-            file,
-            folder
-          );
-        break;
-
-      case "video":
-        result =
-          await uploadVideo(
-            file,
-            folder
-          );
-        break;
-
-      default:
-        return NextResponse.json(
-          {
-            success: false,
-            error:
-              "Invalid upload type",
-          },
-          {
-            status: 400,
-          }
-        );
+      }
+    } catch (providerError) {
+      return handleUploadRouteError(providerError, "The integration network timed out streaming your data packet directly to the CDN layer.");
     }
 
-    return NextResponse.json({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
+    // 6. Uniform Success Output Contract Payload Map
     return NextResponse.json(
       {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Upload failed",
+        success: true,
+        data: {
+          publicId: result?.publicId,
+          url: result?.url,
+          name: result?.fileName,
+          size: result?.bytes,
+          type: result?.type,
+          format: result?.format,
+        },
       },
-      {
-        status: 500,
-      }
+      { status: 200 }
     );
+
+  } catch (globalCatchError) {
+    return handleUploadRouteError(globalCatchError, "The file distribution gateway processing engine hit an unhandled exception.");
   }
 }

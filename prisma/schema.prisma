@@ -7,6 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//////////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////////
+
 enum UserStatus {
   PENDING
   APPROVED
@@ -29,6 +33,7 @@ enum NotificationType {
   WARNING
   ERROR
 }
+
 enum PortfolioCategory {
   STUDENT
   WORKING_PROFESSIONAL
@@ -37,399 +42,851 @@ enum PortfolioCategory {
   STARTUP_FOUNDER
 }
 
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  INTERNSHIP
+  FREELANCE
+  CONTRACT
+}
+
+enum ProjectType {
+  PERSONAL
+  ACADEMIC
+  PROFESSIONAL
+  RESEARCH
+  OPEN_SOURCE
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  COMPLETED
+  MAINTAINED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  PDF
+  ICON
+}
+
+enum IconCategory {
+  SKILL
+  SOCIAL
+  CODING_PLATFORM
+  TECHNOLOGY
+  TOOL
+  OTHER
+}
+
+enum IconSource {
+  LIBRARY
+  USER_UPLOAD
+  DEFAULT_ICON
+}
+
+enum ThemeType {
+  DEFAULT
+  MODERN
+  MINIMAL
+  DARK
+  DEVELOPER
+}
+
+//////////////////////////////////////////////////////
+// USER MODEL
+//////////////////////////////////////////////////////
+
 model User {
-  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String     @unique
+  username      String     @unique
+  password      String?
+  emailVerified DateTime?
+  phone         String?
+  image         String?
+  coverImage    String?
+  website       String?
+  country       String?
+  state         String?
+  city          String?
+  role          UserRole   @default(USER)
+  status        UserStatus @default(PENDING)
+  approvalNote  String?
+  approvedAt    DateTime?
+  isBlocked     Boolean    @default(false)
+  lastLogin     DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-  name            String
-  email           String       @unique
-  password        String?
-
-  emailVerified   DateTime?
-
-  phone           String?
-  image           String?
-
-  role            UserRole     @default(USER)
-  status          UserStatus   @default(PENDING)
-
-  isBlocked       Boolean      @default(false)
-
-  portfolio       Portfolio?
+  portfolio Portfolio?
 
   notifications   Notification[]
   accounts        Account[]
-
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  approvalRequest ApprovalRequest?
+  emailLogs       EmailLog[]
+  auditLogs       AuditLog[]
+  reports         Report[]         @relation("UserReports")
 }
 
-model Portfolio {
-  id                    String            @id @default(auto()) @map("_id") @db.ObjectId
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
 
-  userId                String            @unique @db.ObjectId
-  user                  User              @relation(fields: [userId], references: [id])
+  userId            String  @db.ObjectId
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  username              String            @unique
-
-  title                 String?
-  tagline               String?
-  bio                   String?
-
-  profileImage          String?
-  coverImage            String?
-
-  status                PortfolioStatus   @default(DRAFT)
-
-  isPublic              Boolean           @default(false)
-
-  allowContactForm      Boolean           @default(true)
-  allowResumeDownload   Boolean           @default(true)
-  showSkills          Boolean   @default(true)
-  showProjects        Boolean   @default(true)
-  showEducation       Boolean   @default(true)
-  showExperience      Boolean   @default(true)
-  showAchievements    Boolean   @default(true)
-
-  showSocialLinks     Boolean   @default(true)
-  showCodingProfiles  Boolean   @default(true)
-
-showCustomSections  Boolean @default(true)
-
-showAnalytics       Boolean @default(false)
-
-  totalViews            Int               @default(0)
-  uniqueVisitors        Int               @default(0)
-
-  seoTitle              String?
-  seoDescription        String?
-  seoKeywords           String?
-  seoImage              String?
-  ogTitle         String?
-ogSubtitle      String?
-ogDescription   String?
-
-  activeThemeId         String?           @db.ObjectId
-
-  resume                Resume?
-
-  projects              Project[]
-  educations            Education[]
-  experiences           Experience[]
-  skills                Skill[]
-  achievements          Achievement[]
-
-  socialLinks           SocialLink[]
-  codingProfiles        CodingProfile[]
-
-  customSections        CustomSection[]
-  themes                Theme[]
-
-  analytics             Analytics?
-  views                 PortfolioView[]
-  resumeDownloads     ResumeDownload[]
-  contactMessages       ContactMessage[]
-
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
-  slug                  String?           @unique
-  category              PortfolioCategory @default(STUDENT)
-  pendingFields       String[]
-pendingQuestions    String[]
-
-completionScore     Int      @default(0)
-portfolioScore      Int      @default(0)
-
-profileCompleted    Boolean  @default(false)
-
-lastAnalyzedAt      DateTime?
-
-
-}
-
-model Resume {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId   String     @unique @db.ObjectId
-  portfolio     Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  fileName      String
-  fileUrl       String
-
-  fileSize      Int?
-
-  uploadedAt    DateTime   @default(now())
-
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-}
-model Project {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId   String     @db.ObjectId
-  portfolio     Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  title         String
-  description   String
-
-  techStack     String[]
-
-  githubUrl     String?
-  liveUrl       String?
-
-  imageUrls     String[]
-  videoUrl      String?
-
-  featured      Boolean    @default(false)
-
-  displayOrder  Int        @default(0)
-
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-}
-
-model Education {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId   String     @db.ObjectId
-  portfolio     Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  institution   String
-  degree        String
-
-  fieldOfStudy  String?
-
-  startDate     DateTime?
-  endDate       DateTime?
-
-  grade         String?
-
-  description   String?
-
-  createdAt     DateTime   @default(now())
-}
-
-model Experience {
-  id                String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId       String     @db.ObjectId
-  portfolio         Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  company           String
-  position          String
-
-  location          String?
-
-  startDate         DateTime?
-  endDate           DateTime?
-
-  currentlyWorking  Boolean    @default(false)
-
-  description       String?
-
-  createdAt         DateTime   @default(now())
-}
-
-model Skill {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId   String     @db.ObjectId
-  portfolio     Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  name          String
-
-  category      String?
-  level         Int?
-
-  displayOrder  Int        @default(0)
-
-  createdAt     DateTime   @default(now())
-}
-
-model Achievement {
-  id                String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId       String     @db.ObjectId
-  portfolio         Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  title             String
-  description       String?
-
-  issuer            String?
-
-  achievementDate   DateTime?
-
-  url               String?
-
-  createdAt         DateTime   @default(now())
-}
-
-model SocialLink {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId   String     @db.ObjectId
-  portfolio     Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  platform      String
-  label         String?
-  url           String
-
-  createdAt     DateTime   @default(now())
-}
-
-model CodingProfile {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId   String     @db.ObjectId
-  portfolio     Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  platform      String
-  username      String
-  profileUrl    String
-
-  rating        Int?
-  rank          String?
-
-  createdAt     DateTime   @default(now())
-}
-model CustomSection {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId   String     @db.ObjectId
-  portfolio     Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  title         String
-  content       String
-
-  displayOrder  Int        @default(0)
-
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-}
-
-model Theme {
-  id              String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId     String     @db.ObjectId
-  portfolio       Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  name            String
-
-  primaryColor    String?
-  secondaryColor  String?
-
-  font            String?
-  layout          String?
-
-  darkMode        Boolean    @default(false)
-
-  isActive        Boolean    @default(false)
-
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-}
-
-model Analytics {
-  id                String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId       String     @unique @db.ObjectId
-  portfolio         Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  totalViews        Int        @default(0)
-  uniqueVisitors    Int        @default(0)
-
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-}
-
-model PortfolioView {
-  id              String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId     String     @db.ObjectId
-  portfolio       Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  ipHash          String?
-  country         String?
-  city            String?
-
-  device          String?
-  browser         String?
-
-  referrer        String?
-
-  viewedAt        DateTime   @default(now())
-  expiresAt       DateTime?
-
-  @@index([viewedAt])
-}
-
-model Notification {
-  id            String            @id @default(auto()) @map("_id") @db.ObjectId
-
-  userId        String            @db.ObjectId
-  user          User              @relation(fields: [userId], references: [id])
-
-  title         String
-  message       String
-
-  type          NotificationType  @default(INFO)
-
-  isRead        Boolean           @default(false)
-
-  createdAt     DateTime          @default(now())
-}
-
-model ContactMessage {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  portfolioId   String     @db.ObjectId
-  portfolio     Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  name          String
-  email         String
-
-  subject       String?
-  message       String
-
-  isRead        Boolean    @default(false)
-  replied       Boolean    @default(false)
-
-  createdAt     DateTime   @default(now())
-}model Account {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-
-  userId            String   @db.ObjectId
-  user              User     @relation(fields: [userId], references: [id])
-
+  type              String
   provider          String
   providerAccountId String
 
-  access_token      String?
-  refresh_token     String?
-  expires_at        Int?
+  refresh_token String?
+  access_token  String?
+  expires_at    Int?
+  token_type    String?
+  scope         String?
+  id_token      String?
 
   @@unique([provider, providerAccountId])
 }
 
 model VerificationToken {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
-
   identifier String
   token      String
   expires    DateTime
 
   @@unique([identifier, token])
 }
+
+model Notification {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String           @db.ObjectId
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+}
+
+//////////////////////////////////////////////////////
+// PORTFOLIO MODEL
+//////////////////////////////////////////////////////
+
+model Portfolio {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  username String            @unique
+  slug     String?           @unique
+  category PortfolioCategory @default(STUDENT)
+  status   PortfolioStatus   @default(DRAFT)
+  isPublic Boolean           @default(false)
+
+  title          String?
+  tagline        String?
+  bio            String?
+  profileImage   String?
+  coverImage     String?
+  resumeHeadline String?
+  currentRole    String?
+  email          String?
+  phone          String?
+  website        String?
+  country        String?
+  city           String?
+  state          String?
+  timezone       String?
+
+  allowContactForm    Boolean @default(true)
+  allowResumeDownload Boolean @default(true)
+
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String?
+  seoImage       String?
+  ogTitle        String?
+  ogSubtitle     String?
+  ogDescription  String?
+
+  completionScore  Int     @default(0)
+  profileCompleted Boolean @default(false)
+
+  pendingFields    String[]
+  pendingQuestions String[]
+
+  lastAnalyzedAt DateTime?
+  publishedAt    DateTime?
+  lastViewedAt   DateTime?
+
+  primaryButtonText   String?
+  primaryButtonUrl    String?
+  secondaryButtonText String?
+  secondaryButtonUrl  String?
+
+  currentFocus        String?
+  availabilityStatus  String?
+  aboutImage          String?
+  contactAvailability String?
+  twitterImage        String?
+  description         String?
+  heroIntroduction    String?
+  ogImage             String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  resume          Resume?
+  analytics       Analytics?
+  themePreference ThemePreference?
+
+  sectionSettings    SectionSetting[]
+  media              Media[]
+  projects           Project[]
+  educations         Education[]
+  experiences        Experience[]
+  skills             Skill[]
+  skillCategories    SkillCategory[]
+  achievements       Achievement[]
+  certifications     Certification[]
+  publications       Publication[]
+  testimonials       Testimonial[]
+  socialLinks        SocialLink[]
+  codingProfiles     CodingProfile[]
+  customSections     CustomSection[]
+  openSourceProjects OpenSourceProject[]
+  contactMessages    ContactMessage[]
+  views              PortfolioView[]
+  resumeDownloads    ResumeDownload[]
+  projectClicks      ProjectClick[]
+  snapshots          PortfolioSnapshot[]
+  themeHistories     ThemeHistory[]
+  resumeVersions     ResumeVersion[]
+
+  reports Report[] @relation("PortfolioReports")
+
+  onboardingCompleted Boolean @default(false)
+  publishReady        Boolean @default(false)
+}
+
+model Resume {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId  String    @unique @db.ObjectId
+  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  fileName     String
+  fileUrl      String
+  fileSize     Int?
+  thumbnailUrl String?
+  uploadedAt   DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model SectionSetting {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId String    @db.ObjectId
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  sectionKey String
+  title      String?
+
+  isEnabled Boolean @default(true)
+
+  mandatory Boolean @default(false)
+
+  displayOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ThemePreference {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId String    @unique @db.ObjectId
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  activeTheme ThemeType @default(DEFAULT)
+  config      Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Media {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  portfolioId String    @db.ObjectId
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  type MediaType
+
+  usage String?
+
+  name String?
+
+  url String
+
+  publicId String?
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// CORE RESUME & PORTFOLIO DATA MODES
+//////////////////////////////////////////////////////
+
+model SkillCategory {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId  String    @db.ObjectId
+  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  name         String
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  skills Skill[]
+}
+
+model Skill {
+  id                String         @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId       String         @db.ObjectId
+  portfolio         Portfolio      @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  categoryId        String?        @db.ObjectId
+  category          SkillCategory? @relation(fields: [categoryId], references: [id])
+  name              String
+  proficiency       SkillLevel?
+  yearsOfExperience Int?
+  iconName          String?
+  iconUrl           String?
+  iconSource        IconSource     @default(LIBRARY)
+  description       String?
+  displayOrder      Int            @default(0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  tag               String?
+}
+
+model IconLibrary {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name String
+  slug String @unique
+
+  category IconCategory
+
+  iconUrl String
+
+  isDefault Boolean @default(false)
+
+  usageCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SocialLink {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId  String     @db.ObjectId
+  portfolio    Portfolio  @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  platform     String
+  username     String?
+  url          String
+  iconName     String?
+  iconUrl      String?
+  iconSource   IconSource @default(LIBRARY)
+  displayOrder Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model CodingProfile {
+  id               String     @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId      String     @db.ObjectId
+  portfolio        Portfolio  @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  platform         String
+  username         String
+  profileUrl       String
+  iconName         String?
+  iconUrl          String?
+  iconSource       IconSource @default(LIBRARY)
+  currentRating    Int?
+  maxRating        Int?
+  rank             String?
+  globalRank       String?
+  problemsSolved   Int?
+  contestsAttended Int?
+  activeSince      String?
+  displayOrder     Int        @default(0)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+model Education {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId       String    @db.ObjectId
+  portfolio         Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  institution       String
+  degree            String
+  fieldOfStudy      String?
+  grade             String?
+  cgpa              String?
+  institutionImage  String?
+  location          String?
+  startDate         DateTime?
+  endDate           DateTime?
+  currentlyStudying Boolean   @default(false)
+  description       String?
+  logoUrl           String?
+  displayOrder      Int       @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Experience {
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId      String          @db.ObjectId
+  portfolio        Portfolio       @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  company          String
+  position         String
+  employmentType   EmploymentType?
+  location         String?
+  companyWebsite   String?
+  companyBanner    String?
+  startDate        DateTime?
+  endDate          DateTime?
+  currentlyWorking Boolean         @default(false)
+  description      String?
+  responsibilities String[]
+  technologies     String[]
+  companyLogo      String?
+  displayOrder     Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model Project {
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId      String          @db.ObjectId
+  portfolio        Portfolio       @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  title            String
+  shortDescription String?
+  description      String?
+  problemStatement String?
+  solution         String?
+  category         String?
+  status           ProjectStatus?
+  type             ProjectType?    @default(PERSONAL)
+  role             String?
+  teamSize         Int?
+  projectBanner    String?
+  startDate        DateTime?
+  endDate          DateTime?
+  techStack        String[]
+  githubUrl        String?
+  liveUrl          String?
+  demoUrl          String?
+  videoUrl         String?
+  coverImage       String?
+  images           String[]
+  featured         Boolean         @default(false)
+  displayOrder     Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  thumbnail        String?
+  metrics          ProjectMetric[]
+  projectClicks    ProjectClick[]
+}
+
+model ProjectMetric {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId    String   @db.ObjectId
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  label        String
+  value        String
+  description  String?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+model OpenSourceProject {
+  id                      String               @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId             String               @db.ObjectId
+  portfolio               Portfolio            @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  repositoryName          String
+  repositoryUrl           String?
+  pullRequestUrl          String?
+  pullRequestTitle        String?
+  issueTitle              String?
+  contributionType        String?
+  description             String?
+  impactMetrics           String[]
+  linesChanged            String?
+  status                  ProjectStatus?
+  coverImage              String?
+  architectureDiagrams    String[]
+  contributionScreenshots String[]
+  displayOrder            Int                  @default(0)
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  timeline                OpenSourceTimeline[]
+  contributionTitle       String?
+}
+
+model OpenSourceTimeline {
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  openSourceId String            @db.ObjectId
+  openSource   OpenSourceProject @relation(fields: [openSourceId], references: [id], onDelete: Cascade)
+  milestone    String
+  progress     Int
+  description  String?
+  displayOrder Int               @default(0)
+  createdAt    DateTime          @default(now())
+}
+
+model Achievement {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId     String    @db.ObjectId
+  portfolio       Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  issuer          String?
+  featured        Boolean   @default(false)
+  achievementDate DateTime?
+  certificateUrl  String?
+  imageUrl        String?
+  rank            String?
+  position        String?
+  displayOrder    Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Certification {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId      String    @db.ObjectId
+  portfolio        Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  name             String
+  issuer           String?
+  featured         Boolean   @default(false)
+  credentialId     String?
+  issueDate        DateTime?
+  expiryDate       DateTime?
+  credentialUrl    String?
+  certificateImage String?
+  certificatePdf   String?
+  skillsCovered    String[]
+  displayOrder     Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Publication {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId      String    @db.ObjectId
+  portfolio        Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  title            String
+  journal          String?
+  featured         Boolean   @default(false)
+  publisher        String?
+  publicationDate  DateTime?
+  doi              String?
+  citations        Int?
+  abstract         String?
+  publicationUrl   String?
+  pdfUrl           String?
+  conference       String?
+  publicationCover String?
+  authors          String[]
+  displayOrder     Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Testimonial {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId  String    @db.ObjectId
+  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  authorName   String
+  authorRole   String?
+  company      String?
+  testimonial  String
+  profileImage String?
+  linkedinUrl  String?
+  companyLogo  String?
+  featured     Boolean   @default(false)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model CustomSection {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  portfolioId String    @db.ObjectId
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  title String
+
+  subtitle        String?
+  description     String?
+  richTextContent String?
+
+  imageUrl String?
+
+  galleryImages String[]
+
+  attachments String[]
+
+  buttonText String?
+  buttonUrl  String?
+
+  iconUrl String?
+
+  sectionType String?
+
+  isVisible Boolean @default(true)
+
+  displayOrder Int @default(0)
+
+  items CustomSectionItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CustomSectionItem {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  customSectionId String @db.ObjectId
+
+  customSection CustomSection @relation(fields: [customSectionId], references: [id], onDelete: Cascade)
+
+  title String
+
+  subtitle String?
+
+  description String?
+
+  imageUrl String?
+
+  iconUrl String?
+
+  attachmentUrl String?
+
+  externalUrl String?
+
+  displayOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//////////////////////////////////////////////////////
+// ANALYTICS & INTERACTION LOGS
+//////////////////////////////////////////////////////
+
+model ContactMessage {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId  String    @db.ObjectId
+  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  visitorName  String
+  visitorEmail String
+  note         String?
+  isSeen       Boolean   @default(false)
+  seenAt       DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+model Analytics {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId     String    @unique @db.ObjectId
+  portfolio       Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  totalViews      Int       @default(0)
+  uniqueVisitors  Int       @default(0)
+  resumeDownloads Int       @default(0)
+  contactRequests Int       @default(0)
+  projectClicks   Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model PortfolioView {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId String    @db.ObjectId
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  visitorHash String?
+  viewedAt    DateTime  @default(now())
+
+  @@index([portfolioId])
+  @@index([viewedAt])
+}
+
 model ResumeDownload {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId  String    @db.ObjectId
+  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  visitorHash  String?
+  downloadedAt DateTime  @default(now())
 
-  portfolioId   String     @db.ObjectId
-  portfolio     Portfolio  @relation(fields: [portfolioId], references: [id])
-
-  ipHash        String?
-  country       String?
-  city          String?
-
-  downloadedAt  DateTime   @default(now())
-
+  @@index([portfolioId])
   @@index([downloadedAt])
+}
+
+model ProjectClick {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId String    @db.ObjectId
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  projectId   String    @db.ObjectId
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clickedAt   DateTime  @default(now())
+
+  @@index([portfolioId])
+  @@index([projectId])
+}
+
+//////////////////////////////////////////////////////
+// SYSTEM ADMINISTRATIVE MODELS
+//////////////////////////////////////////////////////
+
+model ApprovalRequest {
+  id         String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String         @unique @db.ObjectId
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note       String?
+  status     ApprovalStatus @default(PENDING)
+  reviewedBy String?        @db.ObjectId
+  reviewedAt DateTime?
+  createdAt  DateTime       @default(now())
+}
+
+model Report {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  reportedUserId String? @db.ObjectId
+  reportedUser   User?   @relation("UserReports", fields: [reportedUserId], references: [id])
+
+  portfolioId String?    @db.ObjectId
+  portfolio   Portfolio? @relation("PortfolioReports", fields: [portfolioId], references: [id])
+
+  reason      String
+  description String?
+
+  status ReportStatus @default(PENDING)
+
+  reviewedBy String?   @db.ObjectId
+  reviewedAt DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model EmailLog {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?   @db.ObjectId
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  recipient String
+  subject   String
+  type      String
+  status    String
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String?  @db.ObjectId
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String
+  token     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model PortfolioSnapshot {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId  String    @db.ObjectId
+  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  snapshotData Json
+  createdAt    DateTime  @default(now())
+
+  @@index([portfolioId])
+}
+
+model ThemeHistory {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  portfolioId String    @db.ObjectId
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  themeName   ThemeType
+  changedAt   DateTime  @default(now())
+
+  @@index([portfolioId])
+}
+
+model ResumeVersion {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  portfolioId String    @db.ObjectId
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  fileName String
+  fileUrl  String
+
+  uploadedAt DateTime @default(now())
+
+  changeLogs ResumeChangeLog[]
+
+  @@index([portfolioId])
+}
+
+model ResumeChangeLog {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  resumeVersionId String        @db.ObjectId
+  resumeVersion   ResumeVersion @relation(fields: [resumeVersionId], references: [id], onDelete: Cascade)
+
+  section   String
+  fieldName String
+
+  oldValue String?
+  newValue String?
+
+  createdAt DateTime @default(now())
+
+  @@index([resumeVersionId])
 }

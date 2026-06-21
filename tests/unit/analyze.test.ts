@@ -7,6 +7,11 @@ describe("analyzeResume", () => {
       education: [],
       experience: [],
       projects: [],
+      codingProfiles: [],
+      socialLinks: [],
+      achievements: [],
+      certifications: [],
+      publications: [],
     });
 
     expect(result.missingFields).toContain("name");
@@ -21,19 +26,10 @@ describe("analyzeResume", () => {
       phone: "1234567890",
       bio: "Full Stack Developer",
 
-      skills: [
-        "C++",
-        "React",
-        "Node.js",
-        "MongoDB",
-        "Next.js",
-      ],
+      skills: ["C++", "React", "Node.js", "MongoDB", "Next.js"],
 
       education: [
-        {
-          institution: "NIT Rourkela",
-          degree: "B.Tech",
-        },
+        { institution: "NIT Rourkela", degree: "B.Tech" },
       ],
 
       experience: [
@@ -51,6 +47,20 @@ describe("analyzeResume", () => {
           techStack: ["Next.js"],
         },
       ],
+
+      codingProfiles: [
+        { platform: "Codeforces", username: "raj" },
+      ],
+
+      socialLinks: [
+        { platform: "GitHub", url: "https://github.com/raj" },
+      ],
+
+      achievements: [{ title: "Codeforces Specialist" }],
+
+      certifications: [{ name: "AWS Certified" }],
+
+      publications: [{ title: "AI Research" }],
     });
 
     expect(result.completionScore).toBeGreaterThan(70);

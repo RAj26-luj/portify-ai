@@ -1,7 +1,5 @@
-import {
-  runCleanupJobs,
-} from "./cleanup";
+import { runCleanupJobs } from "./cleanup";
 
 export async function runJobs() {
-  return runCleanupJobs();
+  return await runCleanupJobs();
 }

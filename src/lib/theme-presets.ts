@@ -1,50 +1,46 @@
+import { ThemeType } from "@prisma/client";
+
 export const THEME_PRESETS = [
   {
+    id: ThemeType.DEFAULT,
+    name: "Default",
+    description:
+      "Balanced portfolio layout",
+    layout: "default",
+  },
+
+  {
+    id: ThemeType.MODERN,
     name: "Modern",
-    primaryColor:
-      "#2563eb",
-    secondaryColor:
-      "#0f172a",
-    font: "Inter",
+    description:
+      "Clean modern design",
     layout: "modern",
   },
 
   {
+    id: ThemeType.MINIMAL,
     name: "Minimal",
-    primaryColor:
-      "#18181b",
-    secondaryColor:
-      "#71717a",
-    font: "Geist",
+    description:
+      "Simple distraction free layout",
     layout: "minimal",
   },
 
   {
-    name: "Creative",
-    primaryColor:
-      "#9333ea",
-    secondaryColor:
-      "#ec4899",
-    font: "Poppins",
-    layout: "creative",
+    id: ThemeType.DEVELOPER,
+    name: "Developer",
+    description:
+      "Cyber luxury portfolio theme",
+    layout: "developer",
   },
 
   {
-    name: "Professional",
-    primaryColor:
-      "#1e3a8a",
-    secondaryColor:
-      "#475569",
-    font: "Roboto",
-    layout: "professional",
+    id: ThemeType.DARK,
+    name: "Dark",
+    description:
+      "Dark theme experience",
+    layout: "dark",
   },
-  {
-  name: "Researcher",
-  primaryColor:
-    "#0f766e",
-  secondaryColor:
-    "#334155",
-  font: "Merriweather",
-  layout: "researcher",
-},
-];
+] as const;
+
+export const themes =
+  THEME_PRESETS;

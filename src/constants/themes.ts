@@ -1,36 +1,13 @@
-export const themes = [
-  {
-    id: "default",
-    name: "Default",
-    description:
-      "Balanced portfolio layout",
-  },
+/* src/constants/themes.ts */
 
-  {
-    id: "modern",
-    name: "Modern",
-    description:
-      "Clean modern design",
-  },
+import { THEME_PRESETS } from "@/lib/theme-presets";
 
-  {
-    id: "minimal",
-    name: "Minimal",
-    description:
-      "Simple distraction free layout",
-  },
+export const themes = THEME_PRESETS;
 
-  {
-    id: "developer",
-    name: "Developer",
-    description:
-      "Developer focused portfolio",
-  },
+export type ThemeId =
+  (typeof themes)[number]["id"];
 
-  {
-    id: "dark",
-    name: "Dark",
-    description:
-      "Dark theme experience",
-  },
-] as const;
+export const themeIds =
+  themes.map(
+    (theme) => theme.id
+  ) as ThemeId[];

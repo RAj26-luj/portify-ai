@@ -1,65 +1,145 @@
-import crypto from "crypto";
-
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
-
 import { sendForgotPasswordEmail } from "@/services/email/send-forgot-password-email";
+
+function handleRecoveryRouteError(
+  error: unknown,
+  fallbackMessage: string,
+  status = 500
+): NextResponse {
+  console.error(
+    "Password Recovery System Route Exception:",
+    error
+  );
+
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : String(error);
+
+  if (
+    errorMessage.includes("SyntaxError") ||
+    errorMessage.includes("JSON")
+  ) {
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          "Malformed payload layout metadata format streams.",
+      },
+      { status: 400 }
+    );
+  }
+
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
+    return NextResponse.json({
+      success: true,
+    });
+  }
+
+  return NextResponse.json(
+    {
+      success: false,
+      error: fallbackMessage,
+    },
+    { status }
+  );
+}
 
 export async function POST(
   req: Request
-) {
+): Promise<Response> {
   try {
     const ip =
-      req.headers.get(
-        "x-forwarded-for"
-      ) ?? "unknown";
+      req.headers.get("x-forwarded-for") ??
+      "unknown";
 
-    const limit =
-      rateLimit(
+    let limit: {
+      success: boolean;
+    };
+
+    try {
+      limit = rateLimit(
         `forgot-password:${ip}`,
         5,
         15 * 60 * 1000
       );
+    } catch (limitError) {
+      console.error(
+        "Rate limiter subsystem exception:",
+        limitError
+      );
+
+      limit = {
+        success: true,
+      };
+    }
 
     if (!limit.success) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "Too many requests. Please try again later.",
+            "Too many recovery attempts from this connection source. Please try again in 15 minutes.",
         },
-        {
-          status: 429,
-        }
+        { status: 429 }
       );
     }
 
-    const { email } =
-      await req.json();
+    let body: {
+      email?: string;
+    };
 
-    if (!email) {
+    try {
+      body = await req.json();
+    } catch (jsonError) {
+      return handleRecoveryRouteError(
+        jsonError,
+        "Failed decoding authentication extraction packet parameters.",
+        400
+      );
+    }
+
+    const { email } = body;
+
+    if (
+      !email ||
+      String(email).trim() === ""
+    ) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "Email is required",
+            "Account identifier criteria is missing. Email address field is required.",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
-    const user =
-      await prisma.user.findUnique(
-        {
-          where: {
-            email,
-          },
-        }
+    const normalizedEmail = String(email)
+      .toLowerCase()
+      .trim();
+
+    let user;
+
+    try {
+      user = await prisma.user.findUnique({
+        where: {
+          email: normalizedEmail,
+        },
+      });
+    } catch (dbError) {
+      return handleRecoveryRouteError(
+        dbError,
+        "Data engine failed to query user parameter records."
       );
+    }
 
     if (!user) {
       return NextResponse.json({
@@ -67,59 +147,66 @@ export async function POST(
       });
     }
 
-    const token =
-      crypto.randomBytes(
-        32
-      ).toString("hex");
+    const token = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
 
-    const expires =
-      new Date(
-        Date.now() +
-          60 *
-            60 *
-            1000
+    try {
+      await prisma.passwordResetToken.deleteMany(
+        {
+          where: {
+            email: normalizedEmail,
+          },
+        }
       );
 
-    await prisma.verificationToken.deleteMany(
-      {
-        where: {
-          identifier:
-            email,
-        },
-      }
-    );
+      await prisma.passwordResetToken.create(
+        {
+          data: {
+            email: normalizedEmail,
+            token,
+            expiresAt: new Date(
+              Date.now() +
+                60 * 60 * 1000
+            ),
+          },
+        }
+      );
+    } catch (dbTxError) {
+      return handleRecoveryRouteError(
+        dbTxError,
+        "Security configuration tracking engine failed writing temporary credentials."
+      );
+    }
 
-    await prisma.verificationToken.create(
-      {
-        data: {
-          identifier:
-            email,
-          token,
-          expires,
-        },
-      }
-    );
+    try {
+      await sendForgotPasswordEmail(
+        normalizedEmail,
+        token
+      );
+    } catch (mailError) {
+      console.error(
+        "Email courier failed dispatching OTP security snapshot:",
+        mailError
+      );
 
-    await sendForgotPasswordEmail(
-      email,
-      token
-    );
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "The recovery request was accepted, but the communication delivery network failed. Try again later.",
+        },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
     });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to process request",
-      },
-      {
-        status: 500,
-      }
+  } catch (globalCatchError) {
+    return handleRecoveryRouteError(
+      globalCatchError,
+      "The password recovery validation pipeline encountered an unhandled execution core threat break."
     );
   }
 }

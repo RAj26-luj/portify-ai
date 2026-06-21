@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
 
 # next.js
 /.next/
@@ -29,8 +31,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
 
 # vercel
@@ -40,4 +43,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# generated
 /src/generated/prisma
+
+# accidental files
+next
+portify-ai@0.1.0
+
+# local scripts / seeds (optional)
+prisma/seed.ts
+prisma/seed2.ts
+prisma/clear-db.ts
+scripts/fix-usernames.ts

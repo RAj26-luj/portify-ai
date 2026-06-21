@@ -1,32 +1,29 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  background: #050816;
+  background: #030303;
   color: white;
   overflow-x: hidden;
   min-height: 100vh;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
+* {
+  box-sizing: border-box;
 }
 
-button {
-  cursor: pointer;
+::-webkit-scrollbar {
+  width: 7px;
 }
 
-.container-custom {
-  width: min(1400px, 92%);
-  margin-inline: auto;
+::-webkit-scrollbar-thumb {
+  background: #10b981;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030303;
 }

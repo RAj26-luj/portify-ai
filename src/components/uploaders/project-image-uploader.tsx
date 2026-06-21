@@ -3,9 +3,7 @@
 import FileUploader from "./file-uploader";
 
 interface ProjectImageUploaderProps {
-  onUpload: (
-    file: File
-  ) => void;
+  onUpload: (file: File) => void;
 }
 
 export default function ProjectImageUploader({
@@ -14,7 +12,8 @@ export default function ProjectImageUploader({
   return (
     <FileUploader
       accept="image/*"
-      onUpload={onUpload}
+      multiple={false}
+      onUpload={(file) => onUpload(file as File)}
     />
   );
 }

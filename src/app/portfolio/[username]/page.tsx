@@ -1,9 +1,15 @@
 import { getPortfolioByUsername } from "@/actions/portfolio";
-import { getActiveTheme } from "@/actions/theme";
-import type {
-  Metadata,
-} from "next";
+import { recordView } from "@/actions/analytics";
+import ThemeRenderer from "@/components/theme/theme-renderer";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export const metadataBase = new URL(
+  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+);
 
 interface Props {
   params: Promise<{
@@ -14,89 +20,63 @@ interface Props {
 export default async function PortfolioPage({
   params,
 }: Props) {
-  const { username } =
-    await params;
+  const { username } = await params;
 
-  const portfolio =
-    await getPortfolioByUsername(
-      username
-    );
+  const result = await getPortfolioByUsername(username);
 
-  if (!portfolio) {
-    return (
-      <div className="p-10">
-        Portfolio Not Found
-      </div>
-    );
+  if (!result.success || !result.data) {
+    notFound();
   }
 
-  const theme =
-    await getActiveTheme(
-      portfolio.id
-    );
+  const portfolio = result.data;
 
-  const dark =
-    theme?.darkMode;
+  if (
+    !portfolio.isPublic ||
+    portfolio.status !== "PUBLISHED"
+  ) {
+    notFound();
+  }
+
+  await recordView(portfolio.id);
 
   return (
-    <main
-      className={`mx-auto max-w-6xl p-8 ${
-        dark
-          ? "bg-black text-white"
-          : ""
-      }`}
-    >
-      <h1 className="text-5xl font-bold">
-        {portfolio.title ??
-          portfolio.username}
-      </h1>
-
-      {portfolio.tagline && (
-        <p className="mt-4 text-xl">
-          {portfolio.tagline}
-        </p>
-      )}
-
-      <p className="mt-6">
-        {portfolio.bio}
-      </p>
-      {portfolio.resume &&
-  portfolio.allowResumeDownload && (
-    <a
-      href={`/api/resume/download?portfolioId=${portfolio.id}`}
-      className="mt-6 inline-block rounded bg-blue-600 px-4 py-2 text-white"
-    >
-      Download Resume
-    </a>
-)}
-      <div className="mt-10">
-        <h2 className="mb-4 text-2xl font-semibold">
-          Active Theme
-        </h2>
-
-        <p>
-          {theme?.name ??
-            "Default"}
-        </p>
-      </div>
-    </main>
+    <ThemeRenderer
+      key={
+        portfolio.profileImage ||
+        portfolio.updatedAt?.toString()
+      }
+      portfolio={portfolio}
+      themeId={
+        portfolio.themePreference?.activeTheme ||
+        "DEFAULT"
+      }
+    />
   );
 }
+
 export async function generateMetadata({
   params,
 }: Props): Promise<Metadata> {
-  const { username } =
-    await params;
+  const { username } = await params;
 
-  const portfolio =
-    await getPortfolioByUsername(
-      username
-    );
+  const result = await getPortfolioByUsername(username);
 
-  if (!portfolio) {
+  if (!result.success || !result.data) {
     return {
-      title:
-        "Portfolio Not Found",
+      title: "Portfolio Not Found",
+      description: "This portfolio is unavailable.",
+    };
+  }
+
+  const portfolio = result.data;
+
+  if (
+    !portfolio.isPublic ||
+    portfolio.status !== "PUBLISHED"
+  ) {
+    return {
+      title: "Portfolio Not Found",
+      description: "This portfolio is unavailable.",
     };
   }
 
@@ -110,40 +90,31 @@ export async function generateMetadata({
     portfolio.bio ??
     "Professional portfolio";
 
- const image =
-  portfolio.seoImage ??
-  `/portfolio/${username}/opengraph-image`;
-  
+  const image =
+    portfolio.seoImage ??
+    portfolio.profileImage ??
+    `/api/og/${username}`;
 
   return {
     title,
-
     description,
-
     keywords:
       portfolio.seoKeywords
         ?.split(",")
-       .map((k: string) =>
-  k.trim()
-) ?? [],
+        .map((k) => k.trim()) ?? [],
 
     openGraph: {
       title,
       description,
-      images: image
-        ? [image]
-        : [],
+      images: image ? [image] : [],
       type: "website",
     },
 
     twitter: {
-      card:
-        "summary_large_image",
+      card: "summary_large_image",
       title,
       description,
-      images: image
-        ? [image]
-        : [],
+      images: image ? [image] : [],
     },
   };
 }

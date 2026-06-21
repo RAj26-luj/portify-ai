@@ -1,5 +1,7 @@
 "use client";
 
+import { Toaster } from "sonner";
+
 export default function ToastProvider() {
-  return null;
+  return <Toaster richColors position="top-right" />;
 }

@@ -1,46 +1,70 @@
 import { getPortfolioByUsername } from "@/actions/portfolio";
-export const dynamic = "force-dynamic";
+import { notFound } from "next/navigation";
+
 interface Props {
-  params: Promise<{
+  params: {
     username: string;
-  }>;
+  };
 }
 
-export default async function AchievementsPage({
-  params,
-}: Props) {
-  const { username } =
-    await params;
+export default async function AchievementsPage({ params }: Props) {
+  // 1. Fetch public metadata checking union response frames layout rules
+  const result = await getPortfolioByUsername(params.username);
 
-  const portfolio =
-    await getPortfolioByUsername(
-      username
-    );
+  // 🛡️ Discriminated Union Guard: Cleanly separates validation constraints before unpacking fields
+  if (!result || !result.success || !result.data || !result.data.isPublic) {
+    return notFound();
+  }
+
+  // ✅ Safe Context:result.data is completely type-narrowed here
+  const portfolio = result.data;
+  const achievements = (portfolio as any).achievements ?? [];
 
   return (
-    <main className="p-8">
-      <h1 className="mb-6 text-4xl font-bold">
-        Achievements
-      </h1>
+    <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
+      <h1 className="text-2xl font-bold">Achievements</h1>
 
-      {portfolio?.achievements.map(
-        (
-  item: {
-    id: string;
-    title: string;
-    description?: string | null;
-    issuer?: string | null;
-    url?: string | null;
-  }
-) => (
-          <div
-            key={item.id}
-            className="mb-4 rounded-xl border p-4"
-          >
-            {item.title}
-          </div>
-        )
+      {achievements.length === 0 ? (
+        <p className="text-sm text-gray-500">No achievements added</p>
+      ) : (
+        <div className="space-y-4">
+          {achievements.map((a: any) => (
+            <div key={a.id} className="border rounded-xl p-5 space-y-2">
+              <div className="flex justify-between gap-4">
+                <p className="font-semibold">{a.title}</p>
+
+                {a.achievementDate && (
+                  <span className="text-xs text-gray-500">
+                    {new Date(a.achievementDate).getFullYear()}
+                  </span>
+                )}
+              </div>
+
+              {a.issuer && (
+                <p className="text-sm text-gray-600">{a.issuer}</p>
+              )}
+
+              {a.description && (
+                <p className="text-xs text-gray-500">{a.description}</p>
+              )}
+
+              {a.rank && (
+                <p className="text-xs text-gray-500">Rank: {a.rank}</p>
+              )}
+
+              {a.certificateUrl && (
+                <a
+                  href={a.certificateUrl}
+                  target="_blank"
+                  className="text-xs text-blue-600"
+                >
+                  View Certificate
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
       )}
-    </main>
+    </div>
   );
 }

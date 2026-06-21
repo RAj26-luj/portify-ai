@@ -10,58 +10,24 @@ export async function improveBio(
     await ai.chat.completions.create({
       model:
         aiConfig.defaultModel,
-
       messages: [
         {
           role: "system",
           content:
-            "Improve the portfolio bio professionally.",
+            "Rewrite the portfolio bio professionally while preserving facts. Return only the improved bio.",
         },
         {
           role: "user",
           content: bio,
         },
       ],
+      temperature: 0.7,
     });
 
   return (
     response.choices[0]
-      ?.message?.content ?? bio
-  );
-}
-
-export async function generateProjectDescription(
-  title: string,
-  techStack: string[]
-) {
-  const ai = getAI();
-
-  const response =
-    await ai.chat.completions.create({
-      model:
-        aiConfig.defaultModel,
-
-      messages: [
-        {
-          role: "system",
-          content:
-            "Generate a professional project description.",
-        },
-        {
-          role: "user",
-          content: `
-Project: ${title}
-
-Tech Stack:
-${techStack.join(", ")}
-`,
-        },
-      ],
-    });
-
-  return (
-    response.choices[0]
-      ?.message?.content ?? ""
+      ?.message?.content
+      ?.trim() ?? bio
   );
 }
 
@@ -74,32 +40,37 @@ export async function parseResumeText(
     await ai.chat.completions.create({
       model:
         aiConfig.defaultModel,
-
       messages: [
         {
           role: "system",
           content: `
-Return ONLY valid JSON.
+Extract resume data and return ONLY valid JSON.
 
 {
   "name":"",
   "email":"",
   "phone":"",
+  "website":"",
   "bio":"",
+  "title":"",
+  "currentRole":"",
   "skills":[],
   "education":[],
   "experience":[],
-  "projects":[]
+  "projects":[],
+  "codingProfiles":[],
+  "socialLinks":[],
+  "achievements":[],
+  "certifications":[],
+  "publications":[]
 }
 
 Rules:
+- Return JSON only
 - No markdown
 - No explanation
-- No text outside JSON
-- Skills must be string array
-- Projects must be array
-- Education must be array
-- Experience must be array
+- Missing values => empty string or []
+- Preserve extracted data exactly
 `,
         },
         {
@@ -107,6 +78,7 @@ Rules:
           content: text,
         },
       ],
+      temperature: 0,
     });
 
   return (

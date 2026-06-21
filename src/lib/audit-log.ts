@@ -1,6 +1,10 @@
-import { NotificationType } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
+import {
+  NotificationType,
+} from "@prisma/client";
 
+
+import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 type Meta = Record<
   string,
   unknown
@@ -8,29 +12,48 @@ type Meta = Record<
 
 export async function createAuditLog(
   action: string,
-  userId: string,
+  userId?: string,
   metadata: Meta = {},
-  type: NotificationType = NotificationType.INFO
+  type: NotificationType =
+    NotificationType.INFO
 ) {
   try {
-    return await prisma.notification.create(
-      {
-        data: {
-          userId,
-          title: action,
-          message:
-            JSON.stringify(
-              {
-                action,
-                timestamp:
-                  new Date().toISOString(),
-                ...metadata,
-              }
-            ),
-          type,
-        },
-      }
-    );
+    const log =
+    await prisma.auditLog.create({
+  data: {
+    userId,
+    action,
+    entityType:
+      metadata.entityType?.toString() ??
+      "SYSTEM",
+    entityId:
+      metadata.entityId?.toString(),
+
+    metadata:
+      JSON.parse(
+        JSON.stringify(metadata)
+      ) as Prisma.InputJsonValue,
+  },
+});
+      
+
+    if (userId) {
+      await prisma.notification.create(
+        {
+          data: {
+            userId,
+            title: action,
+            message:
+              JSON.stringify(
+                metadata
+              ),
+            type,
+          },
+        }
+      );
+    }
+
+    return log;
   } catch {
     return null;
   }
@@ -84,6 +107,18 @@ export async function logUserApproval(
   );
 }
 
+export async function logUserRejected(
+  userId: string,
+  metadata: Meta = {}
+) {
+  return createAuditLog(
+    "USER_REJECTED",
+    userId,
+    metadata,
+    NotificationType.ERROR
+  );
+}
+
 export async function logUserBlocked(
   userId: string,
   metadata: Meta = {}
@@ -116,5 +151,28 @@ export async function logResumeImport(
     userId,
     metadata,
     NotificationType.SUCCESS
+  );
+}
+
+export async function logThemeChange(
+  userId: string,
+  metadata: Meta = {}
+) {
+  return createAuditLog(
+    "THEME_CHANGED",
+    userId,
+    metadata
+  );
+}
+
+export async function logAccountDelete(
+  userId: string,
+  metadata: Meta = {}
+) {
+  return createAuditLog(
+    "ACCOUNT_DELETED",
+    userId,
+    metadata,
+    NotificationType.ERROR
   );
 }
