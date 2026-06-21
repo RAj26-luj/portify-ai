@@ -123,8 +123,13 @@ export default function ThemesPage() {
       const result = await activateTheme(portfolioId, themeId as any);
 
       if (!result || !result.success) {
-        throw new Error(result?.error || "Theme manager engine dropped system transaction configurations.");
-      }
+  const errorMessage =
+    result && "error" in result
+      ? result.error
+      : "Theme manager engine dropped system transaction configurations.";
+
+  throw new Error(errorMessage);
+}
 
       setActiveTheme(themeId);
     } catch (err) {
