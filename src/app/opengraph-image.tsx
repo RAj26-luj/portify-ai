@@ -8,11 +8,12 @@ export const size = {
 export const contentType = "image/png";
 
 export default async function Image() {
- const logo = new URL(
-  "/portify-logo.svg",
-  process.env.NEXT_PUBLIC_APP_URL ||
-    "http://localhost:3000"
-).toString();
+  const logo = new URL(
+    "/logo.png", // put your logo png in public/logo.png
+    process.env.NEXT_PUBLIC_APP_URL ||
+      "http://localhost:3000"
+  ).toString();
+
   return new ImageResponse(
     (
       <div
@@ -20,65 +21,51 @@ export default async function Image() {
           width: "100%",
           height: "100%",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           background:
-            "linear-gradient(135deg, #0f172a, #1e293b)",
+            "linear-gradient(135deg,#0f172a,#1e293b)",
           color: "white",
-          padding: 80,
         }}
       >
+        <img
+          src={logo}
+          width={220}
+          height={220}
+          alt="Portify AI"
+          style={{
+            marginBottom: 40,
+          }}
+        />
+
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 40,
+            fontSize: 72,
+            fontWeight: 800,
           }}
         >
-          <img
-            src={logo}
-            width={180}
-            height={180}
-            alt="Portify AI"
-          />
+          Portify AI
+        </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <div
-              style={{
-                fontSize: 72,
-                fontWeight: 800,
-              }}
-            >
-              Portify AI
-            </div>
+        <div
+          style={{
+            fontSize: 32,
+            marginTop: 16,
+            opacity: 0.9,
+          }}
+        >
+          Build Stunning Portfolio Websites
+        </div>
 
-            <div
-              style={{
-                fontSize: 32,
-                marginTop: 12,
-                opacity: 0.9,
-              }}
-            >
-              Build Stunning Portfolio Websites
-            </div>
-
-            <div
-              style={{
-                fontSize: 24,
-                marginTop: 20,
-                opacity: 0.75,
-                maxWidth: 700,
-              }}
-            >
-              Resume → Portfolio • Multiple Themes •
-              Projects • Skills • Achievements • Analytics
-            </div>
-          </div>
+        <div
+          style={{
+            fontSize: 24,
+            marginTop: 24,
+            opacity: 0.75,
+          }}
+        >
+          Resume → Portfolio • Multiple Themes • Projects • Skills
         </div>
       </div>
     ),

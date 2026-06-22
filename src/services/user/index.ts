@@ -86,10 +86,12 @@ export async function updateProfile(
       ? data.profileImage
       : portfolio.profileImage;
 
-  const portfolioCover =
-    data.coverPortfolioImage?.trim()
-      ? data.coverPortfolioImage
-      : portfolio.coverImage;
+ const portfolioCover =
+  data.coverPortfolioImage?.trim()
+    ? data.coverPortfolioImage
+    : data.coverImage?.trim()
+    ? data.coverImage
+    : portfolio.coverImage;
 
   await prisma.user.update({
     where: { id: user.id },

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { Loader2, Terminal, User, Rocket, Mail, Globe, ImageIcon, ShieldAlert, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, Terminal, User, Rocket, Mail, Globe, ImageIcon, ShieldAlert, AlertCircle, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { getProfile, updateProfile } from "@/actions/user";
 import { useUpload } from "@/hooks/use-upload";
 import { CLOUDINARY_FOLDERS } from "@/lib/cloudinary-folders";
@@ -61,6 +61,11 @@ export default function ProfileForm({
     description: "",
     heroIntroduction: "",
   });
+
+  // Mobile Guide Visibility States
+  const [showAvatarGuide, setShowAvatarGuide] = useState(false);
+  const [showCoverGuide, setShowCoverGuide] = useState(false);
+  const [showBioGuide, setShowBioGuide] = useState(false);
 
   // Interactive Validation & Delta State Flags
   const [isTouched, setIsTouched] = useState(false);
@@ -234,6 +239,7 @@ export default function ProfileForm({
           emailPortfolio: form.emailPortfolio.trim(),
           phonePortfolio: form.phonePortfolio.trim(),
           profileImage: form.image || form.profileImage,
+          coverPortfolioImage: form.coverImage || form.coverPortfolioImage,
         });
         onSuccess?.();
       } catch (error) {
@@ -246,24 +252,28 @@ export default function ProfileForm({
     "w-full rounded-lg border border-white/5 bg-[#0A0A0B] p-2.5 sm:p-3 text-zinc-200 placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:border-blue-500/60 focus:bg-[#0E0E10] shadow-inner font-sans transition-all duration-200 disabled:opacity-40";
 
   const labelStyle = 
-    "mb-1 flex items-center justify-between text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 group-hover/input:text-zinc-300 transition-colors";
+    "mb-1 flex flex-wrap items-center justify-between gap-1 text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 group-hover/input:text-zinc-300 transition-colors";
 
   const descriptionStyle = 
     "text-[10px] sm:text-xs text-zinc-500 font-sans leading-normal block mt-1";
 
   const scrapeRecommendationStyle = 
-    "text-[9px] sm:text-[10px] text-amber-400 font-mono bg-amber-500/5 border border-amber-500/10 rounded p-2.5 mt-1 leading-normal flex items-start gap-1.5";
+    "text-[9px] sm:text-[10px] text-amber-400 font-mono bg-amber-500/5 border border-amber-500/10 rounded p-2.5 mt-1 leading-normal items-start gap-1.5 break-words overflow-hidden";
+
+  // Shared responsive toggle component style
+  const toggleMobileBtnStyle = 
+    "sm:hidden flex items-center gap-1 text-[9px] font-mono font-bold uppercase tracking-wider text-blue-400/80 hover:text-blue-400 mt-1 self-start select-none bg-blue-500/5 border border-blue-500/10 px-2 py-1 rounded transition-colors";
 
   return (
-    <div className="w-full space-y-4 sm:space-y-6 text-zinc-300 bg-transparent font-sans selection:bg-blue-500/30 selection:text-white select-none animate-fadeIn">
+    <div className="w-full space-y-4 sm:space-y-6 text-zinc-300 bg-transparent font-sans selection:bg-blue-500/30 selection:text-white select-none max-w-full overflow-x-hidden px-1 sm:px-0">
       
       {/* SECTION 1: USER INFORMATION */}
       <div className="space-y-3.5 sm:space-y-4 border border-white/5 p-3 sm:p-5 rounded-xl bg-[#070708]">
-        <h2 className="font-bold text-xs sm:text-sm text-zinc-300 flex items-center gap-1.5 border-b border-white/5 pb-2 font-mono uppercase tracking-wider">
-          <User size={14} className="text-blue-400" />
+        <h2 className="font-bold text-xs sm:text-sm text-zinc-300 flex flex-wrap items-center gap-1.5 border-b border-white/5 pb-2 font-mono uppercase tracking-wider">
+          <User size={14} className="text-blue-400 shrink-0" />
           <span>User Account Registry</span>
           {hasChanges && (
-            <span className="ml-2 text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1.5 py-0.5 rounded tracking-normal uppercase font-bold animate-pulse">registry_modified</span>
+            <span className="ml-0 sm:ml-2 text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1.5 py-0.5 rounded tracking-normal uppercase font-bold animate-pulse">registry_modified</span>
           )}
         </h2>
 
@@ -290,7 +300,7 @@ export default function ProfileForm({
             className={`${inputStyle} ${isTouched && isNameInvalid ? "border-red-500/30 bg-red-500/[0.01]" : "border-white/5"}`} 
           />
           {isTouched && isNameInvalid && (
-            <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Registry Exception: Full identity name assignment parameter required.</p>
+            <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5 break-words">⚠️ Registry Exception: Full identity name assignment parameter required.</p>
           )}
           <span className={descriptionStyle}>Your primary personal or corporate system brand representation identity.</span>
         </div>
@@ -299,7 +309,7 @@ export default function ProfileForm({
           <label className={labelStyle}>
             <span>System Username Node <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Immutable)</span></span>
           </label>
-          <div className="w-full rounded-lg border border-white/5 p-2.5 sm:p-3 bg-[#0A0A0B]/40 text-zinc-500 text-xs sm:text-sm font-mono font-bold select-none opacity-60">
+          <div className="w-full rounded-lg border border-white/5 p-2.5 sm:p-3 bg-[#0A0A0B]/40 text-zinc-500 text-xs sm:text-sm font-mono font-bold select-none opacity-60 truncate">
             @{form.username || "username_node"}
           </div>
         </div>
@@ -317,28 +327,6 @@ export default function ProfileForm({
               disabled={isPending}
               className={inputStyle} 
             />
-          </div>
-
-          <div className="flex flex-col gap-1 group/input">
-            <label className={labelStyle}>
-              <span>Website Domain URL <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
-              {isTouched && isWebsiteInvalid && (
-                <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5"><AlertCircle size={9} /> syntax_invalid</span>
-              )}
-              <Globe size={10} className="text-zinc-700 hidden sm:block" />
-            </label>
-            <input 
-              name="website" 
-              value={form.website} 
-              onChange={handleChange} 
-              onBlur={() => setIsTouched(true)}
-              placeholder="https://yourwebsite.com"
-              disabled={isPending}
-              className={`${inputStyle} ${isTouched && isWebsiteInvalid ? "border-red-500/30 bg-red-500/[0.01]" : "border-white/5"}`} 
-            />
-            {isTouched && isWebsiteInvalid && (
-              <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Protocol Exception: Link node path must resolve using an absolute formatting configuration header (http:// or https://).</p>
-            )}
           </div>
         </div>
 
@@ -388,25 +376,36 @@ export default function ProfileForm({
 
         {/* PROFILE IMAGE MEDIA CONTROL */}
         <div className="flex flex-col gap-2 pt-3 border-t border-white/5 group/input">
-          <label className={labelStyle}>
-            <span>Avatar Profile Image <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
-            <ImageIcon size={10} className="text-zinc-700 hidden sm:block" />
-          </label>
+          <div className="flex justify-between items-center w-full">
+            <label className={labelStyle}>
+              <span>Avatar Profile Image <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <ImageIcon size={10} className="text-zinc-700 hidden sm:block" />
+            </label>
+            <button 
+              type="button" 
+              onClick={() => setShowAvatarGuide(!showAvatarGuide)} 
+              className={toggleMobileBtnStyle}
+            >
+              {showAvatarGuide ? <>Hide Guide <ChevronUp size={10} /></> : <>Read Guide <ChevronDown size={10} /></>}
+            </button>
+          </div>
 
           {/* INLINE WARNING BLOCK FOR PROFILE IMAGE */}
-          <div className={scrapeRecommendationStyle}>
+          <div className={`${scrapeRecommendationStyle} ${showAvatarGuide ? "flex" : "hidden sm:flex"}`}>
             <ShieldAlert size={12} className="shrink-0 mt-0.5 text-amber-400 animate-pulse" />
             <span>
               <strong>Profile Image Scope:</strong> This asset maps to your main portfolio profile banner card. Leaving this unpopulated leaves an empty icon placeholder on your live theme. If your image file is missing, search Google Images, right-click, choose <strong>&quot;Copy Image Address / URL&quot;</strong>, and paste the direct string down here.
             </span>
           </div>
 
-          <div className="flex items-center gap-3 sm:gap-4">
-            {form.image ? (
-              <img src={form.image} alt="Avatar preview" className="w-12 h-12 sm:w-14 sm:h-12 rounded-full object-cover border border-white/10 shrink-0 bg-[#0A0A0B]" />
-            ) : (
-              <div className="w-12 h-12 sm:w-14 sm:h-12 rounded-full bg-[#0A0A0B] border border-white/5 flex items-center justify-center text-[10px] text-zinc-600 font-mono shrink-0">NULL</div>
-            )}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full">
+            <div className="flex items-center justify-center shrink-0">
+              {form.image ? (
+                <img src={form.image} alt="Avatar preview" className="w-12 h-12 rounded-full object-cover border border-white/10 bg-[#0A0A0B]" />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-[#0A0A0B] border border-white/5 flex items-center justify-center text-[10px] text-zinc-600 font-mono">NULL</div>
+              )}
+            </div>
             <input
               type="file"
               accept="image/*"
@@ -418,29 +417,38 @@ export default function ProfileForm({
                 setForm((p) => ({ ...p, image: res.url }));
                 e.target.value = "";
               }}
-              className="w-full text-[11px] font-mono text-zinc-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-mono file:font-bold file:uppercase file:bg-[#121214] file:text-zinc-300 hover:file:bg-zinc-800 border border-white/5 p-1 rounded-lg bg-[#0A0A0B]"
+              className="w-full text-[11px] font-mono text-zinc-500 file:mr-2 sm:file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-mono file:font-bold file:uppercase file:bg-[#121214] file:text-zinc-300 hover:file:bg-zinc-800 border border-white/5 p-1 rounded-lg bg-[#0A0A0B] overflow-hidden"
             />
           </div>
         </div>
 
         {/* COVER IMAGE MEDIA CONTROL */}
         <div className="flex flex-col gap-2 pt-3 border-t border-white/5 group/input">
-          <label className={labelStyle}>
-            <span>Account Cover Canvas Banner <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
-          </label>
+          <div className="flex justify-between items-center w-full">
+            <label className={labelStyle}>
+              <span>Account Cover Canvas Banner <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+            </label>
+            <button 
+              type="button" 
+              onClick={() => setShowCoverGuide(!showCoverGuide)} 
+              className={toggleMobileBtnStyle}
+            >
+              {showCoverGuide ? <>Hide Info <ChevronUp size={10} /></> : <>Read Info <ChevronDown size={10} /></>}
+            </button>
+          </div>
 
-          <div className={scrapeRecommendationStyle}>
-            <ShieldAlert size={12} className="shrink-0 mt-0.5 text-amber-400" />
+          <div className={`${scrapeRecommendationStyle} ${showCoverGuide ? "block" : "hidden sm:block"}`}>
+            <ShieldAlert size={12} className="shrink-0 mt-0.5 inline mr-1.5 text-amber-400" />
             <span>
-              <strong>Cover Image Usage:</strong><br /><br />This image is used as your portfolio cover/banner image. It may appear in portfolio hero sections, portfolio preview cards, Open Graph (OG) social sharing previews, LinkedIn shares, WhatsApp previews, Twitter/X cards, Discord embeds, and search engine rich previews. Upload a high-quality banner image for the best presentation of your portfolio across the web.
+              <strong>Cover Image Usage:</strong> This image is used as your portfolio cover/banner image. It may appear in portfolio hero sections, portfolio preview cards, Open Graph (OG) social sharing previews, LinkedIn shares, WhatsApp previews, Twitter/X cards, Discord embeds, and search engine rich previews. Upload a high-quality banner image for the best presentation of your portfolio across the web.
             </span>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             {form.coverImage ? (
-              <img src={form.coverImage} alt="Cover preview" className="w-full h-16 sm:h-20 object-cover rounded-lg border border-white/5 bg-[#0A0A0B]" />
+              <img src={form.coverImage} alt="Cover preview" className="w-full h-20 sm:h-24 object-cover rounded-lg border border-white/5 bg-[#0A0A0B]" />
             ) : (
-              <div className="w-full h-12 rounded-lg bg-[#0A0A0B]/30 border border-white/5 flex items-center justify-center text-[10px] text-zinc-600 font-mono italic">No canvas layout background configured</div>
+              <div className="w-full h-12 rounded-lg bg-[#0A0A0B]/30 border border-white/5 flex items-center justify-center text-[10px] text-zinc-600 font-mono italic text-center px-2">No canvas layout background configured</div>
             )}
             <input
               type="file"
@@ -453,42 +461,19 @@ export default function ProfileForm({
                 setForm((p) => ({ ...p, coverImage: res.url }));
                 e.target.value = "";
               }}
-              className="w-full text-[11px] font-mono text-zinc-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-mono file:font-bold file:uppercase file:bg-[#121214] file:text-zinc-300 hover:file:bg-zinc-800 border border-white/5 p-1 rounded-lg bg-[#0A0A0B]"
+              className="w-full text-[11px] font-mono text-zinc-500 file:mr-2 sm:file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-mono file:font-bold file:uppercase file:bg-[#121214] file:text-zinc-300 hover:file:bg-zinc-800 border border-white/5 p-1 rounded-lg bg-[#0A0A0B] overflow-hidden"
             />
           </div>
         </div>
 
-        <div className={scrapeRecommendationStyle}>
+        <div className={`${scrapeRecommendationStyle} border-emerald-500/10 bg-emerald-500/5 text-zinc-300 ${showCoverGuide ? "block" : "hidden sm:block"}`}>
           <ShieldAlert
             size={12}
-            className="shrink-0 mt-0.5 text-emerald-400"
+            className="shrink-0 mt-0.5 inline mr-1.5 text-emerald-400"
           />
           <span>
-            <strong>Public Portfolio Cover Image:</strong>
-            This image is one of the most important assets in your portfolio.
-        <br /><br />
-
-        • It appears as the hero/banner background in supported portfolio themes.
-
-        <br />
-
-        • It is automatically used for social sharing previews on LinkedIn, X (Twitter), WhatsApp, Discord, Telegram, Facebook, and other platforms when someone shares your portfolio link.
-
-        <br />
-
-        • It is used as the Open Graph (OG) preview image displayed inside chat applications and search results.
-
-        <br />
-
-        • It is also used for portfolio preview cards, portfolio thumbnails, and public portfolio metadata generation.
-
-        <br /><br />
-
-        Recommended size: <strong>1200 × 630 px</strong>
-
-        <br />
-
-        Use a professional banner, project showcase, workspace image, personal branding artwork, or portfolio cover design for the best appearance.
+            <strong className="text-emerald-400">Public Portfolio Cover Image Assets:</strong>
+            It appears as the hero/banner background in supported portfolio themes and handles public metadata display rules across chat applications, LinkedIn cards, and search layouts. Recommended size: <strong>1200 × 630 px</strong>.
           </span>
         </div>
       </div>
@@ -496,7 +481,7 @@ export default function ProfileForm({
       {/* SECTION 2: PORTFOLIO INFORMATION */}
       <div className="space-y-3.5 sm:space-y-4 border border-white/5 p-3 sm:p-5 rounded-xl bg-[#070708]">
         <h2 className="font-bold text-xs sm:text-sm text-zinc-300 flex items-center gap-1.5 border-b border-white/5 pb-2 font-mono uppercase tracking-wider">
-          <Rocket size={14} className="text-blue-400" />
+          <Rocket size={14} className="text-blue-400 shrink-0" />
           <span>Portfolio Presentation Matrix</span>
         </h2>
 
@@ -521,7 +506,7 @@ export default function ProfileForm({
             className={`${inputStyle} ${isTouched && isTitleInvalid ? "border-red-500/30 bg-red-500/[0.01]" : "border-white/5"}`} 
           />
           {isTouched && isTitleInvalid && (
-            <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Field Exception: Portfolio focus tracking title must be stated.</p>
+            <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5 break-words">⚠️ Field Exception: Portfolio focus tracking title must be stated.</p>
           )}
         </div>
 
@@ -546,18 +531,27 @@ export default function ProfileForm({
             className={`${inputStyle} ${isTouched && isTaglineInvalid ? "border-red-500/30 bg-red-500/[0.01]" : "border-white/5"}`} 
           />
           {isTouched && isTaglineInvalid && (
-            <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Field Exception: Showcase context sub-header baseline vector required.</p>
+            <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5 break-words">⚠️ Field Exception: Showcase context sub-header baseline vector required.</p>
           )}
         </div>
 
         {/* INPUT: SHORT PROFESSIONAL BIO */}
         <div className="flex flex-col gap-1 group/input">
-          <label className={labelStyle}>
-            <span>Short Professional Bio <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
-          </label>
+          <div className="flex justify-between items-center w-full">
+            <label className={labelStyle}>
+              <span>Short Professional Bio <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+            </label>
+            <button 
+              type="button" 
+              onClick={() => setShowBioGuide(!showBioGuide)} 
+              className={toggleMobileBtnStyle}
+            >
+              {showBioGuide ? <>Hide Info <ChevronUp size={10} /></> : <>Read Info <ChevronDown size={10} /></>}
+            </button>
+          </div>
 
           {/* INLINE WARNING BLOCK FOR SHORT BIO */}
-          <div className={scrapeRecommendationStyle}>
+          <div className={`${scrapeRecommendationStyle} ${showBioGuide ? "flex" : "hidden sm:flex"}`}>
             <ShieldAlert size={12} className="shrink-0 mt-0.5 text-amber-400 animate-pulse" />
             <span>
               <strong>Bio Section Scope:</strong> This text maps directly to your main portfolio **About / Bio** section on the live landing framework index. Leaving this parameter unpopulated prevents your public visitors from reading your professional baseline credentials story and core stack summary.
@@ -571,7 +565,7 @@ export default function ProfileForm({
             placeholder="Provide a quick macro summary..."
             disabled={isPending}
             className={`${inputStyle} resize-none`} 
-            rows={2} 
+            rows={3} 
           />
         </div>
 
@@ -601,7 +595,7 @@ export default function ProfileForm({
             placeholder="Comprehensive overview layout..."
             disabled={isPending}
             className={`${inputStyle} resize-none`} 
-            rows={3} 
+            rows={4} 
           />
         </div>
 
@@ -639,16 +633,6 @@ export default function ProfileForm({
           <h3 className="font-mono text-[11px] uppercase tracking-widest text-zinc-400">
             Portfolio Location Information
           </h3>
-          <div className={scrapeRecommendationStyle}>
-            <ShieldAlert
-              size={12}
-              className="shrink-0 mt-0.5 text-amber-400"
-            />
-            <span>
-              <strong>Location Visibility:</strong>
-              These values are displayed publicly on supported portfolio themes and help visitors, recruiters, clients, and collaborators understand your geographical location and availability.
-            </span>
-          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
@@ -696,17 +680,9 @@ export default function ProfileForm({
 
         {/* HERO STATUS CONFIGURATION */}
         <div className="space-y-3.5 sm:space-y-4 pt-3 border-t border-white/5">
-
           <h3 className="font-mono text-[11px] uppercase tracking-widest text-zinc-400">
             Hero Status Trackers
           </h3>
-
-          <div className={scrapeRecommendationStyle}>
-            <ShieldAlert size={12} className="shrink-0 mt-0.5 text-amber-400" />
-            <span>
-              <strong>Hero Configuration Notice:</strong> Portfolio themes automatically manage action buttons such as “View Projects”, “Contact”, and other hero actions. These buttons cannot be customized from this profile page to ensure consistent theme behavior across all portfolio templates. You only need to configure your current focus and availability status below.
-            </span>
-          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div className="flex flex-col gap-1 group/input">
@@ -737,14 +713,13 @@ export default function ProfileForm({
               />
             </div>
           </div>
-
         </div>
       </div>
 
       {/* SECTION 3: Public Communications Overrides */}
       <div className="space-y-3.5 sm:space-y-4 border border-white/5 p-3 sm:p-5 rounded-xl bg-[#070708]">
         <h2 className="font-bold text-xs sm:text-sm text-zinc-300 flex items-center gap-1.5 border-b border-white/5 pb-2 font-mono uppercase tracking-wider">
-          <Mail size={14} className="text-blue-400" />
+          <Mail size={14} className="text-blue-400 shrink-0" />
           <span>Public Communications Overrides</span>
         </h2>
         <p className="text-[11px] text-zinc-500 mt-[-4px] font-sans leading-normal">
@@ -785,45 +760,45 @@ export default function ProfileForm({
       {/* SECTION 4: Feature Flags & Toggles */}
       <div className="space-y-3.5 sm:space-y-4 border border-white/5 p-3 sm:p-5 rounded-xl bg-[#070708]">
         <h2 className="font-bold text-xs sm:text-sm text-zinc-300 flex items-center gap-1.5 border-b border-white/5 pb-2 font-mono uppercase tracking-wider">
-          <Terminal size={14} className="text-blue-400" />
+          <Terminal size={14} className="text-blue-400 shrink-0" />
           <span>Feature Flags & Toggles</span>
         </h2>
 
-        <div className="flex flex-col gap-2.5 pt-0.5">
-          <label className="flex items-start sm:items-center gap-2.5 text-xs sm:text-sm font-bold text-zinc-400 select-none cursor-pointer group">
+        <div className="flex flex-col gap-3 pt-0.5">
+          <label className="flex items-start gap-2.5 text-xs sm:text-sm font-bold text-zinc-400 select-none cursor-pointer group">
             <input 
               type="checkbox" 
               name="allowContactForm" 
               checked={form.allowContactForm} 
               onChange={handleCheckbox} 
               disabled={isPending}
-              className="w-4 h-4 border-white/10 rounded text-blue-600 focus:ring-0 focus:ring-offset-0 bg-[#0A0A0B] mt-0.5 sm:mt-0 cursor-pointer"
+              className="w-4 h-4 border-white/10 rounded text-blue-600 focus:ring-0 focus:ring-offset-0 bg-[#0A0A0B] mt-0.5 shrink-0 cursor-pointer"
             />
-            <span className="group-hover:text-white transition-colors">Enable Interactive Public Contact Message Box Form Layout</span>
+            <span className="group-hover:text-white transition-colors leading-tight">Enable Interactive Public Contact Message Box Form Layout</span>
           </label>
 
-          <label className="flex items-start sm:items-center gap-2.5 text-xs sm:text-sm font-bold text-zinc-400 select-none cursor-pointer group">
+          <label className="flex items-start gap-2.5 text-xs sm:text-sm font-bold text-zinc-400 select-none cursor-pointer group">
             <input 
               type="checkbox" 
               name="allowResumeDownload" 
               checked={form.allowResumeDownload} 
               onChange={handleCheckbox} 
               disabled={isPending}
-              className="w-4 h-4 border-white/10 rounded text-blue-600 focus:ring-0 focus:ring-offset-0 bg-[#0A0A0B] mt-0.5 sm:mt-0 cursor-pointer"
+              className="w-4 h-4 border-white/10 rounded text-blue-600 focus:ring-0 focus:ring-offset-0 bg-[#0A0A0B] mt-0.5 shrink-0 cursor-pointer"
             />
-            <span className="group-hover:text-white transition-colors">Allow Anonymous Viewers to Download Attached Resume PDF Document Objects</span>
+            <span className="group-hover:text-white transition-colors leading-tight">Allow Anonymous Viewers to Download Attached Resume PDF Document Objects</span>
           </label>
         </div>
       </div>
 
       {/* COMPONENT ACTIONS BAR */}
-      <div className="pt-2 flex gap-3 border-t border-white/5 font-mono text-xs font-bold uppercase tracking-wider">
+      <div className="pt-2 flex flex-col sm:flex-row gap-3 border-t border-white/5 font-mono text-xs font-bold uppercase tracking-wider">
         {onCancel && (
           <button 
             type="button" 
             onClick={onCancel} 
             disabled={isPending}
-            className="flex-1 bg-[#121214] hover:bg-[#161619] border border-white/5 text-zinc-400 hover:text-white py-3 px-4 rounded-lg text-center focus:outline-none transition-all duration-200"
+            className="w-full sm:flex-1 bg-[#121214] hover:bg-[#161619] border border-white/5 text-zinc-400 hover:text-white py-3 px-4 rounded-lg text-center focus:outline-none transition-all duration-200 order-2 sm:order-1"
           >
             Cancel
           </button>
@@ -833,7 +808,7 @@ export default function ProfileForm({
           type="button"
           onClick={handleManualSubmit}
           disabled={isPending || isFormInvalid || !hasChanges} 
-          className="flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-3 px-4 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-md text-center flex items-center justify-center h-11 focus:outline-none font-mono"
+          className="w-full sm:flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-3 px-4 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-md text-center flex items-center justify-center h-11 focus:outline-none font-mono order-1 sm:order-2"
         >
           {isPending ? (
             <span className="flex items-center justify-center gap-1.5">

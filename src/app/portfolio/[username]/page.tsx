@@ -80,50 +80,57 @@ export async function generateMetadata({
     };
   }
 
-  const title =
-    portfolio.seoTitle ??
-    portfolio.title ??
-    portfolio.username;
+ const title =
+  portfolio.title ||
+  portfolio.username ||
+  "Protfolio";
 
   const description =
-    portfolio.seoDescription ??
-    portfolio.bio ??
+    portfolio.resumeHeadline ||
+    portfolio.tagline ||
     "Professional portfolio";
-
 const image =
-  portfolio.seoImage ??
-  portfolio.coverImage ??
-  portfolio.profileImage ??
-  `/portfolio/${username}/opengraph-image`;
+  portfolio.coverImage ||
+  portfolio.profileImage ||
+  `${process.env.NEXT_PUBLIC_APP_URL}/portfolio/${username}/opengraph-image`;
 
   return {
+  title,
+  description,
+
+  icons: {
+    icon:
+      portfolio.coverImage ||
+      portfolio.profileImage ||
+      "/icon.svg",
+  },
+
+  keywords: portfolio.seoKeywords
+    ? portfolio.seoKeywords
+        .split(",")
+        .map((k: string) => k.trim())
+    : [],
+
+  openGraph: {
     title,
     description,
-    keywords:
-      portfolio.seoKeywords
-        ?.split(",")
-        .map((k) => k.trim()) ?? [],
+    type: "website",
 
-openGraph: {
-  title,
-  description,
-  type: "website",
+    images: [
+      {
+        url: image,
+        width: 1200,
+        height: 630,
+        alt: title,
+      },
+    ],
+  },
 
-  images: [
-    {
-      url: image,
-      width: 1200,
-      height: 630,
-      alt: title,
-    },
-  ],
-},
-
-    twitter: {
-  card: "summary_large_image",
-  title,
-  description,
-  images: [image],
-},
-  };
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: [image],
+  },
+};
 }
