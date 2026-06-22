@@ -432,7 +432,7 @@ export default function ProfileForm({
           <div className={scrapeRecommendationStyle}>
             <ShieldAlert size={12} className="shrink-0 mt-0.5 text-amber-400" />
             <span>
-              <strong>Dashboard Cover Image:</strong> This image is used only inside your dashboard account profile and administrative workspace. It is not displayed on your public portfolio website and has no effect on portfolio themes, hero sections, or visitor-facing pages. You can safely skip this field if you do not want a dashboard cover image.
+              <strong>Cover Image Usage:</strong><br /><br />This image is used as your portfolio cover/banner image. It may appear in portfolio hero sections, portfolio preview cards, Open Graph (OG) social sharing previews, LinkedIn shares, WhatsApp previews, Twitter/X cards, Discord embeds, and search engine rich previews. Upload a high-quality banner image for the best presentation of your portfolio across the web.
             </span>
           </div>
 
@@ -456,6 +456,40 @@ export default function ProfileForm({
               className="w-full text-[11px] font-mono text-zinc-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-mono file:font-bold file:uppercase file:bg-[#121214] file:text-zinc-300 hover:file:bg-zinc-800 border border-white/5 p-1 rounded-lg bg-[#0A0A0B]"
             />
           </div>
+        </div>
+
+        <div className={scrapeRecommendationStyle}>
+          <ShieldAlert
+            size={12}
+            className="shrink-0 mt-0.5 text-emerald-400"
+          />
+          <span>
+            <strong>Public Portfolio Cover Image:</strong>
+            This image is one of the most important assets in your portfolio.
+        <br /><br />
+
+        • It appears as the hero/banner background in supported portfolio themes.
+
+        <br />
+
+        • It is automatically used for social sharing previews on LinkedIn, X (Twitter), WhatsApp, Discord, Telegram, Facebook, and other platforms when someone shares your portfolio link.
+
+        <br />
+
+        • It is used as the Open Graph (OG) preview image displayed inside chat applications and search results.
+
+        <br />
+
+        • It is also used for portfolio preview cards, portfolio thumbnails, and public portfolio metadata generation.
+
+        <br /><br />
+
+        Recommended size: <strong>1200 × 630 px</strong>
+
+        <br />
+
+        Use a professional banner, project showcase, workspace image, personal branding artwork, or portfolio cover design for the best appearance.
+          </span>
         </div>
       </div>
 
@@ -598,6 +632,65 @@ export default function ProfileForm({
               disabled={isPending}
               className={inputStyle} 
             />
+          </div>
+        </div>
+
+        <div className="space-y-3.5 sm:space-y-4 pt-3 border-t border-white/5">
+          <h3 className="font-mono text-[11px] uppercase tracking-widest text-zinc-400">
+            Portfolio Location Information
+          </h3>
+          <div className={scrapeRecommendationStyle}>
+            <ShieldAlert
+              size={12}
+              className="shrink-0 mt-0.5 text-amber-400"
+            />
+            <span>
+              <strong>Location Visibility:</strong>
+              These values are displayed publicly on supported portfolio themes and help visitors, recruiters, clients, and collaborators understand your geographical location and availability.
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
+            <div className="flex flex-col gap-1 group/input">
+              <label className={labelStyle}>
+                <span>Portfolio City</span>
+              </label>
+              <input
+                name="cityPortfolio"
+                value={form.cityPortfolio}
+                onChange={handleChange}
+                placeholder="Rourkela"
+                disabled={isPending}
+                className={inputStyle}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1 group/input">
+              <label className={labelStyle}>
+                <span>Portfolio State</span>
+              </label>
+              <input
+                name="statePortfolio"
+                value={form.statePortfolio}
+                onChange={handleChange}
+                placeholder="Odisha"
+                disabled={isPending}
+                className={inputStyle}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1 group/input">
+              <label className={labelStyle}>
+                <span>Portfolio Country</span>
+              </label>
+              <input
+                name="countryPortfolio"
+                value={form.countryPortfolio}
+                onChange={handleChange}
+                placeholder="India"
+                disabled={isPending}
+                className={inputStyle}
+              />
+            </div>
           </div>
         </div>
 

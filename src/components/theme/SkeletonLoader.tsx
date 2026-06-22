@@ -1,16 +1,30 @@
 import DefaultSkeleton from "@/themes/default/loaders/SkeletonLoader";
-// import ModernSkeleton ...
-// import MinimalSkeleton ...
+import DarkSkeleton from "@/themes/dark/loaders/SkeletonLoader";
+import DeveloperSkeleton from "@/themes/developer/loaders/SkeletonLoader";
+import MinimalSkeleton from "@/themes/minimal/components/loaders/SkeletonLoader";
+import ModernSkeleton from "@/themes/modern/components/loaders/SkeletonLoader";
+
+interface Props {
+  theme?: string;
+}
 
 export default function ThemeSkeleton({
-  theme,
-}: {
-  theme?: string;
-}) {
+  theme = "default",
+}: Props) {
   switch (theme) {
-    case "default":
-      return <DefaultSkeleton />;
+    case "dark":
+      return <DarkSkeleton />;
 
+    case "developer":
+      return <DeveloperSkeleton />;
+
+    case "minimal":
+      return <MinimalSkeleton />;
+
+    case "modern":
+      return <ModernSkeleton />;
+
+    case "default":
     default:
       return <DefaultSkeleton />;
   }

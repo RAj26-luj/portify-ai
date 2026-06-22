@@ -18,11 +18,12 @@ export default async function Image({
   params,
 }: Props) {
   const { username } = await params;
+
   const portfolio = await prisma.portfolio.findFirst({
-  where: {
-    username,
-  },
-});
+    where: {
+      username,
+    },
+  });
 
   if (!portfolio) {
     return new ImageResponse(
@@ -37,6 +38,7 @@ export default async function Image({
             background: "#0f172a",
             color: "white",
             fontSize: 48,
+            fontWeight: 700,
           }}
         >
           Portfolio Not Found
@@ -60,31 +62,24 @@ export default async function Image({
   const description =
     portfolio.ogDescription ||
     portfolio.bio ||
-    "Professional Portfolio";
+    "";
 
   const coverImage =
     portfolio.coverImage ||
     portfolio.profileImage ||
     null;
 
-  const logo = new URL(
-    "/portify-logo.svg",
-    process.env.NEXT_PUBLIC_APP_URL ||
-      "http://localhost:3000"
-  ).toString();
-
   return new ImageResponse(
     (
       <div
         style={{
-          width: "100%",
-          height: "100%",
+          width: "1200px",
+          height: "630px",
           display: "flex",
           position: "relative",
-          background:
-            "linear-gradient(135deg,#0f172a,#1e293b)",
-          color: "white",
           overflow: "hidden",
+          background: "#0f172a",
+          color: "white",
         }}
       >
         {coverImage && (
@@ -95,8 +90,7 @@ export default async function Image({
             height={630}
             style={{
               position: "absolute",
-              top: 0,
-              left: 0,
+              inset: 0,
               width: "100%",
               height: "100%",
               objectFit: "cover",
@@ -109,47 +103,19 @@ export default async function Image({
             position: "absolute",
             inset: 0,
             background:
-              "rgba(15,23,42,0.75)",
+              "linear-gradient(to right, rgba(15,23,42,0.92), rgba(15,23,42,0.65))",
           }}
         />
 
         <div
           style={{
-            position: "absolute",
-            top: 40,
-            right: 40,
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
+            position: "relative",
             zIndex: 10,
-          }}
-        >
-          <img
-            src={logo}
-            width={60}
-            height={60}
-            alt="Portify AI"
-          />
-
-          <div
-            style={{
-              fontSize: 28,
-              fontWeight: 700,
-            }}
-          >
-            Portify AI
-          </div>
-        </div>
-
-        <div
-          style={{
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            padding: "80px",
             width: "100%",
-            position: "relative",
-            zIndex: 10,
+            padding: "80px",
           }}
         >
           <div
@@ -166,9 +132,10 @@ export default async function Image({
           {subtitle && (
             <div
               style={{
-                marginTop: 24,
-                fontSize: 36,
-                opacity: 0.9,
+                marginTop: 20,
+                fontSize: 34,
+                opacity: 0.95,
+                maxWidth: 900,
               }}
             >
               {subtitle}
@@ -178,30 +145,18 @@ export default async function Image({
           {description && (
             <div
               style={{
-                marginTop: 28,
-                fontSize: 28,
-                opacity: 0.75,
-                maxWidth: 900,
+                marginTop: 30,
+                fontSize: 26,
+                lineHeight: 1.4,
+                opacity: 0.85,
+                maxWidth: 850,
               }}
             >
-              {description.length > 180
-                ? `${description.slice(
-                    0,
-                    180
-                  )}...`
+              {description.length > 220
+                ? `${description.slice(0, 220)}...`
                 : description}
             </div>
           )}
-
-          <div
-            style={{
-              marginTop: 40,
-              fontSize: 22,
-              opacity: 0.65,
-            }}
-          >
-            Portfolio • Projects • Skills • Experience
-          </div>
         </div>
       </div>
     ),
