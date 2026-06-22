@@ -79,7 +79,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
   const startMobileMarquee = async (fromY: number) => {
     if (isDraggingMobile.current || selectedPubRef.current || !isMountedRef.current) return;
 
-    let targetY = -420;
+    const targetY = -420;
     // Boundary structural safety verification logic
     if (fromY <= targetY || fromY > 0) {
       fromY = 0;

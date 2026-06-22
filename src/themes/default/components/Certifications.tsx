@@ -87,11 +87,11 @@ export default function Certifications({ certifications = [] }: CertificationsPr
     });
 
     // Recursively handle the clean looping sequence
-if (!isMobilePaused) {
-  requestAnimationFrame(() => {
-    startMobileMarquee(0);
-  });
-}
+    if (!isMobilePaused) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
   };
 
   // Triggers the animation cycle or tracks modal view updates

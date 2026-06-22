@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { Terminal, ExternalLink, Flame, Trophy, Award, X, Workflow, Code, Radio, Cpu, Network } from "lucide-react";
+import { Terminal, ExternalLink, Flame, Trophy, Award, X, Code, Radio, Cpu, Network } from "lucide-react";
 
 const DEFAULT_PLATFORM_ICON = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop";
 
@@ -56,21 +56,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Mobile Marquee Loop System Life Cycle
-  useEffect(() => {
-    isMounted.current = true;
 
-    if (isMobileScrollable && !selectedItem) {
-      startMobileMarquee(currentMobileX.current);
-    } else {
-      mobileControls.stop();
-    }
-
-    return () => {
-      isMounted.current = false;
-      mobileControls.stop();
-      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-    };
-  }, [isMobileScrollable, selectedItem]);
 
   const startMobileMarquee = async (fromX: number) => {
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
@@ -80,7 +66,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
     }
 
     const totalDistance = -1000;
-    let targetX = totalDistance;
+    const targetX = totalDistance;
     let baseFromX = fromX;
 
     if (baseFromX <= totalDistance) {
@@ -112,6 +98,21 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
       // Gracefully capture execution thread stops upon unmount or interrupt flags
     }
   };
+    useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable && !selectedItem) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedItem]);
 
   // 3. Early conditional return clauses moved safely AFTER all Hook declarations
   if (!codingProfiles?.length) return null;

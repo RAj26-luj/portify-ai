@@ -84,7 +84,7 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
   const startMobileMarquee = async (fromY: number) => {
     if (isDraggingMobile.current || selectedProjectRef.current || !isMountedRef.current) return;
 
-    let targetY = -420;
+    const targetY = -420;
     // Boundary structural safety verification logic
     if (fromY <= targetY || fromY > 0) {
       fromY = 0;
@@ -185,7 +185,7 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
     >
       {/* SaaS Visual Assets, Borders & Gradients */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181B_1px,transparent_1px),linear-gradient(to_bottom,#18181B_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none opacity-40" />
-      <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-tr from-[#6366F1]/5 to-[#06B6D4]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#6366F1]/5 to-[#06B6D4]/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute top-1/4 right-1/4 w-[400px] h-[400px] bg-[#8B5CF6]/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 z-10 mb-16 md:mb-24">

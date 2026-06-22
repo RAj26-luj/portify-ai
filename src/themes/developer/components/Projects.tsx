@@ -81,7 +81,7 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
   const startMobileMarquee = async (fromY: number) => {
     if (isDraggingMobile.current || selectedProject || !isMountedRef.current) return;
 
-    let targetY = -400;
+    const targetY = -400;
     // Boundary structural safety verification logic
     if (fromY <= targetY || fromY > 0) {
       fromY = 0;

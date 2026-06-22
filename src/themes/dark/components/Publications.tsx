@@ -101,23 +101,6 @@ export default function Publications({ publications = [] }: PublicationsProps) {
     };
   }, [validPubs, isPaused, selectedPub]);
 
-  // Mobile Marquee Loop System Life Cycle
-  useEffect(() => {
-    isMounted.current = true;
-
-    if (isMobileScrollable && !selectedPub) {
-      startMobileMarquee(currentMobileY.current);
-    } else {
-      mobileControls.stop();
-    }
-
-    return () => {
-      isMounted.current = false;
-      mobileControls.stop();
-      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-    };
-  }, [isMobileScrollable, selectedPub]);
-
   const startMobileMarquee = async (fromY: number) => {
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
 
@@ -126,7 +109,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
     }
 
     const totalDistance = -420;
-    let targetY = totalDistance;
+    const targetY = totalDistance;
     let baseFromY = fromY;
 
     if (baseFromY <= totalDistance) {
@@ -158,6 +141,23 @@ export default function Publications({ publications = [] }: PublicationsProps) {
       // Gracefully isolate lifecycle or frame update thread stops
     }
   };
+
+  // Mobile Marquee Loop System Life Cycle
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable && !selectedPub) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedPub]);
 
   if (!sortedPubs.length) return null;
 
@@ -427,7 +427,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                       href={activePub.publicationUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#00E5FF]/10 border border-[#00E5FF]/40 text-[#00E5FF] hover:bg-[#00E5FF] hover:text-[#050816] font-bold uppercase tracking-widest transition-colors shadow-[0_0_15px_rgba(0,229,255,0.1)]"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#00E5FF]/10 border border-[#00E5FF]/40 text-[#00E5FF] hover:bg-[#00E5FF] hover:text-[#050816] font-bold uppercase tracking-widest transition-colors shadow-[0_0_15px_rgba(0,229,255,0.15)]"
                     >
                       UPLINK_DOCUMENT <ExternalLink className="w-3.5 h-3.5" />
                     </a>
@@ -481,7 +481,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0B1120] via-transparent to-transparent z-10" />
                 
                 {/* Panel blueprint grid patterns underlaid inside image header modal */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,229,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(0,229,255,0.015)_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,229,255,0.015)_1px,transparent_1px),gradient-to-t(90deg,rgba(0,229,255,0.015)_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
 
                 <div className="relative z-20 w-full text-left">
                   <span className="px-2 py-0.5 bg-[#7C3AED]/20 text-[#7C3AED] border border-[#7C3AED]/40 text-[9px] font-mono uppercase tracking-[0.15em] inline-block mb-2">

@@ -75,7 +75,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   const startMobileMarquee = async (fromY: number) => {
     if (isDraggingMobile.current || selectedItem || !isMountedRef.current) return;
 
-    let targetY = -420;
+    const targetY = -420;
     if (fromY <= targetY || fromY > 0) {
       fromY = 0;
       await mobileControls.set({ y: 0 });
@@ -102,7 +102,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   const startDeskMarquee = async (fromX: number) => {
     if (isDraggingDesk.current || selectedItem || !isMountedRef.current) return;
 
-    let targetX = -2000;
+    const targetX = -2000;
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;
       await deskControls.set({ x: 0 });

@@ -58,7 +58,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
   const startDesktopMarquee = async (fromX: number) => {
     if (isDraggingDesktop.current || selectedItem) return;
     
-    let targetX = -2000;
+    const targetX = -2000;
     // Reset boundary logic if position is exceeded or loop completes
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;
@@ -83,7 +83,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
   const startMobileMarquee = async (fromX: number) => {
     if (isDraggingMobile.current || selectedItem) return;
 
-    let targetX = -1000;
+    const targetX = -1000;
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;
       await mobileControls.set({ x: 0 });
@@ -101,10 +101,10 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
     });
 
     if (!isDraggingMobile.current) {
-  setTimeout(() => {
-    startMobileMarquee(0);
-  }, 0);
-}
+      setTimeout(() => {
+        startMobileMarquee(0);
+      }, 0);
+    }
   };
 
   // Dynamic lifecycle triggers for initial mount / modal toggling state updates

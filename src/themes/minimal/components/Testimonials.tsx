@@ -60,7 +60,7 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
   const startMobileMarquee = async (fromX: number) => {
     if (isDraggingMobile.current || !isMountedRef.current) return;
 
-    let targetX = -1200;
+    const targetX = -1200;
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;
       await mobileControls.set({ x: 0 });
@@ -87,7 +87,7 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
   const startDeskMarquee = async (fromX: number) => {
     if (isDraggingDesk.current || !isMountedRef.current) return;
 
-    let targetX = -2500;
+    const targetX = -2500;
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;
       await deskControls.set({ x: 0 });

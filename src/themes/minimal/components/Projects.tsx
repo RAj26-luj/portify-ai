@@ -78,7 +78,7 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
   const startMobileMarquee = async (fromY: number) => {
     if (isDraggingMobile.current || selectedProject || !isMountedRef.current) return;
 
-    let targetY = -420;
+    const targetY = -420;
     // Boundary structural safety verification logic
     if (fromY <= targetY || fromY > 0) {
       fromY = 0;
@@ -568,7 +568,7 @@ onMouseLeave={() => {
                       href={selectedProject.videoUrl} 
                       target="_blank" 
                       rel="noreferrer"
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#FAFAFA] border border-gray-900 text-xs font-bold tracking-wide transition-all text-[#111827] hover:bg-gray-50 rounded-none"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#FAFAFA] border border-gray-200 text-xs font-bold tracking-wide transition-all text-[#111827] hover:bg-gray-50 rounded-none"
                     >
                       <PlayCircle className="w-3.5 h-3.5 text-gray-400" /> Screening Walkthrough
                     </a>

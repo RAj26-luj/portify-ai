@@ -66,7 +66,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
   const startMobileMarquee = async (fromX: number) => {
     if (isDraggingMobile.current || selectedItem || !isMountedRef.current) return;
 
-    let targetX = -1000;
+    const targetX = -1000;
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;
       await mobileControls.set({ x: 0 });
@@ -93,7 +93,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
   const startDeskMarquee = async (fromX: number) => {
     if (isDraggingDesk.current || selectedItem || !isMountedRef.current) return;
 
-    let targetX = -2000;
+    const targetX = -2000;
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;
       await deskControls.set({ x: 0 });
@@ -255,7 +255,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
               <div
                 key={`desk-${item.id}-${idx}`}
                 onClick={() => setSelectedItem(item)}
-                className={`bg-white border-b-2 border-gray-100 hover:border-[#111827] p-5 rounded-none transition-all duration-300 cursor-pointer text-left ${
+                className={`bg-white border-b-2 border-gray-100 hover:border-[#111827] p-55 rounded-none transition-all duration-300 cursor-pointer text-left ${
                   isScrollable ? "w-[340px] shrink-0 inline-block" : "w-full"
                 }`}
               >

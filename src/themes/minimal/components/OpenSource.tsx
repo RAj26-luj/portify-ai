@@ -77,7 +77,7 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
   const startMobileMarquee = async (fromY: number) => {
     if (isDraggingMobile.current || selectedItem || !isMountedRef.current) return;
 
-    let targetY = -420;
+    const targetY = -420;
     // Boundary structural safety verification logic
     if (fromY <= targetY || fromY > 0) {
       fromY = 0;

@@ -61,21 +61,7 @@ export default function Certifications({ certifications = [] }: CertificationsPr
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Mobile Marquee Loop System Life Cycle
-  useEffect(() => {
-    isMounted.current = true;
 
-    if (isMobileScrollable && !selectedCert) {
-      startMobileMarquee(currentMobileX.current);
-    } else {
-      mobileControls.stop();
-    }
-
-    return () => {
-      isMounted.current = false;
-      mobileControls.stop();
-      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-    };
-  }, [isMobileScrollable, selectedCert]);
 
   const startMobileMarquee = async (fromX: number) => {
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
@@ -85,7 +71,7 @@ export default function Certifications({ certifications = [] }: CertificationsPr
     }
 
     const totalDistance = -1000;
-    let targetX = totalDistance;
+    const targetX = totalDistance;
     let baseFromX = fromX;
 
     if (baseFromX <= totalDistance) {
@@ -117,6 +103,21 @@ export default function Certifications({ certifications = [] }: CertificationsPr
       // Gracefully prevent operational execution crash on thread interruption
     }
   };
+    useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable && !selectedCert) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedCert]);
 
   if (!rawCerts.length) return null;
 

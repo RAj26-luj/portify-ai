@@ -100,24 +100,6 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
     };
   }, [validOS, isPaused, selectedItem]);
 
-  // Mobile Marquee Loop System
-  useEffect(() => {
-    isMounted.current = true;
-
-    if (isMobileScrollable && !selectedItem) {
-      // Re-initiate loop from current position or starting clean
-      startMobileMarquee(currentMobileY.current);
-    } else {
-      mobileControls.stop();
-    }
-
-    return () => {
-      isMounted.current = false;
-      mobileControls.stop();
-      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-    };
-  }, [isMobileScrollable, selectedItem]);
-
   const startMobileMarquee = async (fromY: number) => {
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
     
@@ -127,7 +109,7 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
 
     const totalDistance = -420;
     // Handle bounds cleanup gracefully
-    let targetY = totalDistance;
+    const targetY = totalDistance;
     let baseFromY = fromY;
 
     if (baseFromY <= totalDistance) {
@@ -161,6 +143,24 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
       // Catch framework interruptions due to layout modifications or unmount cleanly
     }
   };
+
+  // Mobile Marquee Loop System
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable && !selectedItem) {
+      // Re-initiate loop from current position or starting clean
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedItem]);
 
   if (!sortedOS.length) return null;
 
@@ -246,7 +246,7 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
       {/* ========================================== */}
       {/* 2. DESKTOP VIEW: PREMIUM SAAS SPLIT WORKSPACE */}
       {/* ========================================== */}
-      <div className="hidden md:grid relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 z-10 grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div className="hidden md:block relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         
         {/* Left Side Track: Programmatic Stream Registry */}
         <div className="lg:col-span-5 w-full space-y-4">

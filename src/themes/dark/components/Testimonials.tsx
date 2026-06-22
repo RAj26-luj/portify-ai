@@ -51,23 +51,6 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
   const isMounted = useRef(true);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Mobile Marquee Loop System Life Cycle
-  useEffect(() => {
-    isMounted.current = true;
-
-    if (isMobileScrollable) {
-      startMobileMarquee(currentMobileX.current);
-    } else {
-      mobileControls.stop();
-    }
-
-    return () => {
-      isMounted.current = false;
-      mobileControls.stop();
-      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-    };
-  }, [isMobileScrollable]);
-
   const startMobileMarquee = async (fromX: number) => {
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
 
@@ -76,7 +59,7 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
     }
 
     const totalDistance = -1200;
-    let targetX = totalDistance;
+    const targetX = totalDistance;
     let baseFromX = fromX;
 
     if (baseFromX <= totalDistance) {
@@ -108,6 +91,23 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
       // Gracefully capture layout timeline alterations or lifecycle teardowns cleanly
     }
   };
+
+  // Mobile Marquee Loop System Life Cycle
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable]);
 
   if (!sortedTestimonials.length) return null;
 

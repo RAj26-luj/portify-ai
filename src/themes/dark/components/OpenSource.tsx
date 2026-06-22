@@ -16,7 +16,6 @@ import {
   Diff,
   Image as ImageIcon,
   Cpu,
-  Radio,
   Terminal,
   Activity
 } from "lucide-react";
@@ -106,21 +105,7 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
   }, [validOS, isPaused, selectedItem]);
 
   // Mobile Marquee Loop System Life Cycle
-  useEffect(() => {
-    isMounted.current = true;
 
-    if (isMobileScrollable && !selectedItem) {
-      startMobileMarquee(currentMobileY.current);
-    } else {
-      mobileControls.stop();
-    }
-
-    return () => {
-      isMounted.current = false;
-      mobileControls.stop();
-      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-    };
-  }, [isMobileScrollable, selectedItem]);
 
   const startMobileMarquee = async (fromY: number) => {
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
@@ -130,7 +115,7 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
     }
 
     const totalDistance = -420;
-    let targetY = totalDistance;
+    const targetY = totalDistance;
     let baseFromY = fromY;
 
     if (baseFromY <= totalDistance) {
@@ -162,7 +147,21 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
       // Gracefully isolate layout changes or lifecycle interrupts
     }
   };
+  useEffect(() => {
+    isMounted.current = true;
 
+    if (isMobileScrollable && !selectedItem) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedItem]);
   if (!sortedOS.length) return null;
 
   const getCoverImage = (item: any, idx: number) => {
@@ -256,7 +255,7 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
                 [{String((sortedOS.indexOf(item) % sortedOS.length) + 1).padStart(2, '0')}]
               </div>
               <div className="flex-1 min-w-0 text-left space-y-0.5">
-                <h3 className="font-bold font-mono text-xs text-white truncate uppercase tracking-wide">{item.repositoryName}</h3>
+                <h3 className="font-bold font-mono text-xs text-white uppercase tracking-wide">{item.repositoryName}</h3>
                 <p className="text-[10px] font-mono text-neutral-400 truncate">
                   // {item.contributionTitle || item.pullRequestTitle || "Upstream Repository Log"}
                 </p>

@@ -70,7 +70,7 @@ export default function Certifications({ certifications = [] }: CertificationsPr
   const startMobileMarquee = async (fromX: number) => {
     if (isDraggingMobile.current || selectedCert || !isMountedRef.current) return;
 
-    let targetX = -1000;
+    const targetX = -1000;
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;
       await mobileControls.set({ x: 0 });
@@ -97,7 +97,7 @@ export default function Certifications({ certifications = [] }: CertificationsPr
   const startDeskMarquee = async (fromX: number) => {
     if (isDraggingDesk.current || selectedCert || !isMountedRef.current) return;
 
-    let targetX = -2000;
+    const targetX = -2000;
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;
       await deskControls.set({ x: 0 });

@@ -73,7 +73,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
   const startMobileMarquee = async (fromY: number) => {
     if (isDraggingMobile.current || selectedPub || !isMountedRef.current) return;
 
-    let targetY = -420;
+    const targetY = -420;
     // Boundary structural safety verification logic
     if (fromY <= targetY || fromY > 0) {
       fromY = 0;
@@ -238,7 +238,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
           <div
             ref={verticalScrollContainerRef}
             onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
+            onMouseLeave={() => false}
             className="w-full max-h-[380px] overflow-y-auto space-y-2 pr-2 scrollbar-none border border-gray-200 bg-[#FAFAFA] p-2 rounded-lg text-left"
             style={{ scrollSnapType: "y mandatory" }}
           >

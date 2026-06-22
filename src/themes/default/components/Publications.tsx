@@ -75,7 +75,7 @@ export default function Publications({ publications = [], portfolioId = "" }: Pu
   const startMobileMarquee = async (fromY: number) => {
     if (isDraggingMobile.current || selectedPub || !isMountedRef.current) return;
 
-    let targetY = -400;
+    const targetY = -400;
     // Boundary structural safety verification logic
     if (fromY <= targetY || fromY > 0) {
       fromY = 0;
@@ -521,7 +521,7 @@ export default function Publications({ publications = [], portfolioId = "" }: Pu
                   )}
                   
                   <span className="opacity-30 hidden sm:flex items-center gap-1 ml-auto font-mono text-xs">
-                    <Workflow className="w-3 h-3" /> PUB_SYNC
+                    <Workflow className="w-3 h-3" /> CUST_SYNC
                   </span>
                 </div>
               </div>

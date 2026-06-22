@@ -118,23 +118,6 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
     return () => clearInterval(interval);
   }, [isPaused, activeProject]);
 
-  // Mobile Marquee Loop System Life Cycle
-  useEffect(() => {
-    isMounted.current = true;
-
-    if (isMobileScrollable && !selectedProject) {
-      startMobileMarquee(currentMobileY.current);
-    } else {
-      mobileControls.stop();
-    }
-
-    return () => {
-      isMounted.current = false;
-      mobileControls.stop();
-      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-    };
-  }, [isMobileScrollable, selectedProject]);
-
   const startMobileMarquee = async (fromY: number) => {
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
 
@@ -143,7 +126,7 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
     }
 
     const totalDistance = -420;
-    let targetY = totalDistance;
+    const targetY = totalDistance;
     let baseFromY = fromY;
 
     if (baseFromY <= totalDistance) {
@@ -175,6 +158,23 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
       // Gracefully prevent runtime loop explosions from tracking context collisions
     }
   };
+
+  // Mobile Marquee Loop System Life Cycle
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable && !selectedProject) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedProject]);
 
   if (!sortedProjects.length) return null;
 

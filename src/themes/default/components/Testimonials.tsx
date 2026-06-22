@@ -56,7 +56,7 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
   const startMobileMarquee = async (fromX: number) => {
     if (isDraggingMobile.current || !isMountedRef.current) return;
 
-    let targetX = -1200;
+    const targetX = -1200;
     // Boundary structural safety verification logic
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;

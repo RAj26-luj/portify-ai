@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { Layers, ExternalLink, Download, HelpCircle, X, Workflow, Cpu, Radio, Terminal, Box } from "lucide-react";
+import { Layers, ExternalLink, Download, HelpCircle, X, Radio, Terminal, Box } from "lucide-react";
 
 const DEFAULT_CUSTOM_IMAGE = "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop";
 
@@ -68,21 +68,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   const hasScrollableMobileSection = processedSections.some(s => s.isMobileScrollable);
 
   // Mobile Marquee Loop System Life Cycle
-  useEffect(() => {
-    isMounted.current = true;
 
-    if (hasScrollableMobileSection && !selectedItem) {
-      startMobileMarquee(currentMobileY.current);
-    } else {
-      mobileControls.stop();
-    }
-
-    return () => {
-      isMounted.current = false;
-      mobileControls.stop();
-      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-    };
-  }, [hasScrollableMobileSection, selectedItem]);
 
   const startMobileMarquee = async (fromY: number) => {
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
@@ -92,7 +78,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
     }
 
     const totalDistance = -420;
-    let targetY = totalDistance;
+    const targetY = totalDistance;
     let baseFromY = fromY;
 
     if (baseFromY <= totalDistance) {
@@ -124,6 +110,21 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
       // Gracefully capture execution runtime frame updates or unmount teardowns cleanly
     }
   };
+    useEffect(() => {
+    isMounted.current = true;
+
+    if (hasScrollableMobileSection && !selectedItem) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [hasScrollableMobileSection, selectedItem]);
 
   // 3. Early conditional return statements placed safely AFTER all Hook declarations
   if (!sections?.length || processedSections.length === 0) {
