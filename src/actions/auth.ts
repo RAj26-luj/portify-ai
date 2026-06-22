@@ -148,20 +148,7 @@ export async function registerUser(data: unknown) {
       },
     });
 
-    await prisma.analytics.create({
-      data: {
-        portfolioId: (
-          await prisma.portfolio.findUniqueOrThrow({
-            where: {
-              userId: user.id,
-            },
-            select: {
-              id: true,
-            },
-          })
-        ).id,
-      },
-    });
+ 
 
     // Token generation converted to a 6-digit numeric OTP string
     const token = Math.floor(100000 + Math.random() * 900000).toString();

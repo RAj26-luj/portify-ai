@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { 
-  Lock, 
+
   Eye, 
   EyeOff, 
   LogOut, 
@@ -17,8 +17,7 @@ import {
   LockKeyhole,
   Copy,
   Check,
-  Terminal,
-  Globe
+  
 } from "lucide-react";
 import { updatePortfolioVisibility } from "@/actions/settings";
 
@@ -432,7 +431,15 @@ const handleCopyLink = async () => {
                 <button
                   type="button"
                   onClick={handlePasswordChange}
-                  disabled={changingPassword || !newPassword}
+                  disabled={
+                    changingPassword || 
+                    !newPassword || 
+                    newPassword.length < 8 || 
+                    !/[A-Z]/.test(newPassword) || 
+                    !/[a-z]/.test(newPassword) || 
+                    !/[0-9]/.test(newPassword) || 
+                    !/[^A-Za-z0-9]/.test(newPassword)
+                  }
                   className="w-full inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-mono font-bold uppercase tracking-wider transition-all disabled:opacity-40 select-none"
                 >
                   {changingPassword ? <Loader2 size={12} className="animate-spin shrink-0" /> : null}

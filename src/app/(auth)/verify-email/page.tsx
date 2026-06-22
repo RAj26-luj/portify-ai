@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -28,6 +28,16 @@ export default function VerifyEmailPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  
+  const [cooldown, setCooldown] = useState<number>(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const interval = setInterval(() => {
+      setCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [cooldown]);
 
   const verifyEmail = async () => {
     if (loading || resending) return;
@@ -86,7 +96,7 @@ export default function VerifyEmailPage() {
 
   const resendVerification = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (resending || loading) return;
+    if (resending || loading || cooldown > 0) return;
 
     try {
       setResending(true);
@@ -107,6 +117,7 @@ export default function VerifyEmailPage() {
       }
 
       setMessage("New verification code dispatched.");
+      setCooldown(180);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to resend code.");
     } finally {
@@ -211,11 +222,16 @@ export default function VerifyEmailPage() {
 
           <button
             type="submit"
-            disabled={resending || loading}
+            disabled={resending || loading || cooldown > 0}
             className="w-full flex items-center justify-center gap-2 bg-[#0F0F11] hover:bg-[#151518] border border-white/5 text-zinc-300 p-3.5 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider rounded-lg transition-all duration-200 disabled:opacity-40 h-11"
           >
             {resending ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={11} />}
-            <span>Request Fresh Passcode</span>
+            <span>
+              {cooldown > 0 
+                ? `Retry in ${Math.floor(cooldown / 60)}:${String(cooldown % 60).padStart(2, "0")}` 
+                : "Request Fresh Passcode"
+              }
+            </span>
           </button>
         </form>
       </div>
