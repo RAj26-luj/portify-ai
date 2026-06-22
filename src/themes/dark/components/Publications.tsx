@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { 
   BookOpen, 
   ExternalLink, 
@@ -59,13 +59,20 @@ export default function Publications({ publications = [] }: PublicationsProps) {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [selectedPub, setSelectedProjectPub] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
 
   const verticalScrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // --- MOBILE MARQUEE ANIMATION CONTROLLER ENGINE ---
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef(0);
+  const isDraggingMobile = useRef(false);
+  const isMounted = useRef(true);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const activePub = validPubs[activeIndex] || null;
 
+  // Desktop Scroll Pipeline
   useEffect(() => {
     if (validPubs.length <= 1 || isPaused || selectedPub) {
       if (autoScrollTimerRef.current) clearInterval(autoScrollTimerRef.current);
@@ -93,6 +100,64 @@ export default function Publications({ publications = [] }: PublicationsProps) {
       if (autoScrollTimerRef.current) clearInterval(autoScrollTimerRef.current);
     };
   }, [validPubs, isPaused, selectedPub]);
+
+  // Mobile Marquee Loop System Life Cycle
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable && !selectedPub) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedPub]);
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+
+    if (!isMounted.current || isDraggingMobile.current || selectedPub || !isMobileScrollable) {
+      return;
+    }
+
+    const totalDistance = -420;
+    let targetY = totalDistance;
+    let baseFromY = fromY;
+
+    if (baseFromY <= totalDistance) {
+      baseFromY = 0;
+    }
+
+    const remainingDistance = Math.abs(targetY - baseFromY);
+    const totalDuration = 22; // Constant velocity matched to original 22s cycle specifications
+    const dynamicDuration = (remainingDistance / Math.abs(totalDistance)) * totalDuration;
+
+    try {
+      await mobileControls.set({ y: baseFromY });
+
+      await mobileControls.start({
+        y: targetY,
+        transition: {
+          duration: dynamicDuration,
+          ease: "linear",
+        },
+      });
+
+      if (isMounted.current && !isDraggingMobile.current) {
+        currentMobileY.current = 0;
+        animationTimeoutRef.current = setTimeout(() => {
+          startMobileMarquee(0);
+        }, 0);
+      }
+    } catch (e) {
+      // Gracefully isolate lifecycle or frame update thread stops
+    }
+  };
 
   if (!sortedPubs.length) return null;
 
@@ -154,25 +219,31 @@ export default function Publications({ publications = [] }: PublicationsProps) {
       {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED VERTICAL PACKET FEED */}
       {/* ========================================== */}
       <div 
-        className="block md:hidden w-full max-w-md mx-auto px-4 h-[260px] overflow-hidden relative bg-[#0B1120]/40 border-y border-neutral-800/80"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
+        className="block md:hidden w-full max-w-md mx-auto px-4 h-[260px] overflow-hidden relative bg-[#0B1120]/40 border-y border-neutral-800/80 select-none"
       >
         <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#050816] to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#050816] to-transparent z-20 pointer-events-none" />
 
         <motion.div
-          className="flex flex-col gap-3 py-3"
-          animate={isMobileScrollable && !isMobilePaused && !selectedPub ? { y: [0, -420] } : false}
-          transition={{
-            y: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 22,
-              ease: "linear"
-            }
+          className="flex flex-col gap-3 py-3 touch-pan-y"
+          animate={mobileControls}
+          drag={isMobileScrollable ? "y" : false}
+          dragConstraints={{
+            top: -420,
+            bottom: 0
+          }}
+          dragElastic={0.05}
+          onUpdate={(latest) => {
+            currentMobileY.current = Number(latest.y) || 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+            if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
           }}
         >
           {mobileMarqueeItems.map((pub: any, idx: number) => (

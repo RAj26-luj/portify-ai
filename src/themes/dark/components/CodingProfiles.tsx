@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Terminal, ExternalLink, Flame, Trophy, Award, X, Workflow, Code, Radio, Cpu, Network } from "lucide-react";
 
 const DEFAULT_PLATFORM_ICON = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop";
@@ -14,7 +14,6 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
   // 1. Declare all Hooks unconditionally at the top level
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
 
   // 2. Perform all derivations inside top-level, unconditional useMemo Hooks
   const sortedProfiles = React.useMemo(() => {
@@ -48,6 +47,71 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
     }
     return sortedProfiles;
   }, [sortedProfiles, isScrollable]);
+
+  // --- MOBILE MARQUEE ANIMATION CONTROLLER ENGINE ---
+  const mobileControls = useAnimation();
+  const currentMobileX = useRef(0);
+  const isDraggingMobile = useRef(false);
+  const isMounted = useRef(true);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Mobile Marquee Loop System Life Cycle
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable && !selectedItem) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedItem]);
+
+  const startMobileMarquee = async (fromX: number) => {
+    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+
+    if (!isMounted.current || isDraggingMobile.current || selectedItem || !isMobileScrollable) {
+      return;
+    }
+
+    const totalDistance = -1000;
+    let targetX = totalDistance;
+    let baseFromX = fromX;
+
+    if (baseFromX <= totalDistance) {
+      baseFromX = 0;
+    }
+
+    const remainingDistance = Math.abs(targetX - baseFromX);
+    const totalDuration = 30; // Constant speed matched to original timeline design
+    const dynamicDuration = (remainingDistance / Math.abs(totalDistance)) * totalDuration;
+
+    try {
+      await mobileControls.set({ x: baseFromX });
+
+      await mobileControls.start({
+        x: targetX,
+        transition: {
+          duration: dynamicDuration,
+          ease: "linear",
+        },
+      });
+
+      if (isMounted.current && !isDraggingMobile.current) {
+        currentMobileX.current = 0;
+        animationTimeoutRef.current = setTimeout(() => {
+          startMobileMarquee(0);
+        }, 0);
+      }
+    } catch (e) {
+      // Gracefully capture execution thread stops upon unmount or interrupt flags
+    }
+  };
 
   // 3. Early conditional return clauses moved safely AFTER all Hook declarations
   if (!codingProfiles?.length) return null;
@@ -104,22 +168,28 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
         {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED CONDUIT PIPELINE */}
         {/* ========================================== */}
         <div 
-          className="block md:hidden w-full overflow-hidden py-4 bg-[#0B1120]/40 border-y border-neutral-800/60"
-          onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-          onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-          onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-          onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
+          className="block md:hidden w-full overflow-hidden py-4 bg-[#0B1120]/40 border-y border-neutral-800/60 select-none"
         >
           <motion.div 
-            className="flex gap-4 px-4 w-max"
-            animate={isMobileScrollable && !isMobilePaused && !selectedItem ? { x: [0, -1000] } : false}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 30, // Faster stream replication for cyberpunk grid feeds
-                ease: "linear"
-              }
+            className="flex gap-4 px-4 w-max touch-pan-x"
+            animate={mobileControls}
+            drag={isMobileScrollable ? "x" : false}
+            dragConstraints={{
+              left: -1000,
+              right: 0
+            }}
+            dragElastic={0.05}
+            onUpdate={(latest) => {
+              currentMobileX.current = Number(latest.x) || 0;
+            }}
+            onDragStart={() => {
+              isDraggingMobile.current = true;
+              mobileControls.stop();
+              if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+            }}
+            onDragEnd={() => {
+              isDraggingMobile.current = false;
+              startMobileMarquee(currentMobileX.current);
             }}
           >
             {mobileMarqueeItems.map((item: any, idx: number) => (

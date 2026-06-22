@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { 
   ExternalLink, 
   PlayCircle, 
@@ -62,14 +62,21 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
   const [hoveredImageIndex, setHoveredImageIndex] = useState<number>(0);
   
   const verticalScrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // --- MOBILE MARQUEE ANIMATION CONTROLLER ENGINE ---
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef(0);
+  const isDraggingMobile = useRef(false);
+  const isMounted = useRef(true);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const activeProject = validProjects[activeIndex] || null;
 
+  // Desktop Scroll Pipeline
   useEffect(() => {
     if (validProjects.length <= 1 || isPaused || selectedProject) {
       if (autoScrollTimerRef.current) clearInterval(autoScrollTimerRef.current);
@@ -110,6 +117,64 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
 
     return () => clearInterval(interval);
   }, [isPaused, activeProject]);
+
+  // Mobile Marquee Loop System Life Cycle
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable && !selectedProject) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedProject]);
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+
+    if (!isMounted.current || isDraggingMobile.current || selectedProject || !isMobileScrollable) {
+      return;
+    }
+
+    const totalDistance = -420;
+    let targetY = totalDistance;
+    let baseFromY = fromY;
+
+    if (baseFromY <= totalDistance) {
+      baseFromY = 0;
+    }
+
+    const remainingDistance = Math.abs(targetY - baseFromY);
+    const totalDuration = 22; // Constant velocity matched to original 22s cycle specifications
+    const dynamicDuration = (remainingDistance / Math.abs(totalDistance)) * totalDuration;
+
+    try {
+      await mobileControls.set({ y: baseFromY });
+
+      await mobileControls.start({
+        y: targetY,
+        transition: {
+          duration: dynamicDuration,
+          ease: "linear",
+        },
+      });
+
+      if (isMounted.current && !isDraggingMobile.current) {
+        currentMobileY.current = 0;
+        animationTimeoutRef.current = setTimeout(() => {
+          startMobileMarquee(0);
+        }, 0);
+      }
+    } catch (e) {
+      // Gracefully prevent runtime loop explosions from tracking context collisions
+    }
+  };
 
   if (!sortedProjects.length) return null;
 
@@ -175,25 +240,31 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
       {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED CONDUIT VECTOR FIELD */}
       {/* ========================================== */}
       <div 
-        className="block md:hidden w-full max-w-md mx-auto px-4 h-[260px] overflow-hidden relative bg-[#0B1120]/40 border-y border-neutral-800/80"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
+        className="block md:hidden w-full max-w-md mx-auto px-4 h-[260px] overflow-hidden relative bg-[#0B1120]/40 border-y border-neutral-800/80 select-none"
       >
         <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#050816] to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#050816] to-transparent z-20 pointer-events-none" />
 
         <motion.div
-          className="flex flex-col gap-3 py-3"
-          animate={isMobileScrollable && !isMobilePaused && !selectedProject ? { y: [0, -420] } : false}
-          transition={{
-            y: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 22,
-              ease: "linear"
-            }
+          className="flex flex-col gap-3 py-3 touch-pan-y"
+          animate={mobileControls}
+          drag={isMobileScrollable ? "y" : false}
+          dragConstraints={{
+            top: -420,
+            bottom: 0
+          }}
+          dragElastic={0.05}
+          onUpdate={(latest) => {
+            currentMobileY.current = Number(latest.y) || 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+            if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
           }}
         >
           {mobileMarqueeItems.map((project: any, idx: number) => (

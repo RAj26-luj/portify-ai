@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import {
   GitPullRequest,
   ExternalLink,
@@ -58,13 +58,20 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
 
   const verticalScrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // --- MOBILE MARQUEE ANIMATION CONTROLLER ENGINE ---
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef(0);
+  const isDraggingMobile = useRef(false);
+  const isMounted = useRef(true);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const activeOS = validOS[activeIndex] || null;
 
+  // Desktop Scroll Pipeline
   useEffect(() => {
     if (validOS.length <= 1 || isPaused || selectedItem) {
       if (autoScrollTimerRef.current) clearInterval(autoScrollTimerRef.current);
@@ -92,6 +99,68 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
       if (autoScrollTimerRef.current) clearInterval(autoScrollTimerRef.current);
     };
   }, [validOS, isPaused, selectedItem]);
+
+  // Mobile Marquee Loop System
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable && !selectedItem) {
+      // Re-initiate loop from current position or starting clean
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedItem]);
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    
+    if (!isMounted.current || isDraggingMobile.current || selectedItem || !isMobileScrollable) {
+      return;
+    }
+
+    const totalDistance = -420;
+    // Handle bounds cleanup gracefully
+    let targetY = totalDistance;
+    let baseFromY = fromY;
+
+    if (baseFromY <= totalDistance) {
+      baseFromY = 0;
+    }
+
+    const remainingDistance = Math.abs(targetY - baseFromY);
+    const totalDuration = 25; // Constant speed matched to 25s for full loop length
+    const dynamicDuration = (remainingDistance / Math.abs(totalDistance)) * totalDuration;
+
+    try {
+      // Force set to current layout position reference safely before sliding
+      await mobileControls.set({ y: baseFromY });
+      
+      await mobileControls.start({
+        y: targetY,
+        transition: {
+          duration: dynamicDuration,
+          ease: "linear",
+        },
+      });
+
+      if (isMounted.current && !isDraggingMobile.current) {
+        currentMobileY.current = 0;
+        // Recursive jump execution safely postponed out of animation promise loop stack
+        animationTimeoutRef.current = setTimeout(() => {
+          startMobileMarquee(0);
+        }, 0);
+      }
+    } catch (e) {
+      // Catch framework interruptions due to layout modifications or unmount cleanly
+    }
+  };
 
   if (!sortedOS.length) return null;
 
@@ -128,24 +197,30 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
       {/* ========================================== */}
       <div 
         className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
       >
         <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#0A0A0B] to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0A0A0B] to-transparent z-20 pointer-events-none" />
 
         <motion.div
-          className="flex flex-col gap-3"
-          animate={isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -420] } : false}
-          transition={{
-            y: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 25,
-              ease: "linear"
-            }
+          className="flex flex-col gap-3 touch-pan-y select-none"
+          animate={mobileControls}
+          drag={isMobileScrollable ? "y" : false}
+          dragConstraints={{
+            top: -420,
+            bottom: 0
+          }}
+          dragElastic={0.05}
+          onUpdate={(latest) => {
+            currentMobileY.current = Number(latest.y) || 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+            if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
           }}
         >
           {mobileMarqueeItems.map((item: any, idx: number) => (

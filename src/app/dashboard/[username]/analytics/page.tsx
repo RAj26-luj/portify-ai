@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import { 
   BarChart3, 
   Eye, 
-  Users, 
   Download, 
   Mail, 
   MousePointerClick, 
   Loader2, 
   AlertTriangle, 
-  HelpCircle,
   RefreshCw,
   LayoutGrid,
   List,
@@ -20,9 +18,9 @@ import {
 } from "lucide-react";
 import { getPortfolioStats } from "@/actions/analytics";
 
+// Modified: Removed uniqueVisitors parameter completely
 type Analytics = {
   totalViews: number;
-  uniqueVisitors: number;
   resumeDownloads: number;
   contactRequests: number;
   projectClicks: number;
@@ -41,13 +39,13 @@ export default function AnalyticsPage() {
       else setLoading(true);
       setError(null);
 
-   const result = await getPortfolioStats("");
+      const result = await getPortfolioStats("");
 
-if (result.success) {
-  setAnalytics(result.data);
-} else {
-  setAnalytics(null);
-}
+      if (result.success) {
+        setAnalytics(result.data);
+      } else {
+        setAnalytics(null);
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to sync platform traffic metrics"
@@ -94,9 +92,9 @@ if (result.success) {
     );
   }
 
+  // Modified: Unique visitors reference dropped out of structural zero conditions checks
   const hasNoTraffic = !analytics || (
     analytics.totalViews === 0 && 
-    analytics.uniqueVisitors === 0 && 
     analytics.resumeDownloads === 0 && 
     analytics.contactRequests === 0 && 
     analytics.projectClicks === 0
@@ -167,6 +165,7 @@ if (result.success) {
     );
   }
 
+  // Modified: Unique Visitors mapping entry deleted cleanly out of the tracking parameters stack
   const stats = [
     { 
       label: "Total Views", 
@@ -175,14 +174,6 @@ if (result.success) {
       color: "text-blue-400", 
       bg: "from-blue-500/10 to-transparent",
       desc: "Aggregated sum of overall hits recorded across all page modules."
-    },
-    { 
-      label: "Unique Visitors", 
-      value: analytics.uniqueVisitors, 
-      icon: <Users size={14} />, 
-      color: "text-purple-400", 
-      bg: "from-purple-500/10 to-transparent",
-      desc: "Individual browser signatures calculated within the tracking cycle."
     },
     { 
       label: "Resume Downloads", 
@@ -261,7 +252,7 @@ if (result.success) {
 
       {/* DYNAMIC PRESENTATION INTERFACE ENGINE */}
       {viewMode === "grid" ? (
-        <div className="grid gap-3 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
           {stats.map((s) => (
             <div 
               key={s.label} 
@@ -325,6 +316,7 @@ if (result.success) {
       )}
 
       {/* PRIVACY AXIOM COMPLIANCE FOOTER HUD */}
+      {/* Modified: True statement aligning precisely with zero storage of visitor hash identifiers */}
       <div className="rounded-xl border border-zinc-900/60 bg-zinc-950/20 p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3 text-[10px] sm:text-[11px] font-mono text-zinc-500">
         <span className="flex items-center gap-2">
           <ShieldCheck className="w-3.5 h-3.5 text-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0" />

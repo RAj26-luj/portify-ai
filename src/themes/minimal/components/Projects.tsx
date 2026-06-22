@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { 
   ExternalLink, 
   PlayCircle, 
@@ -59,13 +59,62 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
   const [hoveredImageIndex, setHoveredImageIndex] = useState<number>(0);
   
+  // Animation Controls & Refs for Mobile Interactive Infinite Marquee Track
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
+
   const verticalScrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const activeProject = validProjects[activeIndex] || null;
+
+  // Constant speed calculation for uniform velocity on mobile tracking
+  const MOBILE_SPEED = 420 / 25; // Target distance over duration (Y-axis pixels per second)
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (isDraggingMobile.current || selectedProject || !isMountedRef.current) return;
+
+    let targetY = -420;
+    // Boundary structural safety verification logic
+    if (fromY <= targetY || fromY > 0) {
+      fromY = 0;
+      await mobileControls.set({ y: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetY - fromY);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      y: targetY,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && !selectedProject && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    if (isMobileScrollable && !selectedProject) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+    return () => {
+      mobileControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [isMobileScrollable, selectedProject]);
 
   useEffect(() => {
     if (validProjects.length <= 1 || isPaused || selectedProject) {
@@ -126,7 +175,7 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
   return (
     <section 
       id="projects" 
-      className="relative w-full py-16 md:py-24 bg-white text-[#111827] selection:bg-gray-200"
+      className="relative w-full py-16 md:py-24 bg-white text-[#111827] selection:bg-gray-200 select-none"
     >
       <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 z-10 mb-12 md:mb-16">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-gray-100 pb-6 text-left">
@@ -145,26 +194,33 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
       {/* ========================================== */}
       {/* 1. MOBILE RESPONSIVE VIEW: SWISS MINIMAL LIST ROWS */}
       {/* ========================================== */}
-      <div 
-        className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
-      >
+      <div className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative">
         <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent z-20 pointer-events-none" />
 
         <motion.div
-          className="flex flex-col gap-3"
-          animate={isMobileScrollable && !isMobilePaused && !selectedProject ? { y: [0, -420] } : false}
-          transition={{
-            y: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 25,
-              ease: "linear"
-            }
+          className="flex flex-col gap-3 touch-none"
+          drag={isMobileScrollable ? "y" : false}
+          dragConstraints={{ top: -420, bottom: 0 }}
+          animate={mobileControls}
+          onUpdate={(latest) => {
+            currentMobileY.current = typeof latest.y === "number" ? latest.y : 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
+          }}
+          onMouseEnter={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onMouseLeave={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
           }}
         >
           {mobileMarqueeItems.map((project: any, idx: number) => (
@@ -266,10 +322,11 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={() => {
-                  setIsPaused(false);
-                  setHoveredImageIndex(0);
-                }}
+               
+onMouseLeave={() => {
+  setIsPaused(false);
+  setHoveredImageIndex(0);
+}}
                 onClick={() => {
                   setSelectedProject(activeProject);
                   handleProjectClick(activeProject.portfolioId, activeProject.id);

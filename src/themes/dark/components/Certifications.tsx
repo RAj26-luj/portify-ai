@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { 
   ExternalLink, 
   FileText, 
@@ -52,7 +52,71 @@ export default function Certifications({ certifications = [] }: CertificationsPr
 
   const [selectedCert, setSelectedCert] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  // --- MOBILE MARQUEE ANIMATION CONTROLLER ENGINE ---
+  const mobileControls = useAnimation();
+  const currentMobileX = useRef(0);
+  const isDraggingMobile = useRef(false);
+  const isMounted = useRef(true);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Mobile Marquee Loop System Life Cycle
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable && !selectedCert) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable, selectedCert]);
+
+  const startMobileMarquee = async (fromX: number) => {
+    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+
+    if (!isMounted.current || isDraggingMobile.current || selectedCert || !isMobileScrollable) {
+      return;
+    }
+
+    const totalDistance = -1000;
+    let targetX = totalDistance;
+    let baseFromX = fromX;
+
+    if (baseFromX <= totalDistance) {
+      baseFromX = 0;
+    }
+
+    const remainingDistance = Math.abs(targetX - baseFromX);
+    const totalDuration = 35; // Constant speed matching original timing criteria
+    const dynamicDuration = (remainingDistance / Math.abs(totalDistance)) * totalDuration;
+
+    try {
+      await mobileControls.set({ x: baseFromX });
+
+      await mobileControls.start({
+        x: targetX,
+        transition: {
+          duration: dynamicDuration,
+          ease: "linear",
+        },
+      });
+
+      if (isMounted.current && !isDraggingMobile.current) {
+        currentMobileX.current = 0;
+        animationTimeoutRef.current = setTimeout(() => {
+          startMobileMarquee(0);
+        }, 0);
+      }
+    } catch (e) {
+      // Gracefully prevent operational execution crash on thread interruption
+    }
+  };
 
   if (!rawCerts.length) return null;
 
@@ -125,23 +189,31 @@ export default function Certifications({ certifications = [] }: CertificationsPr
       {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED DATA STREAM */}
       {/* ========================================== */}
       <div 
-        className="block md:hidden w-full overflow-hidden py-4 relative bg-[#0B1120]/50 border-y border-[#00E5FF]/10"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
+        className="block md:hidden w-full overflow-hidden py-4 relative bg-[#0B1120]/50 border-y border-[#00E5FF]/10 select-none"
       >
         {/* Terminal Scanline Overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] pointer-events-none z-10" />
         
         <motion.div 
-          className="flex gap-4 px-4 w-max"
-          animate={isMobileScrollable && !isMobilePaused && !selectedCert ? { x: [0, -1000] } : false}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 35, // Faster, terminal-like output
-              ease: "linear"
-            }
+          className="flex gap-4 px-4 w-max touch-pan-x"
+          animate={mobileControls}
+          drag={isMobileScrollable ? "x" : false}
+          dragConstraints={{
+            left: -1000,
+            right: 0
+          }}
+          dragElastic={0.05}
+          onUpdate={(latest) => {
+            currentMobileX.current = Number(latest.x) || 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+            if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileX.current);
           }}
         >
           {mobileMarqueeCerts.map((cert: any, idx: number) => {

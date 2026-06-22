@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Layers, ExternalLink, Download, HelpCircle, X, Workflow, Cpu, Radio, Terminal, Box } from "lucide-react";
 
 const DEFAULT_CUSTOM_IMAGE = "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop";
@@ -14,7 +14,13 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   // 1. Declare all Hooks unconditionally at the top level
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  // --- MOBILE MARQUEE ANIMATION CONTROLLER ENGINE ---
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef(0);
+  const isDraggingMobile = useRef(false);
+  const isMounted = useRef(true);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 2. Safely pre-filter and derive animation loop streams in a top-level useMemo block
   const processedSections = useMemo(() => {
@@ -57,6 +63,67 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
         };
       });
   }, [sections]);
+
+  // Determine global mobile scroll status from derived sections
+  const hasScrollableMobileSection = processedSections.some(s => s.isMobileScrollable);
+
+  // Mobile Marquee Loop System Life Cycle
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (hasScrollableMobileSection && !selectedItem) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [hasScrollableMobileSection, selectedItem]);
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+
+    if (!isMounted.current || isDraggingMobile.current || selectedItem || !hasScrollableMobileSection) {
+      return;
+    }
+
+    const totalDistance = -420;
+    let targetY = totalDistance;
+    let baseFromY = fromY;
+
+    if (baseFromY <= totalDistance) {
+      baseFromY = 0;
+    }
+
+    const remainingDistance = Math.abs(targetY - baseFromY);
+    const totalDuration = 20; // Constant velocity matching original 20s cycle timeline loop
+    const dynamicDuration = (remainingDistance / Math.abs(totalDistance)) * totalDuration;
+
+    try {
+      await mobileControls.set({ y: baseFromY });
+
+      await mobileControls.start({
+        y: targetY,
+        transition: {
+          duration: dynamicDuration,
+          ease: "linear",
+        },
+      });
+
+      if (isMounted.current && !isDraggingMobile.current) {
+        currentMobileY.current = 0;
+        animationTimeoutRef.current = setTimeout(() => {
+          startMobileMarquee(0);
+        }, 0);
+      }
+    } catch (e) {
+      // Gracefully capture execution runtime frame updates or unmount teardowns cleanly
+    }
+  };
 
   // 3. Early conditional return statements placed safely AFTER all Hook declarations
   if (!sections?.length || processedSections.length === 0) {
@@ -115,26 +182,32 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* 1. MOBILE RESPONSIVE VIEW: CORE HUD VERTICAL SCROLLER */}
             {/* ========================================== */}
             <div 
-              className="block md:hidden w-full max-w-md mx-auto px-4 h-[260px] overflow-hidden relative bg-[#0B1120]/40 border-y border-neutral-800/80"
-              onTouchStart={() => section.isMobileScrollable && setIsMobilePaused(true)}
-              onTouchEnd={() => section.isMobileScrollable && setIsMobilePaused(false)}
-              onMouseEnter={() => section.isMobileScrollable && setIsMobilePaused(true)}
-              onMouseLeave={() => section.isMobileScrollable && setIsMobilePaused(false)}
+              className="block md:hidden w-full max-w-md mx-auto px-4 h-[260px] overflow-hidden relative bg-[#0B1120]/40 border-y border-neutral-800/80 select-none"
             >
               {/* Terminal scanline shader bars */}
               <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#050816] to-transparent z-20 pointer-events-none" />
               <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#050816] to-transparent z-20 pointer-events-none" />
 
               <motion.div
-                className="flex flex-col gap-3 py-3"
-                animate={section.isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -420] } : false}
-                transition={{
-                  y: {
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    duration: 20,
-                    ease: "linear"
-                  }
+                className="flex flex-col gap-3 py-3 touch-pan-y"
+                animate={mobileControls}
+                drag={section.isMobileScrollable ? "y" : false}
+                dragConstraints={{
+                  top: -420,
+                  bottom: 0
+                }}
+                dragElastic={0.05}
+                onUpdate={(latest) => {
+                  currentMobileY.current = Number(latest.y) || 0;
+                }}
+                onDragStart={() => {
+                  isDraggingMobile.current = true;
+                  mobileControls.stop();
+                  if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+                }}
+                onDragEnd={() => {
+                  isDraggingMobile.current = false;
+                  startMobileMarquee(currentMobileY.current);
                 }}
               >
                 {section.mobileMarqueeItems.map((item: any, idx: number) => (
@@ -155,7 +228,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                     </div>
                     {/* Information Labels */}
                     <div className="flex-1 min-w-0 text-left space-y-0.5">
-                      <h3 className="font-bold font-mono text-xs text-white truncate uppercase tracking-wide">{item.title}</h3>
+                      <h3 className="font-bold font-mono text-xs text-white uppercase tracking-wide truncate">{item.title}</h3>
                       {item.subtitle && (
                         <p className="text-[10px] font-mono text-neutral-400 truncate">// {item.subtitle}</p>
                       )}

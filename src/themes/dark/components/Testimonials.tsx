@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
 import { MessageSquare, User2, Sparkles, Radio, Activity, Terminal } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLinkedin as Linkedin } from "@fortawesome/free-brands-svg-icons";
@@ -43,7 +43,71 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
   }, [sortedTestimonials, isScrollable]);
 
   const [isDeskPaused, setIsDeskPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  // --- MOBILE MARQUEE ANIMATION CONTROLLER ENGINE ---
+  const mobileControls = useAnimation();
+  const currentMobileX = useRef(0);
+  const isDraggingMobile = useRef(false);
+  const isMounted = useRef(true);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Mobile Marquee Loop System Life Cycle
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable]);
+
+  const startMobileMarquee = async (fromX: number) => {
+    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+
+    if (!isMounted.current || isDraggingMobile.current || !isMobileScrollable) {
+      return;
+    }
+
+    const totalDistance = -1200;
+    let targetX = totalDistance;
+    let baseFromX = fromX;
+
+    if (baseFromX <= totalDistance) {
+      baseFromX = 0;
+    }
+
+    const remainingDistance = Math.abs(targetX - baseFromX);
+    const totalDuration = 35; // Constant velocity matched to original 35s cycle layout specifications
+    const dynamicDuration = (remainingDistance / Math.abs(totalDistance)) * totalDuration;
+
+    try {
+      await mobileControls.set({ x: baseFromX });
+
+      await mobileControls.start({
+        x: targetX,
+        transition: {
+          duration: dynamicDuration,
+          ease: "linear",
+        },
+      });
+
+      if (isMounted.current && !isDraggingMobile.current) {
+        currentMobileX.current = 0;
+        animationTimeoutRef.current = setTimeout(() => {
+          startMobileMarquee(0);
+        }, 0);
+      }
+    } catch (e) {
+      // Gracefully capture layout timeline alterations or lifecycle teardowns cleanly
+    }
+  };
 
   if (!sortedTestimonials.length) return null;
 
@@ -77,7 +141,7 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 z-10 mb-12 md:mb-20">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-[#00E5FF]/10 pb-6">
           <div className="text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#0B1120] border border-[#00E5FF]/30 text-[10px] font-mono text-[#00E5FF] tracking-[0.2em] uppercase mb-4 shadow-[0_0_15px_rgba(0,229,255,0.1)]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#0B1120] border border-[#00E5FF]/30 text-[10px] font-mono text-[#00FF9D] tracking-[0.2em] uppercase mb-4 shadow-[0_0_15px_rgba(0,229,255,0.1)]">
               <MessageSquare className="w-3.5 h-3.5 text-[#00FF9D]" />
               ENDORSEMENTS_FEED
             </div>
@@ -96,22 +160,28 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
       {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED CONDUIT PIPELINE */}
       {/* ========================================== */}
       <div 
-        className="block md:hidden w-full overflow-hidden py-4 bg-[#0B1120]/40 border-y border-neutral-800/80 relative"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
+        className="block md:hidden w-full overflow-hidden py-4 bg-[#0B1120]/40 border-y border-neutral-800/80 relative select-none"
       >
         <motion.div 
-          className="flex gap-4 px-4 w-max"
-          animate={isMobileScrollable && !isMobilePaused ? { x: [0, -1200] } : false}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 35,
-              ease: "linear"
-            }
+          className="flex gap-4 px-4 w-max touch-pan-x"
+          animate={mobileControls}
+          drag={isMobileScrollable ? "x" : false}
+          dragConstraints={{
+            left: -1200,
+            right: 0
+          }}
+          dragElastic={0.05}
+          onUpdate={(latest) => {
+            currentMobileX.current = Number(latest.x) || 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+            if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileX.current);
           }}
         >
           {mobileMarqueeItems.map((t: any, idx: number) => (

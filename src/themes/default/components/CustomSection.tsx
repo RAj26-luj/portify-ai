@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Layers, ExternalLink, Download, HelpCircle, X, Workflow } from "lucide-react";
 
 const DEFAULT_CUSTOM_IMAGE = "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop";
@@ -14,7 +14,12 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   // 1. Initialize all top-level React Hooks unconditionally
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  // Animation Controls & Refs for Mobile Interactive Infinite Marquee Track
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
 
   // 2. Pre-process and filter sections array unconditionally to remove loops and internal conditional returns
   const processedSections = useMemo(() => {
@@ -58,6 +63,54 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
       });
   }, [sections]);
 
+  // Constant speed calculation for uniform velocity on mobile tracking
+  const MOBILE_SPEED = 400 / 25; // Target distance over duration (Y-axis pixels per second)
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (isDraggingMobile.current || selectedItem || !isMountedRef.current) return;
+
+    let targetY = -400;
+    // Boundary structural safety verification logic
+    if (fromY <= targetY || fromY > 0) {
+      fromY = 0;
+      await mobileControls.set({ y: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetY - fromY);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      y: targetY,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && !selectedItem && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    
+    // Check if any processed section qualifies for mobile scrolling
+    const hasScrollableMobileSection = processedSections.some(s => s.isMobileScrollable);
+
+    if (hasScrollableMobileSection && !selectedItem) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+    return () => {
+      mobileControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [processedSections, selectedItem]);
+
   // 3. Early return block moved safely after all React Hooks
   if (!sections?.length || processedSections.length === 0) {
     return null;
@@ -92,27 +145,34 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED VERTICAL LOOP MARQUEE */}
             {/* ========================================== */}
-            <div 
-              className="block md:hidden w-full max-w-md mx-auto px-4 h-[240px] overflow-hidden relative"
-              onTouchStart={() => section.isMobileScrollable && setIsMobilePaused(true)}
-              onTouchEnd={() => section.isMobileScrollable && setIsMobilePaused(false)}
-              onMouseEnter={() => section.isMobileScrollable && setIsMobilePaused(true)}
-              onMouseLeave={() => section.isMobileScrollable && setIsMobilePaused(false)}
-            >
+            <div className="block md:hidden w-full max-w-md mx-auto px-4 h-[240px] overflow-hidden relative">
               {/* Fade masks overlay to smooth scrolling edge transitions */}
               <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-black to-transparent z-20 pointer-events-none" />
               <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black to-transparent z-20 pointer-events-none" />
 
               <motion.div
-                className="flex flex-col gap-2.5"
-                animate={section.isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -400] } : false}
-                transition={{
-                  y: {
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    duration: 25,
-                    ease: "linear"
-                  }
+                className="flex flex-col gap-2.5 touch-none"
+                drag={section.isMobileScrollable ? "y" : false}
+                dragConstraints={{ top: -400, bottom: 0 }}
+                animate={mobileControls}
+                onUpdate={(latest) => {
+                  currentMobileY.current = typeof latest.y === "number" ? latest.y : 0;
+                }}
+                onDragStart={() => {
+                  isDraggingMobile.current = true;
+                  mobileControls.stop();
+                }}
+                onDragEnd={() => {
+                  isDraggingMobile.current = false;
+                  startMobileMarquee(currentMobileY.current);
+                }}
+                onMouseEnter={() => {
+                  isDraggingMobile.current = true;
+                  mobileControls.stop();
+                }}
+                onMouseLeave={() => {
+                  isDraggingMobile.current = false;
+                  startMobileMarquee(currentMobileY.current);
                 }}
               >
                 {section.mobileMarqueeItems.map((item: any, idx: number) => (

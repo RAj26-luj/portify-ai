@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Terminal, ExternalLink, Flame, Trophy, Award, X, Workflow, Code } from "lucide-react";
 
 const DEFAULT_PLATFORM_ICON = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop";
@@ -12,8 +12,16 @@ interface CodingProfilesProps {
 
 export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesProps) {
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  // Animation Controls & Refs for Adaptive Resuming Infinite Loop
+  const desktopControls = useAnimation();
+  const mobileControls = useAnimation();
+  
+  const currentDesktopX = useRef<number>(0);
+  const currentMobileX = useRef<number>(0);
+
+  const isDraggingDesktop = useRef<boolean>(false);
+  const isDraggingMobile = useRef<boolean>(false);
 
   const sortedProfiles = React.useMemo(() => {
     return [...codingProfiles].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
@@ -32,9 +40,6 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
     }
     return items;
   }, [sortedProfiles, isMobileScrollable]);
-     if (!codingProfiles?.length) return null;
-  // Early return executed *after* all Hook initializations
- 
 
   const marqueeItems = isScrollable
     ? (() => {
@@ -45,6 +50,81 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
         return items;
       })()
     : sortedProfiles;
+
+  // --- Dynamic Velocity / Duration Engine ---
+  const DESKTOP_SPEED = 2000 / 55; // Pixels per second based on design intent
+  const MOBILE_SPEED = 1000 / 45;
+
+  const startDesktopMarquee = async (fromX: number) => {
+    if (isDraggingDesktop.current || selectedItem) return;
+    
+    let targetX = -2000;
+    // Reset boundary logic if position is exceeded or loop completes
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await desktopControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / DESKTOP_SPEED;
+
+    await desktopControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear",
+      },
+    });
+
+    // Re-trigger loop infinitely from 0
+    startDesktopMarquee(0);
+  };
+
+  const startMobileMarquee = async (fromX: number) => {
+    if (isDraggingMobile.current || selectedItem) return;
+
+    let targetX = -1000;
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await mobileControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear",
+      },
+    });
+
+    if (!isDraggingMobile.current) {
+  setTimeout(() => {
+    startMobileMarquee(0);
+  }, 0);
+}
+  };
+
+  // Dynamic lifecycle triggers for initial mount / modal toggling state updates
+  useEffect(() => {
+    if (isScrollable && !selectedItem) {
+      startDesktopMarquee(currentDesktopX.current);
+    } else {
+      desktopControls.stop();
+    }
+  }, [isScrollable, selectedItem]);
+
+  useEffect(() => {
+    if (isMobileScrollable && !selectedItem) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+  }, [isMobileScrollable, selectedItem]);
+
+  if (!codingProfiles?.length) return null;
 
   return (
     <>
@@ -71,23 +151,30 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
         {/* ========================================== */}
         {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED SLOW MINI-BARS */}
         {/* ========================================== */}
-        <div 
-          className="block md:hidden w-full overflow-hidden py-2"
-          onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-          onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-          onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-          onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
-        >
+        <div className="block md:hidden w-full overflow-hidden py-2">
           <motion.div 
             className="flex gap-3 px-4 w-max"
-            animate={isMobileScrollable && !isMobilePaused && !selectedItem ? { x: [0, -1000] } : false}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 45, // Premium slow-motion glide speed
-                ease: "linear"
-              }
+            drag={isMobileScrollable ? "x" : false}
+            dragConstraints={{ right: 0, left: -1000 }}
+            animate={mobileControls}
+            onUpdate={(latest) => {
+              currentMobileX.current = parseFloat(latest.x as string) || 0;
+            }}
+            onDragStart={() => {
+              isDraggingMobile.current = true;
+              mobileControls.stop();
+            }}
+            onDragEnd={() => {
+              isDraggingMobile.current = false;
+              startMobileMarquee(currentMobileX.current);
+            }}
+            onMouseEnter={() => {
+              isDraggingMobile.current = true;
+              mobileControls.stop();
+            }}
+            onMouseLeave={() => {
+              isDraggingMobile.current = false;
+              startMobileMarquee(currentMobileX.current);
             }}
           >
             {mobileMarqueeItems.map((item: any, idx: number) => (
@@ -122,11 +209,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
         {/* ========================================== */}
         {/* 2. DESKTOP VIEW: INFINITE SCROLLING MARQUEE */}
         {/* ========================================== */}
-        <div
-          className={`hidden md:block relative w-full overflow-hidden py-4 ${isScrollable ? "cursor-grab active:cursor-grabbing" : ""}`}
-          onMouseEnter={() => isScrollable && setIsPaused(true)}
-          onMouseLeave={() => isScrollable && setIsPaused(false)}
-        >
+        <div className={`hidden md:block relative w-full overflow-hidden py-4 ${isScrollable ? "cursor-grab active:cursor-grabbing" : ""}`}>
           {isScrollable && (
             <>
               <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-48 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none" />
@@ -140,14 +223,27 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
                 ? "flex gap-6 whitespace-nowrap min-w-full w-max px-4" 
                 : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center"
             }
-            animate={isScrollable && !isPaused && !selectedItem ? { x: [0, -2000] } : false}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 55,
-                ease: "linear"
-              }
+            drag={isScrollable ? "x" : false}
+            dragConstraints={{ right: 0, left: -2000 }}
+            animate={desktopControls}
+            onUpdate={(latest) => {
+              currentDesktopX.current = parseFloat(latest.x as string) || 0;
+            }}
+            onDragStart={() => {
+              isDraggingDesktop.current = true;
+              desktopControls.stop();
+            }}
+            onDragEnd={() => {
+              isDraggingDesktop.current = false;
+              startDesktopMarquee(currentDesktopX.current);
+            }}
+            onMouseEnter={() => {
+              isDraggingDesktop.current = true;
+              desktopControls.stop();
+            }}
+            onMouseLeave={() => {
+              isDraggingDesktop.current = false;
+              startDesktopMarquee(currentDesktopX.current);
             }}
           >
             {marqueeItems.map((item: any, idx: number) => (

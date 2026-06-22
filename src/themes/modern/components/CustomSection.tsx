@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Layers, ExternalLink, Download, HelpCircle, X, Workflow } from "lucide-react";
 
 const DEFAULT_CUSTOM_IMAGE = "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop";
@@ -11,12 +11,28 @@ interface CustomSectionProps {
 }
 
 export default function CustomSection({ sections = [] }: CustomSectionProps) {
-  // 1. Declare all Hooks unconditionally at the top level
-  const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  // 1. Declare all React Hooks unconditionally at the top level
+  const [selectedItem, setSelectedItemState] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
 
-  // 2. Safely structure loops and animation metrics within a unified root-level useMemo hook
+  const selectedItemRef = useRef<any | null>(null);
+  const setSelectedItem = (item: any) => {
+    selectedItemRef.current = item;
+    setSelectedItemState(item);
+  };
+
+  // Animation Controls & Refs for Mobile and Desktop Interactive Infinite Marquee Tracks
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+
+  const deskControls = useAnimation();
+  const currentDeskX = useRef<number>(0);
+  const isDraggingDesk = useRef<boolean>(false);
+
+  const isMountedRef = useRef<boolean>(true);
+
+  // 2. Pre-filter and structure loop track items safely inside an unconditional useMemo block
   const activeSections = useMemo(() => {
     if (!sections?.length) return [];
 
@@ -58,6 +74,89 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
       });
   }, [sections]);
 
+  // Constant speed calculations for uniform velocity tracking
+  const MOBILE_SPEED = 420 / 25; // Target distance over duration (Y-axis pixels per second)
+  const DESK_SPEED = 2000 / 50; // Target distance over duration (X-axis pixels per second)
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (isDraggingMobile.current || selectedItemRef.current || !isMountedRef.current) return;
+
+    let targetY = -420;
+    if (fromY <= targetY || fromY > 0) {
+      fromY = 0;
+      await mobileControls.set({ y: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetY - fromY);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      y: targetY,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && !selectedItemRef.current && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  const startDeskMarquee = async (fromX: number) => {
+    if (isDraggingDesk.current || selectedItemRef.current || !isMountedRef.current) return;
+
+    let targetX = -2000;
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await deskControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / DESK_SPEED;
+
+    await deskControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingDesk.current && !selectedItemRef.current && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startDeskMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    const hasScrollableMobileSection = activeSections.some(s => s.isMobileScrollable);
+    const hasScrollableDeskSection = activeSections.some(s => s.isScrollable);
+
+    if (hasScrollableMobileSection && !selectedItem) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    if (hasScrollableDeskSection && !isPaused && !selectedItem) {
+      startDeskMarquee(currentDeskX.current);
+    } else {
+      deskControls.stop();
+    }
+
+    return () => {
+      mobileControls.stop();
+      deskControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [activeSections, isPaused, selectedItem]);
+
   // 3. Keep conditional returns safely AFTER all React hooks
   if (!sections?.length || activeSections.length === 0) {
     return null;
@@ -70,7 +169,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
           <section
             key={section.id || section.sectionIdx}
             id={section.title?.toLowerCase().replace(/\s+/g, "") || `custom-${section.sectionIdx}`}
-            className="relative w-full py-20 md:py-40 overflow-hidden bg-[#0A0A0B] text-white selection:bg-[#6366F1]/30"
+            className="relative w-full py-20 md:py-40 overflow-hidden bg-[#0A0A0B] text-white selection:bg-[#6366F1]/30 select-none"
           >
             {/* Premium SaaS Micro-Grid & Ambient Lighting Overlays */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181B_1px,transparent_1px),linear-gradient(to_bottom,#18181B_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none opacity-40" />
@@ -95,34 +194,41 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED SWIPE MINIBARS */}
             {/* ========================================== */}
-            <div 
-              className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative"
-              onTouchStart={() => section.isMobileScrollable && setIsMobilePaused(true)}
-              onTouchEnd={() => section.isMobileScrollable && setIsMobilePaused(false)}
-              onMouseEnter={() => section.isMobileScrollable && setIsMobilePaused(true)}
-              onMouseLeave={() => section.isMobileScrollable && setIsMobilePaused(false)}
-            >
+            <div className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative">
               {/* Fade masks overlay to smooth scrolling edge transitions */}
               <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#0A0A0B] to-transparent z-20 pointer-events-none" />
               <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0A0A0B] to-transparent z-20 pointer-events-none" />
 
               <motion.div
-                className="flex flex-col gap-3"
-                animate={section.isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -420] } : false}
-                transition={{
-                  y: {
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    duration: 25,
-                    ease: "linear"
-                  }
+                className="flex flex-col gap-3 touch-none"
+                drag={section.isMobileScrollable ? "y" : false}
+                dragConstraints={{ top: -420, bottom: 0 }}
+                animate={mobileControls}
+                onUpdate={(latest) => {
+                  currentMobileY.current = typeof latest.y === "number" ? latest.y : 0;
+                }}
+                onDragStart={() => {
+                  isDraggingMobile.current = true;
+                  mobileControls.stop();
+                }}
+                onDragEnd={() => {
+                  isDraggingMobile.current = false;
+                  startMobileMarquee(currentMobileY.current);
+                }}
+                onMouseEnter={() => {
+                  isDraggingMobile.current = true;
+                  mobileControls.stop();
+                }}
+                onMouseLeave={() => {
+                  isDraggingMobile.current = false;
+                  startMobileMarquee(currentMobileY.current);
                 }}
               >
                 {section.mobileMarqueeItems.map((item: any, idx: number) => (
                   <div
                     key={`mob-${item.id || idx}-${idx}`}
                     onClick={() => setSelectedItem(item)}
-                    className="w-full bg-[#111113] border border-[#18181B] active:border-[#6366F1]/50 rounded-xl p-4 flex items-center gap-4 shadow-xl shrink-0 cursor-pointer text-left"
+                    className="w-full bg-[#111113] border border-[#18181B] active:border-[#6366F1]/50 rounded-xl p-4 flex items-center gap-4 shadow-xl shrink-0 cursor-pointer text-left transition-colors hover:bg-gray-50"
                   >
                     {/* Compact Image/Icon Placement Frame */}
                     <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#18181B] border border-[#18181B] shrink-0 flex items-center justify-center shadow-inner">
@@ -147,11 +253,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             {/* 2. DESKTOP VIEW: PREMIUM SAAS SCROLLING MARQUEE */}
             {/* ========================================== */}
-            <div
-              className={`hidden md:block relative w-full overflow-hidden py-6 ${section.isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}
-              onMouseEnter={() => section.isScrollable && setIsPaused(true)}
-              onMouseLeave={() => section.isScrollable && setIsPaused(false)}
-            >
+            <div className={`hidden md:block relative w-full overflow-hidden py-6 ${section.isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}>
               {section.isScrollable && (
                 <>
                   <div className="absolute left-0 top-0 bottom-0 w-32 sm:w-64 bg-gradient-to-r from-[#0A0A0B] to-transparent z-20 pointer-events-none" />
@@ -162,17 +264,30 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
               <motion.div
                 className={
                   section.isScrollable 
-                    ? "flex gap-6 whitespace-nowrap min-w-full w-max px-6" 
+                    ? "flex gap-6 whitespace-nowrap min-w-full w-max px-6 touch-none" 
                     : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center"
                 }
-                animate={section.isScrollable && !isPaused && !selectedItem ? { x: [0, -2000] } : false}
-                transition={{
-                  x: {
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    duration: 50,
-                    ease: "linear"
-                  }
+                drag={section.isScrollable ? "x" : false}
+                dragConstraints={{ left: -2000, right: 0 }}
+                animate={deskControls}
+                onUpdate={(latest) => {
+                  currentDeskX.current = typeof latest.x === "number" ? latest.x : 0;
+                }}
+                onDragStart={() => {
+                  isDraggingDesk.current = true;
+                  deskControls.stop();
+                }}
+                onDragEnd={() => {
+                  isDraggingDesk.current = false;
+                  startDeskMarquee(currentDeskX.current);
+                }}
+                onMouseEnter={() => {
+                  isDraggingDesk.current = true;
+                  deskControls.stop();
+                }}
+                onMouseLeave={() => {
+                  isDraggingDesk.current = false;
+                  startDeskMarquee(currentDeskX.current);
                 }}
               >
                 {section.marqueeItems.map((item: any, idx: number) => (
@@ -244,6 +359,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
               className="w-full max-w-2xl bg-[#111113] border border-[#18181B] rounded-2xl overflow-y-auto max-h-[85vh] text-left shadow-[0_30px_70px_rgba(0,0,0,0.8),inset_0_1px_0_0_rgba(255,255,255,0.03)] relative scrollbar-none"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* shadow-inner close anchor */}
               <button
                 onClick={() => setSelectedItem(null)}
                 className="absolute top-4 right-4 z-40 p-2 rounded-xl bg-[#0A0A0B] border border-[#18181B] text-[#71717A] hover:text-white transition-colors backdrop-blur-md active:scale-95 shadow-inner"
@@ -318,7 +434,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                     )}
                   </div>
                   
-                  <span className="opacity-40 hidden sm:flex items-center gap-1">
+                  <span className="opacity-40 flex items-center gap-1">
                     <Workflow className="w-3.5 h-3.5 text-[#8B5CF6]" /> CUST_SYNC_OK
                   </span>
                 </div>

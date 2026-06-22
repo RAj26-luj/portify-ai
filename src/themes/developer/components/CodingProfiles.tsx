@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Terminal, ExternalLink, Flame, Trophy, Award, X, Cpu, Code, GitBranch } from "lucide-react";
 
 const DEFAULT_PLATFORM_ICON = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop";
@@ -14,7 +14,17 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
   // 1. Declare all state hooks unconditionally at the top level
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  // Animation Controls & Refs for Mobile and Desktop Interactive Infinite Marquee Tracks
+  const mobileControls = useAnimation();
+  const currentMobileX = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+
+  const deskControls = useAnimation();
+  const currentDeskX = useRef<number>(0);
+  const isDraggingDesk = useRef<boolean>(false);
+
+  const isMountedRef = useRef<boolean>(true);
 
   // 2. Perform all derivations inside top-level, unconditional useMemo hooks
   const sortedProfiles = React.useMemo(() => {
@@ -48,6 +58,86 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
     }
     return sortedProfiles;
   }, [sortedProfiles, isScrollable]);
+
+  // Constant speed calculations for uniform velocity tracking
+  const MOBILE_SPEED = 1000 / 45; // Target distance over duration (X-axis pixels per second)
+  const DESK_SPEED = 2000 / 55; // Target distance over duration (X-axis pixels per second)
+
+  const startMobileMarquee = async (fromX: number) => {
+    if (isDraggingMobile.current || selectedItem || !isMountedRef.current) return;
+
+    let targetX = -1000;
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await mobileControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && !selectedItem && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  const startDeskMarquee = async (fromX: number) => {
+    if (isDraggingDesk.current || selectedItem || !isMountedRef.current) return;
+
+    let targetX = -2000;
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await deskControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / DESK_SPEED;
+
+    await deskControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingDesk.current && !selectedItem && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startDeskMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    if (isMobileScrollable && !selectedItem) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    if (isScrollable && !selectedItem) {
+      startDeskMarquee(currentDeskX.current);
+    } else {
+      deskControls.stop();
+    }
+
+    return () => {
+      mobileControls.stop();
+      deskControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [isMobileScrollable, isScrollable, selectedItem]);
 
   // 3. Move early returns safely AFTER all Hook declarations
   if (!codingProfiles?.length) return null;
@@ -85,23 +175,30 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
         {/* ========================================== */}
         {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED SLOW MINI-BARS */}
         {/* ========================================== */}
-        <div 
-          className="block md:hidden w-full overflow-hidden py-2"
-          onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-          onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-          onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-          onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
-        >
+        <div className="block md:hidden w-full overflow-hidden py-2">
           <motion.div 
-            className="flex gap-3 px-4 w-max"
-            animate={isMobileScrollable && !isMobilePaused && !selectedItem ? { x: [0, -1000] } : false}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 45,
-                ease: "linear"
-              }
+            className="flex gap-3 px-4 w-max touch-none"
+            drag={isMobileScrollable ? "x" : false}
+            dragConstraints={{ left: -1000, right: 0 }}
+            animate={mobileControls}
+            onUpdate={(latest) => {
+              currentMobileX.current = typeof latest.x === "number" ? latest.x : 0;
+            }}
+            onDragStart={() => {
+              isDraggingMobile.current = true;
+              mobileControls.stop();
+            }}
+            onDragEnd={() => {
+              isDraggingMobile.current = false;
+              startMobileMarquee(currentMobileX.current);
+            }}
+            onMouseEnter={() => {
+              isDraggingMobile.current = true;
+              mobileControls.stop();
+            }}
+            onMouseLeave={() => {
+              isDraggingMobile.current = false;
+              startMobileMarquee(currentMobileX.current);
             }}
           >
             {mobileMarqueeItems.map((item: any, idx: number) => (
@@ -136,11 +233,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
         {/* ========================================== */}
         {/* 2. DESKTOP VIEW: INFINITE SCROLLING MARQUEE */}
         {/* ========================================== */}
-        <div
-          className={`hidden md:block relative w-full overflow-hidden py-2 ${isScrollable ? "cursor-grab active:cursor-grabbing" : ""}`}
-          onMouseEnter={() => isScrollable && setIsPaused(true)}
-          onMouseLeave={() => isScrollable && setIsPaused(false)}
-        >
+        <div className="hidden md:block relative w-full overflow-hidden py-2">
           {isScrollable && (
             <>
               <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#0D1117] to-transparent z-20 pointer-events-none" />
@@ -151,17 +244,30 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
           <motion.div
             className={
               isScrollable 
-                ? "flex gap-4 whitespace-nowrap min-w-full w-max px-4" 
+                ? "flex gap-4 whitespace-nowrap min-w-full w-max px-4 touch-none" 
                 : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-center"
             }
-            animate={isScrollable && !isPaused && !selectedItem ? { x: [0, -2000] } : false}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 55,
-                ease: "linear"
-              }
+            drag={isScrollable ? "x" : false}
+            dragConstraints={{ left: -2000, right: 0 }}
+            animate={deskControls}
+            onUpdate={(latest) => {
+              currentDeskX.current = typeof latest.x === "number" ? latest.x : 0;
+            }}
+            onDragStart={() => {
+              isDraggingDesk.current = true;
+              deskControls.stop();
+            }}
+            onDragEnd={() => {
+              isDraggingDesk.current = false;
+              startDeskMarquee(currentDeskX.current);
+            }}
+            onMouseEnter={() => {
+              isDraggingDesk.current = true;
+              deskControls.stop();
+            }}
+            onMouseLeave={() => {
+              isDraggingDesk.current = false;
+              startDeskMarquee(currentDeskX.current);
             }}
           >
             {marqueeItems.map((item: any, idx: number) => (
@@ -275,7 +381,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
                     )}
                   </div>
 
-                  <div className="space-y-0.5 truncate">
+                  <div className="space-y-0.5 truncate z-20">
                     <span className="px-1.5 py-0.5 rounded bg-[#58A6FF]/10 text-[#58A6FF] border border-[#58A6FF]/20 text-[9px] font-bold uppercase tracking-wider mb-0.5 inline-block">
                       TELEMETRY_NODE
                     </span>

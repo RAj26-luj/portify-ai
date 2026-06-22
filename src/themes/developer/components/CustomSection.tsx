@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Layers, ExternalLink, Download, HelpCircle, X, Terminal, Cpu, GitBranch } from "lucide-react";
 
 const DEFAULT_CUSTOM_IMAGE = "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop";
@@ -14,7 +14,17 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   // 1. Initialize all React Hooks unconditionally at the top level
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  // Animation Controls & Refs for Mobile and Desktop Interactive Infinite Marquee Tracks
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+
+  const deskControls = useAnimation();
+  const currentDeskX = useRef<number>(0);
+  const isDraggingDesk = useRef<boolean>(false);
+
+  const isMountedRef = useRef<boolean>(true);
 
   // 2. Compute loops and marquee tracks ahead of the rendering loops inside a useMemo hook
   const validSections = useMemo(() => {
@@ -58,6 +68,89 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
       });
   }, [sections]);
 
+  // Constant speed calculations for uniform velocity tracking
+  const MOBILE_SPEED = 400 / 25; // Target distance over duration (Y-axis pixels per second)
+  const DESK_SPEED = 2000 / 50; // Target distance over duration (X-axis pixels per second)
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (isDraggingMobile.current || selectedItem || !isMountedRef.current) return;
+
+    let targetY = -400;
+    if (fromY <= targetY || fromY > 0) {
+      fromY = 0;
+      await mobileControls.set({ y: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetY - fromY);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      y: targetY,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && !selectedItem && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  const startDeskMarquee = async (fromX: number) => {
+    if (isDraggingDesk.current || selectedItem || !isMountedRef.current) return;
+
+    let targetX = -2000;
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await deskControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / DESK_SPEED;
+
+    await deskControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingDesk.current && !selectedItem && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startDeskMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    const hasScrollableMobileSection = validSections.some(s => s.isMobileScrollable);
+    const hasScrollableDeskSection = validSections.some(s => s.isScrollable);
+
+    if (hasScrollableMobileSection && !selectedItem) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    if (hasScrollableDeskSection && !isPaused && !selectedItem) {
+      startDeskMarquee(currentDeskX.current);
+    } else {
+      deskControls.stop();
+    }
+
+    return () => {
+      mobileControls.stop();
+      deskControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [validSections, isPaused, selectedItem]);
+
   // 3. Early conditional return clauses moved below all top-level Hook declarations
   if (!sections?.length || validSections.length === 0) {
     return null;
@@ -98,27 +191,34 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED VERTICAL LOOP MARQUEE */}
             {/* ========================================== */}
-            <div 
-              className="block md:hidden w-full max-w-md mx-auto px-4 h-[240px] overflow-hidden relative"
-              onTouchStart={() => section.isMobileScrollable && setIsMobilePaused(true)}
-              onTouchEnd={() => section.isMobileScrollable && setIsMobilePaused(false)}
-              onMouseEnter={() => section.isMobileScrollable && setIsMobilePaused(true)}
-              onMouseLeave={() => section.isMobileScrollable && setIsMobilePaused(false)}
-            >
+            <div className="block md:hidden w-full max-w-md mx-auto px-4 h-[240px] overflow-hidden relative">
               {/* Fade masks overlay to smooth scrolling edge transitions */}
               <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#0D1117] to-transparent z-20 pointer-events-none" />
               <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0D1117] to-transparent z-20 pointer-events-none" />
 
               <motion.div
-                className="flex flex-col gap-2.5"
-                animate={section.isMobileScrollable && !isMobilePaused && !selectedItem ? { y: [0, -400] } : false}
-                transition={{
-                  y: {
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    duration: 25,
-                    ease: "linear"
-                  }
+                className="flex flex-col gap-2.5 touch-none"
+                drag={section.isMobileScrollable ? "y" : false}
+                dragConstraints={{ top: -400, bottom: 0 }}
+                animate={mobileControls}
+                onUpdate={(latest) => {
+                  currentMobileY.current = typeof latest.y === "number" ? latest.y : 0;
+                }}
+                onDragStart={() => {
+                  isDraggingMobile.current = true;
+                  mobileControls.stop();
+                }}
+                onDragEnd={() => {
+                  isDraggingMobile.current = false;
+                  startMobileMarquee(currentMobileY.current);
+                }}
+                onMouseEnter={() => {
+                  isDraggingMobile.current = true;
+                  mobileControls.stop();
+                }}
+                onMouseLeave={() => {
+                  isDraggingMobile.current = false;
+                  startMobileMarquee(currentMobileY.current);
                 }}
               >
                 {section.mobileMarqueeItems.map((item: any, idx: number) => (
@@ -150,11 +250,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             {/* 2. DESKTOP VIEW: HORIZONTAL TIMELINE RIBBON */}
             {/* ========================================== */}
-            <div
-              className={`hidden md:block relative w-full overflow-hidden py-2 ${section.isScrollable ? "cursor-grab active:cursor-grabbing" : ""}`}
-              onMouseEnter={() => section.isScrollable && setIsPaused(true)}
-              onMouseLeave={() => section.isScrollable && setIsPaused(false)}
-            >
+            <div className={`hidden md:block relative w-full overflow-hidden py-2 ${section.isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}>
               {section.isScrollable && (
                 <>
                   <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#0D1117] to-transparent z-20 pointer-events-none" />
@@ -165,17 +261,30 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
               <motion.div
                 className={
                   section.isScrollable 
-                    ? "flex gap-4 whitespace-nowrap min-w-full w-max px-4" 
+                    ? "flex gap-4 whitespace-nowrap min-w-full w-max px-4 touch-none" 
                     : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-center"
                 }
-                animate={section.isScrollable && !isPaused && !selectedItem ? { x: [0, -2000] } : false}
-                transition={{
-                  x: {
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    duration: 50,
-                    ease: "linear"
-                  }
+                drag={section.isScrollable ? "x" : false}
+                dragConstraints={{ left: -2000, right: 0 }}
+                animate={deskControls}
+                onUpdate={(latest) => {
+                  currentDeskX.current = typeof latest.x === "number" ? latest.x : 0;
+                }}
+                onDragStart={() => {
+                  isDraggingDesk.current = true;
+                  deskControls.stop();
+                }}
+                onDragEnd={() => {
+                  isDraggingDesk.current = false;
+                  startDeskMarquee(currentDeskX.current);
+                }}
+                onMouseEnter={() => {
+                  isDraggingDesk.current = true;
+                  deskControls.stop();
+                }}
+                onMouseLeave={() => {
+                  isDraggingDesk.current = false;
+                  startDeskMarquee(currentDeskX.current);
                 }}
               >
                 {section.marqueeItems.map((item: any, idx: number) => (

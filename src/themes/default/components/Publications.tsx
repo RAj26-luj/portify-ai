@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { 
   BookOpen, 
   ExternalLink, 
@@ -13,6 +13,7 @@ import {
   Workflow, 
   Award
 } from "lucide-react";
+import { trackProjectClick } from "@/actions/analytics"; // Imported atomic click tracking counter hook
 
 const DEFAULT_PUB_COVERS = [
   "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
@@ -22,9 +23,10 @@ const DEFAULT_PUB_COVERS = [
 
 interface PublicationsProps {
   publications?: any[];
+  portfolioId?: string; // Enhanced to safely bind the targeted context instance
 }
 
-export default function Publications({ publications = [] }: PublicationsProps) {
+export default function Publications({ publications = [], portfolioId = "" }: PublicationsProps) {
   const sortedPubs = React.useMemo(() => {
     if (!publications || publications.length === 0) return [];
     return [...publications].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
@@ -55,12 +57,61 @@ export default function Publications({ publications = [] }: PublicationsProps) {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [selectedPub, setSelectedProjectPub] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  // Animation Controls & Refs for Mobile Interactive Infinite Marquee Track
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
 
   const verticalScrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const activePub = validPubs[activeIndex] || null;
+
+  // Constant speed calculation for uniform velocity on mobile tracking
+  const MOBILE_SPEED = 400 / 25; // Target distance over duration (Y-axis pixels per second)
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (isDraggingMobile.current || selectedPub || !isMountedRef.current) return;
+
+    let targetY = -400;
+    // Boundary structural safety verification logic
+    if (fromY <= targetY || fromY > 0) {
+      fromY = 0;
+      await mobileControls.set({ y: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetY - fromY);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      y: targetY,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && !selectedPub && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    if (isMobileScrollable && !selectedPub) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+    return () => {
+      mobileControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [isMobileScrollable, selectedPub]);
 
   useEffect(() => {
     if (validPubs.length <= 1 || isPaused || selectedPub) {
@@ -101,6 +152,15 @@ export default function Publications({ publications = [] }: PublicationsProps) {
     return new Date(dateStr).getFullYear();
   };
 
+  // Safe client-facing invocation mapping click telemetry to atomic metrics update path
+  const handleInteractionTrack = async (publicationId: string) => {
+    try {
+      await trackProjectClick(portfolioId, publicationId);
+    } catch (err) {
+      console.warn("Telemetry click registration silently bypassed error boundary:", err);
+    }
+  };
+
   return (
     <section
       id="publications"
@@ -125,28 +185,35 @@ export default function Publications({ publications = [] }: PublicationsProps) {
       </div>
 
       {/* ========================================== */}
-      {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED VERTICAL LOOP MARQUEE */}
+      {/* 1. MOBILE RESPONSIVE VIEW */}
       {/* ========================================== */}
-      <div 
-        className="block md:hidden w-full max-w-md mx-auto px-4 h-[240px] overflow-hidden relative"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
-      >
+      <div className="block md:hidden w-full max-w-md mx-auto px-4 h-[240px] overflow-hidden relative">
         <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-black to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-black to-transparent z-20 pointer-events-none" />
 
         <motion.div
-          className="flex flex-col gap-2.5"
-          animate={isMobileScrollable && !isMobilePaused && !selectedPub ? { y: [0, -400] } : false}
-          transition={{
-            y: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 25,
-              ease: "linear"
-            }
+          className="flex flex-col gap-2.5 touch-none"
+          drag={isMobileScrollable ? "y" : false}
+          dragConstraints={{ top: -400, bottom: 0 }}
+          animate={mobileControls}
+          onUpdate={(latest) => {
+            currentMobileY.current = typeof latest.y === "number" ? latest.y : 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
+          }}
+          onMouseEnter={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onMouseLeave={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
           }}
         >
           {mobileMarqueeItems.map((pub: any, idx: number) => (
@@ -174,7 +241,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
       {/* ========================================== */}
       <div className="hidden md:grid relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 z-10 grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left Hand: Continuous Automated Tracking List Scroller */}
+        {/* Left Hand List */}
         <div className="lg:col-span-5 w-full space-y-4">
           <div className="flex items-center justify-between px-2 text-xs text-neutral-500 tracking-wider font-mono uppercase">
             <span>Dossier Registry ({sortedPubs.length})</span>
@@ -238,7 +305,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
           </div>
         </div>
 
-        {/* Right Hand: Live Dynamic Preview Panel Frame */}
+        {/* Right Hand Dynamic Preview Panel */}
         <div className="lg:col-span-7 w-full h-full min-h-[480px]">
           <AnimatePresence mode="wait">
             {activePub && (
@@ -276,7 +343,6 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                     </div>
                   </div>
 
-                  {/* Context Blueprint Framework Tags */}
                   {(activePub.journal || activePub.conference || activePub.publisher) && (
                     <div className="space-y-2 text-left">
                       <div className="text-[10px] uppercase font-mono tracking-wider text-neutral-500">Distribution Channel Node</div>
@@ -307,6 +373,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                       href={activePub.pdfUrl}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={() => handleInteractionTrack(activePub.id)}
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-neutral-400 hover:text-white hover:bg-white/10 transition-all"
                     >
                       <FileText className="w-4 h-4" /> Source PDF
@@ -317,6 +384,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                       href={activePub.publicationUrl}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={() => handleInteractionTrack(activePub.id)}
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-black hover:bg-neutral-200 text-xs font-semibold tracking-wide transition-all"
                     >
                       View Publication <ExternalLink className="w-3.5 h-3.5" />
@@ -329,7 +397,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
         </div>
       </div>
 
-      {/* Details Pop-up Modal Box Layer */}
+      {/* Details Pop-up Modal Frame Layer */}
       <AnimatePresence>
         {selectedPub && (
           <motion.div
@@ -434,6 +502,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                       href={selectedPub.publicationUrl}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={() => handleInteractionTrack(selectedPub.id)}
                       className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-black hover:bg-neutral-200 text-xs font-semibold tracking-wide transition-all active:scale-[0.98]"
                     >
                       <ExternalLink className="w-3.5 h-3.5" /> Global Publication Hub
@@ -444,6 +513,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                       href={selectedPub.pdfUrl}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={() => handleInteractionTrack(selectedPub.id)}
                       className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium tracking-wide transition-all active:scale-[0.98] text-neutral-300"
                     >
                       <FileText className="w-3.5 h-3.5 text-neutral-400" /> Download PDF

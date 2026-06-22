@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
 import { MessageSquare, User2, Sparkles } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLinkedin as Linkedin } from "@fortawesome/free-brands-svg-icons";
@@ -42,9 +42,57 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
     return items;
   }, [sortedTestimonials, isScrollable]);
 
-  const [setIsPaused] = useState<boolean>(false);
   const [isDeskPaused, setIsDeskPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  // Animation Controls & Refs for Mobile Interactive Infinite Marquee Track
+  const mobileControls = useAnimation();
+  const currentMobileX = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
+
+  // Constant speed calculation for uniform velocity on mobile tracking
+  const MOBILE_SPEED = 1200 / 45; // Target distance over duration (X-axis pixels per second)
+
+  const startMobileMarquee = async (fromX: number) => {
+    if (isDraggingMobile.current || !isMountedRef.current) return;
+
+    let targetX = -1200;
+    // Boundary structural safety verification logic
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await mobileControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    if (isMobileScrollable) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+    return () => {
+      mobileControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [isMobileScrollable]);
 
   if (!sortedTestimonials.length) return null;
 
@@ -73,23 +121,30 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
       {/* ========================================== */}
       {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED SLOW MINI-MARQUEE */}
       {/* ========================================== */}
-      <div 
-        className="block md:hidden w-full overflow-hidden py-2"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
-      >
+      <div className="block md:hidden w-full overflow-hidden py-2">
         <motion.div 
-          className="flex gap-4 px-4 w-max"
-          animate={isMobileScrollable && !isMobilePaused ? { x: [0, -1200] } : false}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 45, // Premium slow-motion glide speed
-              ease: "linear"
-            }
+          className="flex gap-4 px-4 w-max touch-none"
+          drag={isMobileScrollable ? "x" : false}
+          dragConstraints={{ left: -1200, right: 0 }}
+          animate={mobileControls}
+          onUpdate={(latest) => {
+            currentMobileX.current = typeof latest.x === "number" ? latest.x : 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileX.current);
+          }}
+          onMouseEnter={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onMouseLeave={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileX.current);
           }}
         >
           {mobileMarqueeItems.map((t: any, idx: number) => (

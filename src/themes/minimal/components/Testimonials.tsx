@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
 import { MessageSquare, User2, Sparkles } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLinkedin as Linkedin } from "@fortawesome/free-brands-svg-icons";
@@ -42,15 +42,103 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
     return items;
   }, [sortedTestimonials, isScrollable]);
 
-  const [isDeskPaused, setIsDeskPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+  // Animation Controls & Refs for Mobile and Desktop Interactive Infinite Marquee Tracks
+  const mobileControls = useAnimation();
+  const currentMobileX = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+
+  const deskControls = useAnimation();
+  const currentDeskX = useRef<number>(0);
+  const isDraggingDesk = useRef<boolean>(false);
+
+  const isMountedRef = useRef<boolean>(true);
+
+  // Constant speed calculations for uniform velocity tracking
+  const MOBILE_SPEED = 1200 / 45; // Target distance over duration (X-axis pixels per second)
+  const DESK_SPEED = 2500 / 55; // Target distance over duration (X-axis pixels per second)
+
+  const startMobileMarquee = async (fromX: number) => {
+    if (isDraggingMobile.current || !isMountedRef.current) return;
+
+    let targetX = -1200;
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await mobileControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  const startDeskMarquee = async (fromX: number) => {
+    if (isDraggingDesk.current || !isMountedRef.current) return;
+
+    let targetX = -2500;
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await deskControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / DESK_SPEED;
+
+    await deskControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingDesk.current && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startDeskMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    if (isMobileScrollable) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    if (isScrollable) {
+      startDeskMarquee(currentDeskX.current);
+    } else {
+      deskControls.stop();
+    }
+
+    return () => {
+      mobileControls.stop();
+      deskControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [isMobileScrollable, isScrollable]);
 
   if (!sortedTestimonials.length) return null;
 
   return (
     <section
       id="testimonials"
-      className="relative w-full py-16 md:py-24 overflow-hidden bg-white text-[#111827] selection:bg-gray-200"
+      className="relative w-full py-16 md:py-24 overflow-hidden bg-white text-[#111827] selection:bg-gray-200 select-none"
     >
       <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 z-10 mb-12 md:mb-16">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-gray-100 pb-6 text-left">
@@ -69,23 +157,30 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
       {/* ========================================== */}
       {/* 1. MOBILE RESPONSIVE VIEW: SWISS MINIMAL LIST ROWS */}
       {/* ========================================== */}
-      <div 
-        className="block md:hidden w-full overflow-hidden py-1"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
-      >
+      <div className="block md:hidden w-full overflow-hidden py-1">
         <motion.div 
-          className="flex gap-4 px-6 w-max"
-          animate={isMobileScrollable && !isMobilePaused ? { x: [0, -1200] } : false}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 45,
-              ease: "linear"
-            }
+          className="flex gap-4 px-6 w-max touch-none"
+          drag={isMobileScrollable ? "x" : false}
+          dragConstraints={{ left: -1200, right: 0 }}
+          animate={mobileControls}
+          onUpdate={(latest) => {
+            currentMobileX.current = typeof latest.x === "number" ? latest.x : 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileX.current);
+          }}
+          onMouseEnter={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onMouseLeave={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileX.current);
           }}
         >
           {mobileMarqueeItems.map((t: any, idx: number) => (
@@ -147,25 +242,41 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
       {/* ========================================== */}
       {/* 2. DESKTOP VIEW: INFINITE SCROLLING MARQUEE STRIP */}
       {/* ========================================== */}
-      <div
-        className={`hidden md:block relative w-full overflow-hidden py-2 ${isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}
-        onMouseEnter={() => isScrollable && setIsDeskPaused(true)}
-        onMouseLeave={() => isScrollable && setIsDeskPaused(false)}
-      >
+      <div className="hidden md:block relative w-full overflow-hidden py-2">
+        {isScrollable && (
+          <>
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#0D1117] to-transparent z-20 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#0D1117] to-transparent z-20 pointer-events-none" />
+          </>
+        )}
+
         <motion.div
           className={
             isScrollable
-              ? "flex gap-8 whitespace-nowrap min-w-full w-max px-6"
+              ? "flex gap-8 whitespace-nowrap min-w-full w-max px-6 touch-none"
               : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center"
           }
-          animate={isScrollable && !isDeskPaused ? { x: [0, -2500] } : false}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 55,
-              ease: "linear"
-            }
+          drag={isScrollable ? "x" : false}
+          dragConstraints={{ left: -2500, right: 0 }}
+          animate={deskControls}
+          onUpdate={(latest) => {
+            currentDeskX.current = typeof latest.x === "number" ? latest.x : 0;
+          }}
+          onDragStart={() => {
+            isDraggingDesk.current = true;
+            deskControls.stop();
+          }}
+          onDragEnd={() => {
+            isDraggingDesk.current = false;
+            startDeskMarquee(currentDeskX.current);
+          }}
+          onMouseEnter={() => {
+            isDraggingDesk.current = true;
+            deskControls.stop();
+          }}
+          onMouseLeave={() => {
+            isDraggingDesk.current = false;
+            startDeskMarquee(currentDeskX.current);
           }}
         >
           {marqueeItems.map((t: any, idx: number) => (

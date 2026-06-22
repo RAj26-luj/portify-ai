@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { 
   ExternalLink, 
   PlayCircle, 
@@ -62,13 +62,62 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
   const [hoveredImageIndex, setHoveredImageIndex] = useState<number>(0);
   
+  // Animation Controls & Refs for Mobile Interactive Infinite Marquee Track
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
+
   const verticalScrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const activeProject = validProjects[activeIndex] || null;
+
+  // Constant speed calculation for uniform velocity on mobile tracking
+  const MOBILE_SPEED = 400 / 25; // Target distance over duration (Y-axis pixels per second)
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (isDraggingMobile.current || selectedProject || !isMountedRef.current) return;
+
+    let targetY = -400;
+    // Boundary structural safety verification logic
+    if (fromY <= targetY || fromY > 0) {
+      fromY = 0;
+      await mobileControls.set({ y: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetY - fromY);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      y: targetY,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && !selectedProject && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    if (isMobileScrollable && !selectedProject) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+    return () => {
+      mobileControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [isMobileScrollable, selectedProject]);
 
   useEffect(() => {
     if (validProjects.length <= 1 || isPaused || selectedProject) {
@@ -158,26 +207,33 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
       {/* ========================================== */}
       {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED VERTICAL LOOP MARQUEE */}
       {/* ========================================== */}
-      <div 
-        className="block md:hidden w-full max-w-md mx-auto px-4 h-[240px] overflow-hidden relative border-x border-b border-[#30363D] bg-[#161B22]/20 rounded-b-lg"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
-      >
+      <div className="block md:hidden w-full max-w-md mx-auto px-4 h-[240px] overflow-hidden relative border-x border-b border-[#30363D] bg-[#161B22]/20 rounded-b-lg">
         <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-[#0D1117] to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0D1117] to-transparent z-20 pointer-events-none" />
 
         <motion.div
-          className="flex flex-col gap-2.5"
-          animate={isMobileScrollable && !isMobilePaused && !selectedProject ? { y: [0, -400] } : false}
-          transition={{
-            y: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 25,
-              ease: "linear"
-            }
+          className="flex flex-col gap-2.5 touch-none"
+          drag={isMobileScrollable ? "y" : false}
+          dragConstraints={{ top: -400, bottom: 0 }}
+          animate={mobileControls}
+          onUpdate={(latest) => {
+            currentMobileY.current = typeof latest.y === "number" ? latest.y : 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
+          }}
+          onMouseEnter={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onMouseLeave={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
           }}
         >
           {mobileMarqueeItems.map((project: any, idx: number) => (
@@ -403,7 +459,7 @@ export default function Projects({ projects = [], username }: ProjectsProps) {
                   <Cpu size={12} className="text-[#F78166]" />
                   <span className="text-neutral-400 font-bold">repository_inspector.sh</span>
                 </div>
-                <button
+                <button 
                   onClick={() => setSelectedProject(null)}
                   className="p-1 rounded bg-[#0D1117] border border-[#30363D] text-neutral-400 hover:text-white transition-colors"
                 >

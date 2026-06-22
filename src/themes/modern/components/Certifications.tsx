@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { 
   Award, 
   ExternalLink, 
@@ -47,9 +47,104 @@ export default function Certifications({ certifications = [] }: CertificationsPr
     return items;
   }, [rawCerts, isScrollable]);
 
-  const [selectedCert, setSelectedCert] = useState<any | null>(null);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+  const selectedCertRef = useRef<any | null>(null);
+  const [selectedCert, setSelectedCertState] = useState<any | null>(null);
+  
+  const setSelectedCert = (cert: any) => {
+    selectedCertRef.current = cert;
+    setSelectedCertState(cert);
+  };
+
+  // Animation Controls & Refs for Mobile and Desktop Interactive Infinite Marquee Tracks
+  const mobileControls = useAnimation();
+  const currentMobileX = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+
+  const deskControls = useAnimation();
+  const currentDeskX = useRef<number>(0);
+  const isDraggingDesk = useRef<boolean>(false);
+
+  const isMountedRef = useRef<boolean>(true);
+
+  // Constant speed calculations for uniform velocity tracking
+  const MOBILE_SPEED = 1000 / 45; // Target distance over duration (X-axis pixels per second)
+  const DESK_SPEED = 2000 / 55; // Target distance over duration (X-axis pixels per second)
+
+  const startMobileMarquee = async (fromX: number) => {
+    if (isDraggingMobile.current || selectedCertRef.current || !isMountedRef.current) return;
+
+    let targetX = -1000;
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await mobileControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && !selectedCertRef.current && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  const startDeskMarquee = async (fromX: number) => {
+    if (isDraggingDesk.current || selectedCertRef.current || !isMountedRef.current) return;
+
+    let targetX = -2000;
+    if (fromX <= targetX || fromX > 0) {
+      fromX = 0;
+      await deskControls.set({ x: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetX - fromX);
+    const dynamicDuration = remainingDistance / DESK_SPEED;
+
+    await deskControls.start({
+      x: targetX,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingDesk.current && !selectedCertRef.current && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startDeskMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    if (isMobileScrollable && !selectedCert) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    if (isScrollable && !selectedCert) {
+      startDeskMarquee(currentDeskX.current);
+    } else {
+      deskControls.stop();
+    }
+
+    return () => {
+      mobileControls.stop();
+      deskControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [isMobileScrollable, isScrollable, selectedCert]);
 
   if (!rawCerts.length) return null;
 
@@ -68,7 +163,7 @@ export default function Certifications({ certifications = [] }: CertificationsPr
   return (
     <section
       id="certifications"
-      className="relative w-full py-20 md:py-40 overflow-hidden bg-[#0A0A0B] text-white selection:bg-[#6366F1]/30"
+      className="relative w-full py-20 md:py-40 overflow-hidden bg-[#0A0A0B] text-white selection:bg-[#6366F1]/30 select-none"
     >
       {/* Premium SaaS Grid Overlay & Ambient Lighting */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181B_1px,transparent_1px),linear-gradient(to_bottom,#18181B_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none opacity-40" />
@@ -92,23 +187,30 @@ export default function Certifications({ certifications = [] }: CertificationsPr
       {/* ========================================== */}
       {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED SWIPE MINIBARS */}
       {/* ========================================== */}
-      <div 
-        className="block md:hidden w-full overflow-hidden py-2"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
-      >
+      <div className="block md:hidden w-full overflow-hidden py-2">
         <motion.div 
-          className="flex gap-3 px-6 w-max"
-          animate={isMobileScrollable && !isMobilePaused && !selectedCert ? { x: [0, -1000] } : false}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 45,
-              ease: "linear"
-            }
+          className="flex gap-3 px-6 w-max touch-none"
+          drag={isMobileScrollable ? "x" : false}
+          dragConstraints={{ left: -1000, right: 0 }}
+          animate={mobileControls}
+          onUpdate={(latest) => {
+            currentMobileX.current = typeof latest.x === "number" ? latest.x : 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileX.current);
+          }}
+          onMouseEnter={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onMouseLeave={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileX.current);
           }}
         >
           {mobileMarqueeCerts.map((cert: any, idx: number) => {
@@ -146,11 +248,7 @@ export default function Certifications({ certifications = [] }: CertificationsPr
       {/* ========================================== */}
       {/* 2. DESKTOP VIEW: INFINITE SCROLLING MARQUEE */}
       {/* ========================================== */}
-      <div 
-        className={`hidden md:block relative w-full overflow-hidden py-6 ${isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}
-        onMouseEnter={() => isScrollable && setIsPaused(true)}
-        onMouseLeave={() => isScrollable && setIsPaused(false)}
-      >
+      <div className="hidden md:block relative w-full overflow-hidden py-6">
         {isScrollable && (
           <>
             <div className="absolute left-0 top-0 bottom-0 w-32 sm:w-64 bg-gradient-to-r from-[#0A0A0B] to-transparent z-20 pointer-events-none" />
@@ -161,17 +259,30 @@ export default function Certifications({ certifications = [] }: CertificationsPr
         <motion.div 
           className={
             isScrollable
-              ? "flex gap-6 whitespace-nowrap min-w-full w-max px-6"
+              ? "flex gap-6 whitespace-nowrap min-w-full w-max px-6 touch-none"
               : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center"
           }
-          animate={isScrollable && !isPaused && !selectedCert ? { x: [0, -2000] } : false}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 55,
-              ease: "linear"
-            }
+          drag={isScrollable ? "x" : false}
+          dragConstraints={{ left: -2000, right: 0 }}
+          animate={deskControls}
+          onUpdate={(latest) => {
+            currentDeskX.current = typeof latest.x === "number" ? latest.x : 0;
+          }}
+          onDragStart={() => {
+            isDraggingDesk.current = true;
+            deskControls.stop();
+          }}
+          onDragEnd={() => {
+            isDraggingDesk.current = false;
+            startDeskMarquee(currentDeskX.current);
+          }}
+          onMouseEnter={() => {
+            isDraggingDesk.current = true;
+            deskControls.stop();
+          }}
+          onMouseLeave={() => {
+            isDraggingDesk.current = false;
+            startDeskMarquee(currentDeskX.current);
           }}
         >
           {marqueeCerts.map((cert: any, idx: number) => {

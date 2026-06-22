@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { 
   Award, 
   ExternalLink, 
@@ -51,6 +51,66 @@ export default function Certifications({ certifications = [] }: CertificationsPr
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
 
+  // Dynamic constraints calculation for fluid mobile dragging
+  const mobileConstraintsRef = useRef<HTMLDivElement>(null);
+  const mobileTrackRef = useRef<HTMLDivElement>(null);
+  const [mobileDragLeftConstraint, setMobileDragLeftConstraint] = useState<number>(0);
+  
+  // Advanced Animation Controller for Resume-from-Current behavior
+  const mobileControls = useAnimation();
+  const currentX = useRef(0);
+
+  // Core function to handle infinite loop translation seamlessly
+  const startMobileMarquee = async (fromX: number) => {
+    if (!isMobileScrollable || selectedCert) return;
+    
+    // Total distance the loop covers before snapping cleanly
+    const targetDistance = -1000;
+    
+    // If the loop reaches past the threshold, reset coordinates seamlessly
+    let startX = fromX;
+    if (startX <= targetDistance) {
+      startX = 0;
+    }
+
+    // Calculate dynamic time remaining based on speed factor
+    const remainingDistance = targetDistance - startX;
+    const totalDuration = 45; 
+    const calculatedDuration = Math.abs(remainingDistance / (targetDistance / totalDuration));
+
+    await mobileControls.start({
+      x: [startX, targetDistance],
+      transition: {
+        duration: calculatedDuration,
+        ease: "linear",
+      }
+    });
+
+    // Recursively handle the clean looping sequence
+if (!isMobilePaused) {
+  requestAnimationFrame(() => {
+    startMobileMarquee(0);
+  });
+}
+  };
+
+  // Triggers the animation cycle or tracks modal view updates
+  useEffect(() => {
+    if (isMobileScrollable && !isMobilePaused && !selectedCert) {
+      startMobileMarquee(currentX.current);
+    } else {
+      mobileControls.stop();
+    }
+  }, [isMobileScrollable, isMobilePaused, selectedCert]);
+
+  useEffect(() => {
+    if (mobileConstraintsRef.current && mobileTrackRef.current) {
+      const containerWidth = mobileConstraintsRef.current.offsetWidth;
+      const trackWidth = mobileTrackRef.current.scrollWidth;
+      setMobileDragLeftConstraint(containerWidth - trackWidth);
+    }
+  }, [mobileMarqueeCerts]);
+
   if (!rawCerts.length) return null;
 
   const getCertImage = (cert: any, idx: number) => {
@@ -92,23 +152,37 @@ export default function Certifications({ certifications = [] }: CertificationsPr
       {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED SWIPE MINIBARS */}
       {/* ========================================== */}
       <div 
-        className="block md:hidden w-full overflow-hidden py-2"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
+        ref={mobileConstraintsRef}
+        className="block md:hidden w-full overflow-hidden py-2 touch-pan-y"
       >
         <motion.div 
-          className="flex gap-3 px-4 w-max"
-          animate={isMobileScrollable && !isMobilePaused && !selectedCert ? { x: [0, -1000] } : false}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 45, // Retuned to 45s for an ultra-smooth, premium slow glide
-              ease: "linear"
+          ref={mobileTrackRef}
+          drag={isMobileScrollable ? "x" : false}
+          dragConstraints={{ left: mobileDragLeftConstraint, right: 0 }}
+          dragElastic={0.2}
+          animate={mobileControls}
+          onUpdate={(latest: any) => {
+            if (latest.x !== undefined) {
+              currentX.current = latest.x;
             }
           }}
+          onDragStart={() => {
+            if (isMobileScrollable) {
+              setIsMobilePaused(true);
+              mobileControls.stop();
+            }
+          }}
+          onDragEnd={(event, info) => {
+            if (isMobileScrollable) {
+              setIsMobilePaused(false);
+              startMobileMarquee(currentX.current);
+            }
+          }}
+          className={
+            isMobileScrollable
+              ? "flex gap-3 px-4 w-max cursor-grab active:cursor-grabbing"
+              : "flex gap-3 px-4 justify-center w-full"
+          }
         >
           {mobileMarqueeCerts.map((cert: any, idx: number) => {
             const certTitle = cert?.name || cert?.title || "Credential Item";
@@ -116,10 +190,10 @@ export default function Certifications({ certifications = [] }: CertificationsPr
               <div
                 key={`mob-${cert.id || idx}-${idx}`}
                 onClick={() => setSelectedCert(cert)}
-                className="w-[250px] bg-[#07070b] border border-white/5 active:border-purple-500/40 rounded-xl p-3 flex items-center gap-3 shadow-md cursor-pointer shrink-0"
+                className="w-[250px] bg-[#07070b] border border-white/5 active:border-purple-500/40 rounded-xl p-3 flex items-center gap-3 shadow-md cursor-pointer shrink-0 select-none"
               >
                 {/* Micro Icon Thumbnail Frame */}
-                <div className="w-11 h-11 rounded-lg overflow-hidden bg-neutral-900 shrink-0 relative border border-white/10">
+                <div className="w-11 h-11 rounded-lg overflow-hidden bg-neutral-900 shrink-0 relative border border-white/10 pointer-events-none">
                   <img 
                     src={getCertImage(cert, idx)} 
                     alt="" 
@@ -128,7 +202,7 @@ export default function Certifications({ certifications = [] }: CertificationsPr
                 </div>
 
                 {/* Title & Metadata Lines */}
-                <div className="flex-1 min-w-0 text-left space-y-0.5">
+                <div className="flex-1 min-w-0 text-left space-y-0.5 pointer-events-none">
                   <h3 className="font-semibold text-xs text-white truncate">
                     {certTitle}
                   </h3>

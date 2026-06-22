@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { 
   BookOpen, 
   ExternalLink, 
@@ -32,6 +32,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
 
   const isMobileScrollable = sortedPubs.length > 1;
 
+  // Duplicate raw entries to populate uniform animation cycles on mobile rails
   const mobileMarqueeItems = React.useMemo(() => {
     if (sortedPubs.length === 0) return [];
     if (!isMobileScrollable) return sortedPubs;
@@ -52,14 +53,69 @@ export default function Publications({ publications = [] }: PublicationsProps) {
   }, [sortedPubs]);
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [selectedPub, setSelectedProjectPub] = useState<any | null>(null);
+  const [selectedPub, setSelectedProjectPubState] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  const selectedPubRef = useRef<any | null>(null);
+  const setSelectedProjectPub = (pub: any) => {
+    selectedPubRef.current = pub;
+    setSelectedProjectPubState(pub);
+  };
+
+  // Animation Controls & Refs for Mobile Interactive Infinite Marquee Track
+  const mobileControls = useAnimation();
+  const currentMobileY = useRef<number>(0);
+  const isDraggingMobile = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
 
   const verticalScrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const activePub = validPubs[activeIndex] || null;
+
+  // Constant speed calculation for uniform velocity on mobile tracking
+  const MOBILE_SPEED = 420 / 25; // Target distance over duration (Y-axis pixels per second)
+
+  const startMobileMarquee = async (fromY: number) => {
+    if (isDraggingMobile.current || selectedPubRef.current || !isMountedRef.current) return;
+
+    let targetY = -420;
+    // Boundary structural safety verification logic
+    if (fromY <= targetY || fromY > 0) {
+      fromY = 0;
+      await mobileControls.set({ y: 0 });
+    }
+
+    const remainingDistance = Math.abs(targetY - fromY);
+    const dynamicDuration = remainingDistance / MOBILE_SPEED;
+
+    await mobileControls.start({
+      y: targetY,
+      transition: {
+        duration: dynamicDuration,
+        ease: "linear"
+      }
+    });
+
+    if (!isDraggingMobile.current && !selectedPubRef.current && isMountedRef.current) {
+      requestAnimationFrame(() => {
+        startMobileMarquee(0);
+      });
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    if (isMobileScrollable && !selectedPub) {
+      startMobileMarquee(currentMobileY.current);
+    } else {
+      mobileControls.stop();
+    }
+    return () => {
+      mobileControls.stop();
+      isMountedRef.current = false;
+    };
+  }, [isMobileScrollable, selectedPub]);
 
   useEffect(() => {
     if (validPubs.length <= 1 || isPaused || selectedPub) {
@@ -103,11 +159,11 @@ export default function Publications({ publications = [] }: PublicationsProps) {
   return (
     <section
       id="publications"
-      className="relative w-full py-20 md:py-40 overflow-hidden bg-[#0A0A0B] text-white selection:bg-[#6366F1]/30"
+      className="relative w-full py-20 md:py-40 overflow-hidden bg-[#0A0A0B] text-white selection:bg-[#6366F1]/30 select-none"
     >
       {/* Premium SaaS Micro-Grid & Ambient Mesh Lights */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181B_1px,transparent_1px),linear-gradient(to_bottom,#18181B_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none opacity-40" />
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-tr from-[#6366F1]/5 to-[#06B6D4]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#6366F1]/5 to-[#06B6D4]/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#8B5CF6]/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 z-10 mb-16 md:mb-24">
@@ -127,26 +183,33 @@ export default function Publications({ publications = [] }: PublicationsProps) {
       {/* ========================================== */}
       {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED SAAS MARQUEE TRACK */}
       {/* ========================================== */}
-      <div 
-        className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
-      >
+      <div className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative">
         <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#0A0A0B] to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0A0A0B] to-transparent z-20 pointer-events-none" />
 
         <motion.div
-          className="flex flex-col gap-3"
-          animate={isMobileScrollable && !isMobilePaused && !selectedPub ? { y: [0, -420] } : false}
-          transition={{
-            y: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 25,
-              ease: "linear"
-            }
+          className="flex flex-col gap-3 touch-none"
+          drag={isMobileScrollable ? "y" : false}
+          dragConstraints={{ top: -420, bottom: 0 }}
+          animate={mobileControls}
+          onUpdate={(latest) => {
+            currentMobileY.current = typeof latest.y === "number" ? latest.y : 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
+          }}
+          onMouseEnter={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+          }}
+          onMouseLeave={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileY.current);
           }}
         >
           {mobileMarqueeItems.map((pub: any, idx: number) => (
@@ -187,7 +250,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
             ref={verticalScrollContainerRef}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            className="w-full max-h-[420px] overflow-y-auto pr-2 space-y-3 scrollbar-none border border-[#18181B] bg-[#111113]/40 p-3 rounded-2xl backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.02)]"
+            className="w-full max-h-[420px] overflow-y-auto pr-2 space-y-3 scrollbar-none border border-[#18181B] bg-[#111113]/40 p-3 rounded-2xl backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.02)] text-left"
             style={{ scrollSnapType: "y mandatory" }}
           >
             {validPubs.map((pub: any, idx: number) => {
@@ -224,7 +287,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                           {pub.title}
                         </h3>
                       </div>
-                      <p className="text-xs text-[#71717A] truncate max-w-[95%] font-medium">
+                      <p className="text-xs text-[#71717A] truncate max-w-[95%] font-normal font-sans">
                         {pub.journal || pub.conference || pub.publisher || "Scientific Research Publication Node."}
                       </p>
                     </div>
@@ -249,7 +312,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
                 onClick={() => setSelectedProjectPub(activePub)}
-                className="w-full bg-[#111113]/80 border border-[#18181B] rounded-3xl p-6 relative flex flex-col justify-between overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.02)] min-h-[500px] cursor-pointer group"
+                className="w-full bg-[#111113]/80 border border-[#18181B] rounded-3xl p-6 relative flex flex-col justify-between overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.02)] min-h-[500px] cursor-pointer group text-left"
               >
                 <div>
                   {/* Dashboard Graphic Container Box Frame */}
@@ -283,17 +346,17 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                       <div className="text-[10px] uppercase font-mono tracking-wider text-[#71717A] font-semibold">Distribution Channel Node</div>
                       <div className="flex flex-wrap gap-2">
                         {activePub.journal && (
-                          <span className="px-3 py-1 rounded-lg bg-[#6366F1]/5 border border-[#6366F1]/10 text-xs font-bold text-[#6366F1] font-mono shadow-sm">
+                          <span className="px-2.5 py-1 rounded-lg bg-[#6366F1]/5 border border-[#6366F1]/10 text-xs font-bold text-[#6366F1] font-mono shadow-sm">
                             Journal: {activePub.journal}
                           </span>
                         )}
                         {activePub.conference && (
-                          <span className="px-3 py-1 rounded-lg bg-[#06B6D4]/5 border border-[#06B6D4]/10 text-xs font-bold text-[#06B6D4] font-mono shadow-sm">
+                          <span className="px-2.5 py-1 rounded-lg bg-[#06B6D4]/5 border border-[#06B6D4]/10 text-xs font-bold text-[#06B6D4] font-mono shadow-sm">
                             Conference: {activePub.conference}
                           </span>
                         )}
                         {activePub.publisher && (
-                          <span className="px-3 py-1 rounded-lg bg-[#18181B] border border-[#18181B] text-xs font-medium text-[#D4D4D8] font-mono shadow-sm">
+                          <span className="px-2.5 py-1 rounded-lg bg-[#18181B] border border-[#18181B] text-xs font-medium text-[#D4D4D8] font-mono shadow-sm">
                             {activePub.publisher}
                           </span>
                         )}
@@ -318,9 +381,9 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                       href={activePub.publicationUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] hover:opacity-95 text-white text-xs font-bold tracking-wide transition-all shadow-[0_4px_15px_rgba(99,102,241,0.2)] border border-white/10"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] hover:opacity-95 text-white text-xs font-bold tracking-wide transition-all shadow-[0_4px_15px_rgba(99,102,241,0.2)] border border-white/10"
                     >
-                      View Publication <ExternalLink className="w-3.5 h-3.5 text-white/80" />
+                      View Publication <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   )}
                 </div>
@@ -363,7 +426,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111113] via-[#111113]/30 to-transparent" />
-                <div className="absolute bottom-5 left-5 right-5 sm:bottom-8 sm:left-8 sm:right-8">
+                <div className="absolute bottom-5 left-5 right-5 sm:bottom-8 sm:left-8 sm:right-8 text-left">
                   <span className="px-2.5 py-1 rounded-md bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20 text-[10px] font-bold tracking-wider uppercase mb-2 inline-block font-mono">
                     Scientific Literature Ledger Node
                   </span>
@@ -375,21 +438,21 @@ export default function Publications({ publications = [] }: PublicationsProps) {
 
               <div className="p-5 sm:p-8 space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-[#0A0A0B]/60 border border-[#18181B] shadow-inner font-sans">
-                  <div>
+                  <div className="text-left">
                     <div className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider font-mono">Document Date</div>
                     <div className="text-sm font-bold text-[#D4D4D8] mt-1 flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-[#6366F1]" /> 
                       {getYear(selectedPub.publicationDate)} Release
                     </div>
                   </div>
-                  <div>
+                  <div className="text-left">
                     <div className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider font-mono">Digital DOI</div>
                     <div className="text-sm font-semibold font-mono text-[#D4D4D8] mt-1 flex items-center gap-2 truncate" title={selectedPub.doi || "No registered identifier Token"}>
                       <Bookmark className="w-4 h-4 text-[#8B5CF6] shrink-0" />
                       <span className="truncate">{selectedPub.doi || "Generic Identifier"}</span>
                     </div>
                   </div>
-                  <div>
+                  <div className="text-left">
                     <div className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider font-mono">Citations Index</div>
                     <div className="text-sm font-bold text-[#06B6D4] mt-1 flex items-center gap-2">
                       <Award className="w-4 h-4 text-[#06B6D4]" />
@@ -412,7 +475,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                     <h4 className="text-[11px] font-bold text-[#71717A] tracking-wider uppercase font-mono">Co-Authors Array</h4>
                     <div className="flex flex-wrap gap-2">
                       {selectedPub.authors.map((author: string, i: number) => (
-                        <div key={i} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#0A0A0B] border border-[#18181B] text-xs font-semibold text-[#D4D4D8] font-sans shadow-sm">
+                        <div key={i} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-none bg-[#0A0A0B] border border-[#18181B] text-xs font-semibold text-[#D4D4D8] font-sans shadow-sm">
                           <User className="w-3.5 h-3.5 text-[#71717A]" />
                           <span>{author}</span>
                         </div>
@@ -451,7 +514,7 @@ export default function Publications({ publications = [] }: PublicationsProps) {
                     </a>
                   )}
                   
-                  <span className="opacity-40 hidden sm:flex items-center gap-1 ml-auto font-mono text-xs font-semibold">
+                  <span className="opacity-40 hidden sm:flex items-center gap-1.5 ml-auto font-mono text-xs font-semibold">
                     <Workflow className="w-3.5 h-3.5 text-[#8B5CF6]" /> PUB_SYNC_OK
                   </span>
                 </div>

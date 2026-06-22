@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
 import { MessageSquare, User2, Sparkles } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLinkedin as Linkedin } from "@fortawesome/free-brands-svg-icons";
@@ -42,16 +42,79 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
     return items;
   }, [sortedTestimonials, isScrollable]);
 
-  const [setIsPaused] = useState<boolean>(false);
   const [isDeskPaused, setIsDeskPaused] = useState<boolean>(false);
-  const [isMobilePaused, setIsMobilePaused] = useState<boolean>(false);
+
+  // --- MOBILE MARQUEE ANIMATION CONTROLLER ENGINE ---
+  const mobileControls = useAnimation();
+  const currentMobileX = useRef(0);
+  const isDraggingMobile = useRef(false);
+  const isMounted = useRef(true);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Mobile Marquee Loop System Life Cycle
+  useEffect(() => {
+    isMounted.current = true;
+
+    if (isMobileScrollable) {
+      startMobileMarquee(currentMobileX.current);
+    } else {
+      mobileControls.stop();
+    }
+
+    return () => {
+      isMounted.current = false;
+      mobileControls.stop();
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isMobileScrollable]);
+
+  const startMobileMarquee = async (fromX: number) => {
+    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+
+    if (!isMounted.current || isDraggingMobile.current || !isMobileScrollable) {
+      return;
+    }
+
+    const totalDistance = -1200;
+    let targetX = totalDistance;
+    let baseFromX = fromX;
+
+    if (baseFromX <= totalDistance) {
+      baseFromX = 0;
+    }
+
+    const remainingDistance = Math.abs(targetX - baseFromX);
+    const totalDuration = 45; // Constant speed matched to 45s for full loop length
+    const dynamicDuration = (remainingDistance / Math.abs(totalDistance)) * totalDuration;
+
+    try {
+      await mobileControls.set({ x: baseFromX });
+
+      await mobileControls.start({
+        x: targetX,
+        transition: {
+          duration: dynamicDuration,
+          ease: "linear",
+        },
+      });
+
+      if (isMounted.current && !isDraggingMobile.current) {
+        currentMobileX.current = 0;
+        animationTimeoutRef.current = setTimeout(() => {
+          startMobileMarquee(0);
+        }, 0);
+      }
+    } catch (e) {
+      // Catch framework interruptions due to timeline stops or updates cleanly
+    }
+  };
 
   if (!sortedTestimonials.length) return null;
 
   return (
     <section
       id="testimonials"
-      className="relative w-full py-20 md:py-40 overflow-hidden bg-[#0A0A0B] text-white selection:bg-[#6366F1]/30"
+      className="relative w-full py-20 md:py-40 overflow-hidden bg-[#0A0A0B] text-white selection:bg-[#6366F1]/30 select-none"
     >
       {/* Premium SaaS Tech Grid and Ambient Glow Backdrops */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181B_1px,transparent_1px),linear-gradient(to_bottom,#18181B_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none opacity-40" />
@@ -75,22 +138,28 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
       {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED SWIPE TRACKS */}
       {/* ========================================== */}
       <div 
-        className="block md:hidden w-full overflow-hidden py-2"
-        onTouchStart={() => isMobileScrollable && setIsMobilePaused(true)}
-        onTouchEnd={() => isMobileScrollable && setIsMobilePaused(false)}
-        onMouseEnter={() => isMobileScrollable && setIsMobilePaused(true)}
-        onMouseLeave={() => isMobileScrollable && setIsMobilePaused(false)}
+        className="block md:hidden w-full overflow-hidden py-2 select-none"
       >
         <motion.div 
-          className="flex gap-4 px-6 w-max"
-          animate={isMobileScrollable && !isMobilePaused ? { x: [0, -1200] } : false}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 45,
-              ease: "linear"
-            }
+          className="flex gap-4 px-6 w-max touch-pan-x"
+          animate={mobileControls}
+          drag={isMobileScrollable ? "x" : false}
+          dragConstraints={{
+            left: -1200,
+            right: 0
+          }}
+          dragElastic={0.05}
+          onUpdate={(latest) => {
+            currentMobileX.current = Number(latest.x) || 0;
+          }}
+          onDragStart={() => {
+            isDraggingMobile.current = true;
+            mobileControls.stop();
+            if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+          }}
+          onDragEnd={() => {
+            isDraggingMobile.current = false;
+            startMobileMarquee(currentMobileX.current);
           }}
         >
           {mobileMarqueeItems.map((t: any, idx: number) => (
@@ -167,7 +236,7 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
         <motion.div
           className={
             isScrollable
-              ? "flex gap-6 whitespace-nowrap min-w-full w-max px-6"
+              ? "flex gap-6 whitespace-nowrap min-w-full w-max px-6 space-x-1"
               : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center"
           }
           animate={isScrollable && !isDeskPaused ? { x: [0, -2500] } : false}

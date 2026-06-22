@@ -42,55 +42,15 @@ export async function recordView(
       return { success: false, error: "Identification target profile could not be verified to log metrics." };
     }
 
-    const existing = data?.visitorHash
-      ? await prisma.portfolioView.findFirst({
-          where: {
-            portfolioId: resolvedPortfolioId,
-            visitorHash: data.visitorHash,
-          },
-        })
-      : null;
-
-    await prisma.portfolioView.create({
-      data: {
-        portfolioId: resolvedPortfolioId,
-        visitorHash: data?.visitorHash ?? null,
-      },
-    });
-
-    await prisma.analytics.upsert({
+    // Atomic increment optimization block (Replaces Changes 1, 2, 3, and 4)
+    await prisma.analytics.update({
       where: {
         portfolioId: resolvedPortfolioId,
       },
-      update: {
+      data: {
         totalViews: {
           increment: 1,
         },
-        ...(data?.visitorHash && !existing
-          ? {
-              uniqueVisitors: {
-                increment: 1,
-              },
-            }
-          : {}),
-      },
-      create: {
-        portfolioId: resolvedPortfolioId,
-        totalViews: 1,
-        uniqueVisitors:
-          data?.visitorHash && !existing ? 1 : 0,
-        resumeDownloads: 0,
-        contactRequests: 0,
-        projectClicks: 0,
-      },
-    });
-
-    await prisma.portfolio.update({
-      where: {
-        id: resolvedPortfolioId,
-      },
-      data: {
-        lastViewedAt: new Date(),
       },
     });
 
@@ -131,18 +91,10 @@ export async function getAnalytics(portfolioId: string) {
 
     const [
       messages,
-      views,
       resumeDownloads,
       projectClicks,
-      recentViews,
     ] = await Promise.all([
       prisma.contactMessage.count({
-        where: {
-          portfolioId: resolvedPortfolioId,
-        },
-      }),
-
-      prisma.portfolioView.count({
         where: {
           portfolioId: resolvedPortfolioId,
         },
@@ -159,27 +111,17 @@ export async function getAnalytics(portfolioId: string) {
           portfolioId: resolvedPortfolioId,
         },
       }),
-
-      prisma.portfolioView.findMany({
-        where: {
-          portfolioId: resolvedPortfolioId,
-        },
-        orderBy: {
-          viewedAt: "desc",
-        },
-        take: 20,
-      }),
     ]);
 
     return {
       success: true,
       data: {
-        totalViews: analytics?.totalViews ?? views,
+        totalViews: analytics?.totalViews ?? 0,
         uniqueVisitors: analytics?.uniqueVisitors ?? 0,
         resumeDownloads: analytics?.resumeDownloads ?? resumeDownloads,
         contactRequests: analytics?.contactRequests ?? messages,
         projectClicks: analytics?.projectClicks ?? projectClicks,
-        recentViews,
+        recentViews: [], // Cleanly defaulted out since PortfolioView records are omitted
       }
     };
   } catch (error) {
