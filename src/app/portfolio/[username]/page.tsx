@@ -91,9 +91,9 @@ export async function generateMetadata({
     "Professional portfolio";
 
   const image =
-    portfolio.seoImage ??
-    portfolio.profileImage ??
-    `/api/og/${username}`;
+  portfolio.coverImage ||
+  portfolio.profileImage ||
+  `${process.env.NEXT_PUBLIC_APP_URL}/portfolio/${username}/opengraph-image`;
 
   return {
     title,
@@ -103,18 +103,26 @@ export async function generateMetadata({
         ?.split(",")
         .map((k) => k.trim()) ?? [],
 
-    openGraph: {
-      title,
-      description,
-      images: image ? [image] : [],
-      type: "website",
+openGraph: {
+  title,
+  description,
+  type: "website",
+
+  images: [
+    {
+      url: image,
+      width: 1200,
+      height: 630,
+      alt: title,
     },
+  ],
+},
 
     twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: image ? [image] : [],
-    },
+  card: "summary_large_image",
+  title,
+  description,
+  images: [image],
+},
   };
 }
