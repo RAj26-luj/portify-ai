@@ -8,7 +8,11 @@ export const size = {
 export const contentType = "image/png";
 
 export default async function Image() {
- const logo = "/portify-logo.svg";
+ const logo = new URL(
+  "/portify-logo.svg",
+  process.env.NEXT_PUBLIC_APP_URL ||
+    "http://localhost:3000"
+).toString();
   return new ImageResponse(
     (
       <div
