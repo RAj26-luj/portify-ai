@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getPortfolioByUsername } from "@/actions/portfolio";
+import { prisma } from "@/lib/prisma";
 
 export const size = {
   width: 1200,
@@ -21,10 +21,15 @@ export default async function Image({
     params.username
   );
 
-  const result =
-    await getPortfolioByUsername(username);
+  const portfolio = await prisma.portfolio.findFirst({
+    where: {
+      username,
+      isPublic: true,
+      status: "PUBLISHED",
+    },
+  });
 
-  if (!result.success || !result.data) {
+  if (!portfolio) {
     return new ImageResponse(
       (
         <div
@@ -45,14 +50,6 @@ export default async function Image({
       size
     );
   }
-
-  const portfolio = result.data;
-  console.log("OG PORTFOLIO:", {
-  username: portfolio.username,
-  coverImage: portfolio.coverImage,
-  profileImage: portfolio.profileImage,
-  seoImage: portfolio.seoImage,
-});
 
   const title =
     portfolio.ogTitle ||
@@ -208,8 +205,7 @@ export default async function Image({
               opacity: 0.65,
             }}
           >
-            Portfolio • Projects • Skills •
-            Experience
+            Portfolio • Projects • Skills • Experience
           </div>
         </div>
       </div>
