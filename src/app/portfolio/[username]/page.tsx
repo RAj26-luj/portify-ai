@@ -85,37 +85,30 @@ export async function generateMetadata({
   portfolio.username ||
   "Protfolio";
 
-  const description =
-    portfolio.resumeHeadline ||
-    portfolio.tagline ||
-    "Professional portfolio";
-const image =
-  portfolio.coverImage ||
-  portfolio.profileImage ||
-  `${process.env.NEXT_PUBLIC_APP_URL}/portfolio/${username}/opengraph-image`;
 
-  return {
+
+const description =
+  portfolio.resumeHeadline ||
+  portfolio.tagline ||
+  "Professional portfolio";
+
+const image = `${process.env.NEXT_PUBLIC_APP_URL}/portfolio/${username}/opengraph-image`;
+
+return {
   title,
   description,
 
   icons: {
     icon:
-      portfolio.coverImage ||
       portfolio.profileImage ||
+      portfolio.coverImage ||
       "/icon.svg",
   },
-
-  keywords: portfolio.seoKeywords
-    ? portfolio.seoKeywords
-        .split(",")
-        .map((k: string) => k.trim())
-    : [],
 
   openGraph: {
     title,
     description,
     type: "website",
-
     images: [
       {
         url: image,

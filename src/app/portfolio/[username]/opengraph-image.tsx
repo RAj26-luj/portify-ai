@@ -47,7 +47,12 @@ export default async function Image({ params }: Props) {
   }
 
   const coverImage =
-    portfolio.coverImage || portfolio.profileImage || null;
+    portfolio.coverImage ||
+    portfolio.profileImage ||
+    new URL(
+      "/icon.svg",
+      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    ).toString();
 
   return new ImageResponse(
     (
@@ -57,37 +62,62 @@ export default async function Image({ params }: Props) {
           height: "630px",
           display: "flex",
           overflow: "hidden",
+          position: "relative",
           background: "#000",
         }}
       >
-        {coverImage ? (
-          <img
-            src={coverImage}
-            alt="Cover"
-            width={1200}
-            height={630}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
-        ) : (
+        <img
+          src={coverImage}
+          alt="Cover"
+          width={1200}
+          height={630}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.15))",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            left: 60,
+            bottom: 50,
+            display: "flex",
+            flexDirection: "column",
+            color: "white",
+          }}
+        >
           <div
             style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontSize: 40,
-              background: "#111827",
+              fontSize: 64,
+              fontWeight: 800,
             }}
           >
-            No Cover Image
+            {portfolio.title || portfolio.username}
           </div>
-        )}
+
+          {portfolio.resumeHeadline && (
+            <div
+              style={{
+                fontSize: 28,
+                marginTop: 12,
+                opacity: 0.95,
+              }}
+            >
+              {portfolio.resumeHeadline}
+            </div>
+          )}
+        </div>
       </div>
     ),
     size
