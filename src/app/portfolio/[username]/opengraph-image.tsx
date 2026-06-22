@@ -9,25 +9,20 @@ export const size = {
 export const contentType = "image/png";
 
 interface Props {
-  params: {
+  params: Promise<{
     username: string;
-  };
+  }>;
 }
 
 export default async function Image({
   params,
 }: Props) {
-  const username = decodeURIComponent(
-    params.username
-  );
-
+  const { username } = await params;
   const portfolio = await prisma.portfolio.findFirst({
-    where: {
-      username,
-      isPublic: true,
-      status: "PUBLISHED",
-    },
-  });
+  where: {
+    username,
+  },
+});
 
   if (!portfolio) {
     return new ImageResponse(
