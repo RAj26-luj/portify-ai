@@ -9,28 +9,37 @@ export const size = {
 export const contentType = "image/png";
 
 interface Props {
-  params: {
+  params: Promise<{
     username: string;
-  };
+  }>;
 }
 
-export default async function Image({ params }: Props) {
-  const result = await getPortfolioByUsername(params.username);
+export default async function Image({
+  params,
+}: Props) {
+  const { username } = await params;
+
+  const result =
+    await getPortfolioByUsername(username);
 
   if (!result.success || !result.data) {
     return new ImageResponse(
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 48,
-        }}
-      >
-        Portfolio Not Found
-      </div>,
+      (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#0f172a",
+            color: "white",
+            fontSize: 48,
+          }}
+        >
+          Portfolio Not Found
+        </div>
+      ),
       size
     );
   }
@@ -38,19 +47,26 @@ export default async function Image({ params }: Props) {
   const portfolio = result.data;
 
   const title =
-    portfolio.ogTitle ??
-    portfolio.title ??
+    portfolio.ogTitle ||
+    portfolio.title ||
     portfolio.username;
 
   const subtitle =
-    portfolio.ogSubtitle ??
-    portfolio.tagline ??
+    portfolio.ogSubtitle ||
+    portfolio.tagline ||
+    portfolio.currentRole ||
     "";
 
   const description =
-    portfolio.ogDescription ??
-    portfolio.bio ??
-    "";
+    portfolio.ogDescription ||
+    portfolio.bio ||
+    "Professional Portfolio";
+
+  const logo = new URL(
+    "/portify-logo.svg",
+    process.env.NEXT_PUBLIC_APP_URL ||
+      "http://localhost:3000"
+  ).toString();
 
   return new ImageResponse(
     (
@@ -59,40 +75,101 @@ export default async function Image({ params }: Props) {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          padding: 80,
-          background: "#0f172a",
+          position: "relative",
+          background:
+            "linear-gradient(135deg,#0f172a,#1e293b)",
           color: "white",
+          overflow: "hidden",
         }}
       >
-        <div style={{ fontSize: 64, fontWeight: 700 }}>
-          {title}
-        </div>
+        <div
+          style={{
+            position: "absolute",
+            top: 40,
+            right: 40,
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+          }}
+        >
+          <img
+            src={logo}
+            width={60}
+            height={60}
+            alt="Portify AI"
+          />
 
-        {subtitle && (
-          <div
-            style={{
-              fontSize: 36,
-              marginTop: 20,
-              opacity: 0.9,
-            }}
-          >
-            {subtitle}
-          </div>
-        )}
-
-        {description && (
           <div
             style={{
               fontSize: 28,
-              marginTop: 30,
-              opacity: 0.8,
+              fontWeight: 700,
             }}
           >
-            {description}
+            Portify AI
           </div>
-        )}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "80px",
+            width: "100%",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 72,
+              fontWeight: 800,
+              lineHeight: 1.1,
+              maxWidth: 900,
+            }}
+          >
+            {title}
+          </div>
+
+          {subtitle && (
+            <div
+              style={{
+                marginTop: 24,
+                fontSize: 36,
+                opacity: 0.9,
+              }}
+            >
+              {subtitle}
+            </div>
+          )}
+
+          {description && (
+            <div
+              style={{
+                marginTop: 28,
+                fontSize: 28,
+                opacity: 0.75,
+                maxWidth: 900,
+              }}
+            >
+              {description.length > 180
+                ? `${description.slice(
+                    0,
+                    180
+                  )}...`
+                : description}
+            </div>
+          )}
+
+          <div
+            style={{
+              marginTop: 40,
+              fontSize: 22,
+              opacity: 0.65,
+            }}
+          >
+            Portfolio • Projects • Skills •
+            Experience
+          </div>
+        </div>
       </div>
     ),
     size

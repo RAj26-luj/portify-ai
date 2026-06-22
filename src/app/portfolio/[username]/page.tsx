@@ -90,10 +90,11 @@ export async function generateMetadata({
     portfolio.bio ??
     "Professional portfolio";
 
-  const image =
-  portfolio.coverImage ||
-  portfolio.profileImage ||
-  `${process.env.NEXT_PUBLIC_APP_URL}/portfolio/${username}/opengraph-image`;
+const image =
+  portfolio.seoImage ??
+  portfolio.coverImage ??
+  portfolio.profileImage ??
+  `/portfolio/${username}/opengraph-image`;
 
   return {
     title,
