@@ -92,7 +92,8 @@ const description =
   portfolio.tagline ||
   "Professional portfolio";
 
-const image = `${process.env.NEXT_PUBLIC_APP_URL}/portfolio/${username}/opengraph-image`;
+const image =
+`${process.env.NEXT_PUBLIC_APP_URL}/portfolio/${username}/opengraph-image?v=${portfolio.updatedAt?.getTime()}`
 
 return {
   title,
