@@ -9,15 +9,17 @@ export const size = {
 export const contentType = "image/png";
 
 interface Props {
-  params: Promise<{
+  params: {
     username: string;
-  }>;
+  };
 }
 
 export default async function Image({
   params,
 }: Props) {
-  const { username } = await params;
+  const username = decodeURIComponent(
+    params.username
+  );
 
   const result =
     await getPortfolioByUsername(username);
@@ -45,6 +47,12 @@ export default async function Image({
   }
 
   const portfolio = result.data;
+  console.log("OG PORTFOLIO:", {
+  username: portfolio.username,
+  coverImage: portfolio.coverImage,
+  profileImage: portfolio.profileImage,
+  seoImage: portfolio.seoImage,
+});
 
   const title =
     portfolio.ogTitle ||
@@ -61,6 +69,11 @@ export default async function Image({
     portfolio.ogDescription ||
     portfolio.bio ||
     "Professional Portfolio";
+
+  const coverImage =
+    portfolio.coverImage ||
+    portfolio.profileImage ||
+    null;
 
   const logo = new URL(
     "/portify-logo.svg",
@@ -82,6 +95,32 @@ export default async function Image({
           overflow: "hidden",
         }}
       >
+        {coverImage && (
+          <img
+            src={coverImage}
+            alt="Cover"
+            width={1200}
+            height={630}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        )}
+
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "rgba(15,23,42,0.75)",
+          }}
+        />
+
         <div
           style={{
             position: "absolute",
@@ -90,6 +129,7 @@ export default async function Image({
             display: "flex",
             alignItems: "center",
             gap: 16,
+            zIndex: 10,
           }}
         >
           <img
@@ -116,6 +156,8 @@ export default async function Image({
             justifyContent: "center",
             padding: "80px",
             width: "100%",
+            position: "relative",
+            zIndex: 10,
           }}
         >
           <div
