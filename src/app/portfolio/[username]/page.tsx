@@ -100,8 +100,9 @@ return {
 
   icons: {
     icon:
-      portfolio.profileImage ||
       portfolio.coverImage ||
+      portfolio.profileImage ||
+      
       "/icon.svg",
   },
 
