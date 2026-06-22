@@ -87,37 +87,7 @@ export default async function Image({ params }: Props) {
           }}
         />
 
-        <div
-          style={{
-            position: "absolute",
-            left: 60,
-            bottom: 50,
-            display: "flex",
-            flexDirection: "column",
-            color: "white",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 64,
-              fontWeight: 800,
-            }}
-          >
-            {portfolio.title || portfolio.username}
-          </div>
-
-          {portfolio.resumeHeadline && (
-            <div
-              style={{
-                fontSize: 28,
-                marginTop: 12,
-                opacity: 0.95,
-              }}
-            >
-              {portfolio.resumeHeadline}
-            </div>
-          )}
-        </div>
+      
       </div>
     ),
     size
