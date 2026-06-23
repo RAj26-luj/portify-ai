@@ -8,15 +8,12 @@ interface Props {
 }
 
 export default async function MediaPage({ params }: Props) {
-  // 1. Fetch public portfolio specification models from server response envelope
   const result = await getPortfolioByUsername(params.username);
 
-  // 🛡️ Discriminated Union Guard: Directs type narrowing parameters and handles hidden portfolios safely
   if (!result || !result.success || !result.data || !result.data.isPublic) {
     return notFound();
   }
 
-  // ✅ Safe Context: Accessing relational tracks is guaranteed type-narrowed out of the success lane
   const portfolio = result.data;
   const media = (portfolio as any).media ?? [];
 
@@ -32,21 +29,13 @@ export default async function MediaPage({ params }: Props) {
             <div key={m.id} className="border rounded-xl overflow-hidden">
               {m.type === "IMAGE" && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={m.url}
-                  alt={m.name || "media"}
-                  className="w-full h-48 object-cover"
-                />
+                <img src={m.url} alt={m.name || "media"} className="w-full h-48 object-cover" />
               )}
 
               {m.type !== "IMAGE" && (
                 <div className="p-4 space-y-2">
                   <p className="font-semibold text-sm">{m.name || "File"}</p>
-                  <a
-                    href={m.url}
-                    target="_blank"
-                    className="text-xs text-blue-600"
-                  >
+                  <a href={m.url} target="_blank" className="text-xs text-blue-600">
                     View File
                   </a>
                 </div>

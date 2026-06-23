@@ -10,7 +10,6 @@ export function useTheme() {
 
   const [theme, setThemeState] = useState<ThemeType>("DEFAULT");
 
-  // load initial theme (DB → session → local fallback)
   useEffect(() => {
     const dbTheme = (session?.user as any)?.theme as ThemeType | undefined;
 

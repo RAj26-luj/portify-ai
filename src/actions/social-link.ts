@@ -10,24 +10,30 @@ import {
 
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
-/**
- * Transforms connectivity parameter errors, missing address vectors, or datastore lookup
- * glitches into structured, user-friendly objects tailored for instant UI toast alerts.
- */
+// Error
 function handleSocialLinkServerError(error: any, fallbackMessage: string) {
   console.error("Social Link Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("portfolioId required") || errorMessage.includes("portfolioId not found")) {
+  if (
+    errorMessage.includes("portfolioId required") ||
+    errorMessage.includes("portfolioId not found")
+  ) {
     return {
       success: false,
-      error: "Authentication mapping missing. Could not link this handle to an active portfolio profile.",
+      error:
+        "Authentication mapping missing. Could not link this handle to an active portfolio profile.",
     };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
-      error: "The directory router engine is currently executing background data logs. Please try again.",
+      error:
+        "The directory router engine is currently executing background data logs. Please try again.",
     };
   }
 
@@ -48,11 +54,17 @@ export async function createSocialLink(data: {
     const resolvedPortfolioId = data.portfolioId || (await getPortfolioId());
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Portfolio connection target not found. Unable to anchor communication link." };
+      return {
+        success: false,
+        error: "Portfolio connection target not found. Unable to anchor communication link.",
+      };
     }
 
     if (!data.platform) {
-      return { success: false, error: "Platform name identifier (e.g., 'GitHub', 'LinkedIn') is required." };
+      return {
+        success: false,
+        error: "Platform name identifier (e.g., 'GitHub', 'LinkedIn') is required.",
+      };
     }
 
     if (!data.url) {
@@ -71,7 +83,10 @@ export async function createSocialLink(data: {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleSocialLinkServerError(error, "Failed to instantiate new media communication link parameter.");
+    return handleSocialLinkServerError(
+      error,
+      "Failed to instantiate new media communication link parameter."
+    );
   }
 }
 
@@ -89,13 +104,19 @@ export async function updateSocialLink(
 ) {
   try {
     if (!id) {
-      return { success: false, error: "Missing unique channel structural tracking identification pointer key." };
+      return {
+        success: false,
+        error: "Missing unique channel structural tracking identification pointer key.",
+      };
     }
 
     const result = await updateSocialLinkService(id, data);
     return { success: true, data: result };
   } catch (error) {
-    return handleSocialLinkServerError(error, "Failed to commit updated address properties to routing handle fields.");
+    return handleSocialLinkServerError(
+      error,
+      "Failed to commit updated address properties to routing handle fields."
+    );
   }
 }
 
@@ -106,7 +127,8 @@ export async function getSocialLinks(portfolioId: string) {
     if (!resolved) {
       return {
         success: false,
-        error: "Unable to sync social feeds. Portfolio validation trace identifier context is unverified.",
+        error:
+          "Unable to sync social feeds. Portfolio validation trace identifier context is unverified.",
         data: [],
       };
     }
@@ -130,19 +152,28 @@ export async function getSocialLinkById(id: string) {
     const data = await getSocialLinkService(id);
     return { success: true, data };
   } catch (error) {
-    return handleSocialLinkServerError(error, "Failed to cross-reference system details configurations for this channel handle.");
+    return handleSocialLinkServerError(
+      error,
+      "Failed to cross-reference system details configurations for this channel handle."
+    );
   }
 }
 
 export async function deleteSocialLink(id: string) {
   try {
     if (!id) {
-      return { success: false, error: "Identification trace code reference missing. Removal pipeline cancelled." };
+      return {
+        success: false,
+        error: "Identification trace code reference missing. Removal pipeline cancelled.",
+      };
     }
 
     const result = await deleteSocialLinkService(id);
     return { success: true, data: result };
   } catch (error) {
-    return handleSocialLinkServerError(error, "The specified external redirection gateway anchor row could not be cleared.");
+    return handleSocialLinkServerError(
+      error,
+      "The specified external redirection gateway anchor row could not be cleared."
+    );
   }
 }

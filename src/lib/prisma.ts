@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
 declare global {
-  // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
 }
 
@@ -20,7 +19,6 @@ export async function connectDB() {
     await prisma.$connect();
     return prisma;
   } catch (error) {
-      
     throw error;
   }
 }
@@ -28,9 +26,7 @@ export async function connectDB() {
 export async function disconnectDB() {
   try {
     await prisma.$disconnect();
-  } catch (error) {
-      
-  }
+  } catch (error) {}
 }
 
 export default prisma;

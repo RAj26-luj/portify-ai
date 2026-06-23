@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  Briefcase, 
-  Calendar, 
-  MapPin, 
-  ExternalLink, 
-  Edit3, 
-  Trash2, 
-  Loader2, 
+import {
+  Briefcase,
+  Calendar,
+  MapPin,
+  ExternalLink,
+  Edit3,
+  Trash2,
+  Loader2,
   AlertTriangle,
-  Image as ImageIcon
+  Image as ImageIcon,
 } from "lucide-react";
 
 export interface ExperienceCardProps {
@@ -31,8 +31,8 @@ export interface ExperienceCardProps {
   onDelete?: (id: string) => Promise<void> | void;
 }
 
-// Added universal corporate asset image brand placeholder fallback
-const DEFAULT_COMPANY_LOGO = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSza5rtdmLbRpVvHU34e2_GOA_5HIWl5IVy0wuFKi8c6Q&s=10";
+const DEFAULT_COMPANY_LOGO =
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSza5rtdmLbRpVvHU34e2_GOA_5HIWl5IVy0wuFKi8c6Q&s=10";
 
 export default function ExperienceCard({
   id,
@@ -73,15 +73,10 @@ export default function ExperienceCard({
   };
 
   return (
-    /* Note: Added h-full to ensure cards dynamically scale to match the tallest sibling height */
     <div className="group/exp-card relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] p-6 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-zinc-700 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.6)] w-full h-full">
-      
-      {/* Added flex-1 layer to isolate metrics stack from action footer, pinning items perfectly to the container baseline */}
       <div className="space-y-4 flex-1 flex flex-col justify-start">
-        {/* Dominant Layout Structure Focusing Fully on Immediate Brand Recognition */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-4 shrink-0">
           <div className="flex items-center gap-4 min-w-0">
-            {/* Displaying logo element space consistently using active logo fallback setup to avoid structural shift */}
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 p-2.5 flex items-center justify-center shadow-md group-hover/exp-card:border-zinc-500 transition-colors bg-gradient-to-b from-zinc-900 to-zinc-950">
               <img
                 src={activeLogo}
@@ -90,7 +85,7 @@ export default function ExperienceCard({
                 loading="lazy"
               />
             </div>
-            
+
             <div className="min-w-0 space-y-0.5">
               <h3 className="font-bold text-zinc-100 text-base sm:text-lg tracking-tight truncate group-hover/exp-card:text-white transition-colors">
                 {company}
@@ -112,15 +107,15 @@ export default function ExperienceCard({
           )}
         </div>
 
-        {/* Dynamic Contextual Optimization Prompt for missing imagery assets */}
         {!hasLogo && (
           <div className="flex items-center gap-1.5 rounded-lg border border-blue-500/10 bg-blue-500/5 px-2.5 py-1.5 text-[11px] text-blue-400/90 shrink-0">
             <ImageIcon size={12} className="shrink-0 text-blue-400" />
-            <span className="truncate">We recommend adding a company logo for better visibility</span>
+            <span className="truncate">
+              We recommend adding a company logo for better visibility
+            </span>
           </div>
         )}
 
-        {/* Highly Attractive and Simplified Timeline Node Segment */}
         {(startDate || endDate || location) && (
           <div className="flex flex-col gap-2 rounded-lg border border-zinc-900 bg-zinc-900/20 p-3 text-xs shrink-0">
             <div className="flex items-center gap-2 text-zinc-400">
@@ -128,8 +123,10 @@ export default function ExperienceCard({
               <div className="flex items-center gap-1.5 font-mono text-[11px]">
                 <span className="text-zinc-200 font-semibold">{startDate ?? "—"}</span>
                 <span className="text-zinc-600 font-sans font-bold">→</span>
-                <span className={`font-semibold ${currentlyWorking ? "text-blue-400" : "text-zinc-200"}`}>
-                  {currentlyWorking ? "Present" : endDate ?? "Present"}
+                <span
+                  className={`font-semibold ${currentlyWorking ? "text-blue-400" : "text-zinc-200"}`}
+                >
+                  {currentlyWorking ? "Present" : (endDate ?? "Present")}
                 </span>
               </div>
             </div>
@@ -142,20 +139,23 @@ export default function ExperienceCard({
           </div>
         )}
 
-        {/* Core Body Description Narrative Module */}
         {description && (
           <p className="text-xs sm:text-sm leading-relaxed text-zinc-400 font-sans line-clamp-3">
             {description}
           </p>
         )}
 
-        {/* Responsibilities Block Grid List Layout */}
         {responsibilities && responsibilities.length > 0 && (
           <div className="space-y-1.5 border-l border-zinc-900 pl-3">
-            <span className="text-[10px] font-medium tracking-wider text-zinc-600 uppercase block font-sans">Key Contribution Summary</span>
+            <span className="text-[10px] font-medium tracking-wider text-zinc-600 uppercase block font-sans">
+              Key Contribution Summary
+            </span>
             <ul className="space-y-1 text-xs text-zinc-400 list-none">
               {responsibilities.slice(0, 3).map((item, index) => (
-                <li key={index} className="line-clamp-2 relative pl-3 before:content-[''] before:absolute before:left-0 before:top-2 before:h-1 before:w-1 before:rounded-full before:bg-zinc-700">
+                <li
+                  key={index}
+                  className="line-clamp-2 relative pl-3 before:content-[''] before:absolute before:left-0 before:top-2 before:h-1 before:w-1 before:rounded-full before:bg-zinc-700"
+                >
                   {item}
                 </li>
               ))}
@@ -168,7 +168,6 @@ export default function ExperienceCard({
           </div>
         )}
 
-        {/* Skills Badges Ecosystem Row placed inside flex structure tracking layout baseline */}
         {technologies && technologies.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1 mt-auto">
             {technologies.map((tech, index) => (
@@ -182,7 +181,6 @@ export default function ExperienceCard({
           </div>
         )}
 
-        {/* External Verification Links Row */}
         {companyWebsite && (
           <div className="pt-0.5">
             <a
@@ -198,7 +196,6 @@ export default function ExperienceCard({
         )}
       </div>
 
-      {/* Control Actions & Operational Error Management Interface Dock Footer */}
       <div className="mt-5 shrink-0">
         {errorFeedback && (
           <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-2.5 text-xs text-red-400 animate-fadeIn">
@@ -208,8 +205,10 @@ export default function ExperienceCard({
         )}
 
         {showDeleteConfirm ? (
-          <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 animate-fadeIn">
-            <p className="text-xs font-medium text-zinc-400 px-1 text-center">Confirm irreversible deletion?</p>
+          <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-955 p-2.5 animate-fadeIn">
+            <p className="text-xs font-medium text-zinc-400 px-1 text-center">
+              Confirm irreversible deletion?
+            </p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -268,7 +267,6 @@ export default function ExperienceCard({
           </div>
         )}
       </div>
-
     </div>
   );
 }

@@ -2,27 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { 
-  Plus, 
-  Code2, 
-  Loader2, 
-  AlertTriangle, 
-  FolderOpen, 
-  Grid, 
-  List, 
-  Search, 
-  X, 
-  ArrowUpDown, 
+import {
+  Plus,
+  Code2,
+  Loader2,
+  AlertTriangle,
+  FolderOpen,
+  Grid,
+  List,
+  Search,
+  X,
+  ArrowUpDown,
   Sparkles,
   GitPullRequest,
   Edit3,
-  Trash2
+  Trash2,
 } from "lucide-react";
 
-import {
-  getOpenSourceProjects,
-  deleteOpenSourceProject,
-} from "@/actions/open-source";
+import { getOpenSourceProjects, deleteOpenSourceProject } from "@/actions/open-source";
 
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
@@ -66,7 +63,6 @@ export default function OpenSourcePage() {
   const [showForm, setShowForm] = useState(false);
   const [selectedProject, setSelectedProject] = useState<OpenSourceProject | undefined>();
 
-  // Advanced SaaS Interface Layout, Filtration and Multi-Click Safeguards
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -74,13 +70,12 @@ export default function OpenSourcePage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // 1. Resolve master user workspace context string primitive safely
   useEffect(() => {
     let isMounted = true;
     (async () => {
       try {
         const id = await getPortfolioId();
-        
+
         if (!id) {
           throw new Error("Active user portfolio identity context mapping was not found.");
         }
@@ -90,15 +85,13 @@ export default function OpenSourcePage() {
         }
       } catch (err) {
         if (isMounted) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Failed to load portfolio specifications"
-          );
+          setError(err instanceof Error ? err.message : "Failed to load portfolio specifications");
         }
       }
     })();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [username]);
 
   useEffect(() => {
@@ -106,22 +99,19 @@ export default function OpenSourcePage() {
     loadProjects();
   }, [portfolioId]);
 
-  // 2. Query relative repository collections checking data envelope boundaries
   async function loadProjects() {
     if (!portfolioId) return;
 
     try {
       setLoading(true);
       setError(null);
-      
+
       const result = await getOpenSourceProjects(portfolioId);
 
-      // 🛡️ Clean literal branch assertion check matching the expected action union wrapper contract
       if (!result.success) {
         throw new Error(result.error || "Failed pulling records from server repository.");
       }
 
-      // ✅ Safe Context Narrowed: result.data is guaranteed to exist as an array here
       const normalized: OpenSourceProject[] = result.data.map((p: any) => ({
         id: p.id,
         repositoryName: p.repositoryName,
@@ -137,7 +127,9 @@ export default function OpenSourcePage() {
         status: p.status ?? undefined,
         coverImage: p.coverImage ?? undefined,
         architectureDiagrams: Array.isArray(p.architectureDiagrams) ? p.architectureDiagrams : [],
-        contributionScreenshots: Array.isArray(p.contributionScreenshots) ? p.contributionScreenshots : [],
+        contributionScreenshots: Array.isArray(p.contributionScreenshots)
+          ? p.contributionScreenshots
+          : [],
         timeline: Array.isArray(p.timeline)
           ? p.timeline.map((t: any) => ({
               id: t.id,
@@ -151,9 +143,7 @@ export default function OpenSourcePage() {
       setProjects(normalized);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to pull records from server repository"
+        err instanceof Error ? err.message : "Failed to pull records from server repository"
       );
     } finally {
       setLoading(false);
@@ -163,31 +153,41 @@ export default function OpenSourcePage() {
   async function handleDelete(id: string) {
     if (processingId) return;
 
-    const confirmDelete = window.confirm("Are you sure you want to remove this open source contribution entry permanently?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to remove this open source contribution entry permanently?"
+    );
     if (!confirmDelete) return;
 
     try {
       setProcessingId(id);
       setActionError(null);
-      
+
       const result = await deleteOpenSourceProject(id);
 
       if (!result.success) {
-        throw new Error("error" in result && typeof result.error === "string" ? result.error : "Server mutation trace split.");
+        throw new Error(
+          "error" in result && typeof result.error === "string"
+            ? result.error
+            : "Server mutation trace split."
+        );
       }
 
       await loadProjects();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Unable to safely complete index record delete sequence. Please retry.");
+      setActionError(
+        err instanceof Error
+          ? err.message
+          : "Unable to safely complete index record delete sequence. Please retry."
+      );
     } finally {
       setProcessingId(null);
     }
   }
 
-  // Pure functional filter sorting array evaluation pipelines
   const filteredProjects = projects
     .filter((project) => {
-      const matchCriteria = `${project.repositoryName} ${project.contributionTitle || ""} ${project.description || ""}`.toLowerCase();
+      const matchCriteria =
+        `${project.repositoryName} ${project.contributionTitle || ""} ${project.description || ""}`.toLowerCase();
       const matchesSearch = matchCriteria.includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === "ALL" || project.status === statusFilter;
       return matchesSearch && matchesStatus;
@@ -208,7 +208,9 @@ export default function OpenSourcePage() {
           <Loader2 className="h-7 w-7 sm:h-8 sm:w-8 animate-spin text-blue-500 z-10" />
           <div className="absolute h-7 w-7 sm:h-8 sm:w-8 border border-zinc-800 rounded-full animate-ping opacity-20" />
         </div>
-        <p className="text-[10px] sm:text-xs uppercase tracking-widest">// Syncing open source modules...</p>
+        <p className="text-[10px] sm:text-xs uppercase tracking-widest">
+          // Syncing open source modules...
+        </p>
       </div>
     );
   }
@@ -218,9 +220,13 @@ export default function OpenSourcePage() {
       <div className="mx-auto max-w-xl my-6 sm:my-12 rounded-xl border border-red-500/10 bg-gradient-to-b from-red-500/5 to-transparent p-4 sm:p-5 shadow-2xl flex gap-3 items-start text-white font-sans w-full">
         <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
         <div className="space-y-2 flex-1 min-w-0">
-          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">Ecosystem Synchronization Failure</h4>
-          <p className="text-[11px] sm:text-xs text-red-400/90 leading-relaxed break-words">{error}</p>
-          <button 
+          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
+            Ecosystem Synchronization Failure
+          </h4>
+          <p className="text-[11px] sm:text-xs text-red-400/90 leading-relaxed break-words">
+            {error}
+          </p>
+          <button
             onClick={loadProjects}
             className="w-full inline-flex h-8 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 px-3 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white"
           >
@@ -233,23 +239,23 @@ export default function OpenSourcePage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 text-white max-w-[1440px] mx-auto font-sans antialiased px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
-      
-      {/* ACTIONS CONTROL HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-4 sm:pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 shadow-sm">
               <Code2 size={15} />
             </div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-zinc-100">Open Source</h1>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-zinc-100">
+              Open Source
+            </h1>
           </div>
           <p className="text-[11px] sm:text-xs text-zinc-500 font-medium leading-relaxed max-w-2xl">
-            Manage your upstream repositories, community packages, patches and community ecosystem contributions.
+            Manage your upstream repositories, community packages, patches and community ecosystem
+            contributions.
           </p>
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end shrink-0">
-          {/* Layout View Mode Configuration Switches */}
           {projects.length > 0 && (
             <div className="flex items-center rounded-lg border border-zinc-900 bg-zinc-950 p-0.5 text-zinc-500 hidden sm:flex">
               <button
@@ -286,22 +292,25 @@ export default function OpenSourcePage() {
         </div>
       </div>
 
-      {/* INLINE ACTION ERROR PANEL */}
       {actionError && (
         <div className="flex items-start gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-3 text-xs text-red-400 animate-fadeIn">
           <AlertTriangle size={14} className="shrink-0 mt-0.5" />
           <span className="font-medium flex-1 leading-normal">{actionError}</span>
-          <button onClick={() => setActionError(null)} className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2">✕</button>
+          <button
+            onClick={() => setActionError(null)}
+            className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* FILTER CONTROL HUBS TOOLBAR */}
       {projects.length > 0 && (
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between border-b border-zinc-900/50 pb-4 w-full">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1 w-full lg:min-w-0">
             <div className="relative w-full sm:max-w-xs md:max-w-sm shrink-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 h-3.5 w-3.5" />
-              <input 
+              <input
                 type="text"
                 placeholder="Search repository registry matrix..."
                 value={searchQuery}
@@ -309,7 +318,10 @@ export default function OpenSourcePage() {
                 className="w-full pl-9 pr-8 h-8.5 bg-[#09090b] border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400"
+                >
                   <X size={12} />
                 </button>
               )}
@@ -322,7 +334,7 @@ export default function OpenSourcePage() {
                     key={st}
                     type="button"
                     onClick={() => setStatusFilter(st)}
-                    className={`px-2.5 py-1 text-[9px] sm:text-[10px] font-mono font-bold tracking-tight rounded-md uppercase transition-all ${statusFilter === st ? 'bg-zinc-900 border border-zinc-800 text-zinc-200 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`px-2.5 py-1 text-[9px] sm:text-[10px] font-mono font-bold tracking-tight rounded-md uppercase transition-all ${statusFilter === st ? "bg-zinc-900 border border-zinc-800 text-zinc-200 shadow-sm" : "text-zinc-500 hover:text-zinc-300"}`}
                   >
                     {st.replace("_", " ")}
                   </button>
@@ -354,7 +366,6 @@ export default function OpenSourcePage() {
         </div>
       )}
 
-      {/* RENDER GRID / LIST PIPELINES */}
       {filteredProjects.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/10 p-6 sm:p-12 text-center max-w-xl mx-auto my-4 animate-fadeIn w-full">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-900 text-zinc-500 mb-3 shadow-inner">
@@ -363,13 +374,12 @@ export default function OpenSourcePage() {
           <h3 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
             {projects.length === 0 ? "Open Source Section Empty" : "No classifications resolved"}
           </h3>
-          
+
           <div className="text-[11px] sm:text-xs text-zinc-500 max-w-xs sm:max-w-sm mt-1.5 leading-relaxed font-sans space-y-2 w-full">
             <p>
-              {projects.length === 0 
+              {projects.length === 0
                 ? "Your upstream contribution history tracks are clear. Registering community patches introduces powerful proof vectors verifying specialized execution capacities."
-                : "No matching registered project metrics found. Clear your active filtering inputs to reset baseline arrays."
-              }
+                : "No matching registered project metrics found. Clear your active filtering inputs to reset baseline arrays."}
             </p>
           </div>
 
@@ -390,39 +400,49 @@ export default function OpenSourcePage() {
         </div>
       ) : (
         <>
-          {/* MOBILE SLIM STREAM LAYER */}
           <div className="block sm:hidden space-y-2.5 animate-fadeIn">
             {filteredProjects.map((project) => (
-              <div 
-                key={project.id} 
+              <div
+                key={project.id}
                 className="p-3.5 rounded-xl border border-zinc-800 bg-[#0C0C0E] space-y-3 shadow-sm relative overflow-hidden"
               >
                 {project.status && (
-                  <div className={`absolute top-0 right-0 border-b border-l px-2 py-0.5 text-[8px] font-mono font-bold tracking-wider rounded-bl ${
-                    project.status === "COMPLETED" ? "border-emerald-500/10 bg-emerald-500/5 text-emerald-400" :
-                    project.status === "IN_PROGRESS" ? "border-blue-500/10 bg-blue-500/5 text-blue-400" :
-                    project.status === "MAINTAINED" ? "border-purple-500/10 bg-purple-500/5 text-purple-400" :
-                    "border-zinc-800 bg-zinc-900 text-zinc-500"
-                  }`}>
+                  <div
+                    className={`absolute top-0 right-0 border-b border-l px-2 py-0.5 text-[8px] font-mono font-bold tracking-wider rounded-bl ${
+                      project.status === "COMPLETED"
+                        ? "border-emerald-500/10 bg-emerald-500/5 text-emerald-400"
+                        : project.status === "IN_PROGRESS"
+                          ? "border-blue-500/10 bg-blue-500/5 text-blue-400"
+                          : project.status === "MAINTAINED"
+                            ? "border-purple-500/10 bg-purple-500/5 text-purple-400"
+                            : "border-zinc-800 bg-zinc-900 text-zinc-500"
+                    }`}
+                  >
                     {project.status}
                   </div>
                 )}
-                
+
                 <div className="space-y-1 pr-16">
-                  <h4 className="text-xs font-bold text-zinc-100 leading-snug tracking-tight break-words">{project.repositoryName}</h4>
+                  <h4 className="text-xs font-bold text-zinc-100 leading-snug tracking-tight break-words">
+                    {project.repositoryName}
+                  </h4>
                   {project.contributionTitle && (
                     <div className="flex items-center gap-1 text-[10px] text-zinc-400 mt-1">
                       <GitPullRequest size={10} className="text-zinc-600 shrink-0" />
                       <span className="truncate break-all">{project.contributionTitle}</span>
                     </div>
                   )}
-                  
+
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 pt-1.5 text-[10px] font-mono text-zinc-500">
                     {project.linesChanged && (
-                      <span>Impact: <strong className="text-zinc-300">{project.linesChanged}</strong></span>
+                      <span>
+                        Impact: <strong className="text-zinc-300">{project.linesChanged}</strong>
+                      </span>
                     )}
                     {project.contributionType && (
-                      <span className="text-zinc-500 truncate max-w-[140px]">{project.contributionType}</span>
+                      <span className="text-zinc-500 truncate max-w-[140px]">
+                        {project.contributionType}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -445,14 +465,17 @@ export default function OpenSourcePage() {
                     onClick={() => handleDelete(project.id)}
                     className="inline-flex h-6 w-6 items-center justify-center rounded border border-red-950/20 bg-red-950/10 text-red-400 disabled:opacity-35"
                   >
-                    {processingId === project.id ? <Loader2 size={10} className="animate-spin" /> : <Trash2 size={10} />}
+                    {processingId === project.id ? (
+                      <Loader2 size={10} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={10} />
+                    )}
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* DESKTOP RESPONSIVE CONFIGURATIONS SYSTEM */}
           <div className="hidden sm:block">
             {viewMode === "grid" ? (
               <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 animate-fadeIn">
@@ -483,10 +506,19 @@ export default function OpenSourcePage() {
                   </thead>
                   <tbody className="divide-y divide-zinc-900 text-xs font-sans">
                     {filteredProjects.map((project) => (
-                      <tr key={project.id} className="hover:bg-zinc-900/30 transition-colors group/row">
+                      <tr
+                        key={project.id}
+                        className="hover:bg-zinc-900/30 transition-colors group/row"
+                      >
                         <td className="py-3.5 px-4 min-w-[180px]">
-                          <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-xs">{project.repositoryName}</div>
-                          {project.contributionType && <span className="text-[10px] text-zinc-500 font-mono block mt-0.5">{project.contributionType}</span>}
+                          <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-xs">
+                            {project.repositoryName}
+                          </div>
+                          {project.contributionType && (
+                            <span className="text-[10px] text-zinc-500 font-mono block mt-0.5">
+                              {project.contributionType}
+                            </span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4 text-zinc-400 max-w-xs truncate font-medium">
                           {project.contributionTitle ? (
@@ -495,17 +527,24 @@ export default function OpenSourcePage() {
                               <span className="truncate">{project.contributionTitle}</span>
                             </div>
                           ) : (
-                            <span className="text-zinc-700 font-normal italic">No assigned patch log</span>
+                            <span className="text-zinc-700 font-normal italic">
+                              No assigned patch log
+                            </span>
                           )}
                         </td>
                         <td className="py-3.5 px-4">
                           {project.status ? (
-                            <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-mono font-bold border ${
-                              project.status === "COMPLETED" ? "bg-emerald-500/5 border-emerald-500/10 text-emerald-400" :
-                              project.status === "IN_PROGRESS" ? "bg-blue-500/5 border-blue-500/10 text-blue-400" :
-                              project.status === "MAINTAINED" ? "bg-purple-500/5 border-purple-500/10 text-purple-400" :
-                              "bg-zinc-900 border-zinc-800 text-zinc-500"
-                            }`}>
+                            <span
+                              className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-mono font-bold border ${
+                                project.status === "COMPLETED"
+                                  ? "bg-emerald-500/5 border-emerald-500/10 text-emerald-400"
+                                  : project.status === "IN_PROGRESS"
+                                    ? "bg-blue-500/5 border-blue-500/10 text-blue-400"
+                                    : project.status === "MAINTAINED"
+                                      ? "bg-purple-500/5 border-purple-500/10 text-purple-400"
+                                      : "bg-zinc-900 border-zinc-800 text-zinc-500"
+                              }`}
+                            >
                               {project.status}
                             </span>
                           ) : (
@@ -513,7 +552,9 @@ export default function OpenSourcePage() {
                           )}
                         </td>
                         <td className="py-3.5 px-4 text-zinc-300 font-mono text-[11px] font-bold">
-                          {project.linesChanged || <span className="text-zinc-700 font-normal">—</span>}
+                          {project.linesChanged || (
+                            <span className="text-zinc-700 font-normal">—</span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4 text-zinc-500 font-mono text-[11px]">
                           {project.timeline && project.timeline.length > 0 ? (
@@ -540,7 +581,11 @@ export default function OpenSourcePage() {
                               onClick={() => handleDelete(project.id)}
                               className="text-[11px] font-semibold text-red-500/90 hover:text-red-400 transition-colors bg-red-950/10 hover:bg-red-950/20 px-2 py-1 rounded border border-red-900/10 disabled:opacity-35 inline-flex items-center justify-center min-w-[50px]"
                             >
-                              {processingId === project.id ? <Loader2 size={10} className="animate-spin" /> : "Purge"}
+                              {processingId === project.id ? (
+                                <Loader2 size={10} className="animate-spin" />
+                              ) : (
+                                "Purge"
+                              )}
                             </button>
                           </div>
                         </td>
@@ -554,7 +599,6 @@ export default function OpenSourcePage() {
         </>
       )}
 
-      {/* MODAL CONFIGURATION PANELS */}
       {showForm && portfolioId && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
           <div className="max-h-[92vh] sm:max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-t-2xl sm:rounded-xl border-t sm:border border-zinc-800 bg-[#0C0C0E] p-4 sm:p-6 text-white shadow-2xl relative">
@@ -574,7 +618,9 @@ export default function OpenSourcePage() {
             <div className="mb-4 flex items-center gap-2 border-b border-zinc-900/80 pb-3 sticky top-0 bg-[#0C0C0E] z-10">
               <Sparkles size={14} className="text-blue-400 animate-pulse" />
               <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                {selectedProject ? "Modify Upstream Entry Matrix" : "Integrate Upstream Module Entry"}
+                {selectedProject
+                  ? "Modify Upstream Entry Matrix"
+                  : "Integrate Upstream Module Entry"}
               </h2>
             </div>
 

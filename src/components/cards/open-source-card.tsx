@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-  GitBranch, 
-  GitPullRequest, 
-  AlertCircle, 
-  Sparkles, 
-  Edit3, 
-  Trash2, 
-  Loader2, 
+import {
+  GitBranch,
+  GitPullRequest,
+  AlertCircle,
+  Sparkles,
+  Edit3,
+  Trash2,
+  Loader2,
   AlertTriangle,
   Image as ImageIcon,
   ExternalLink,
@@ -16,7 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
 } from "lucide-react";
 
 type TimelineItem = {
@@ -48,7 +48,8 @@ interface Props {
   onDelete?: () => void;
 }
 
-const DEFAULT_OS_IMAGE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
+const DEFAULT_OS_IMAGE =
+  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
 
 export default function OpenSourceCard({
   repositoryName,
@@ -72,8 +73,6 @@ export default function OpenSourceCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<string | null>(null);
-  
-  // Controls the expandable section for technical metadata fields and the progress timeline
   const [showMore, setShowMore] = useState(false);
 
   const slideImages = [
@@ -133,16 +132,19 @@ export default function OpenSourceCard({
     }
   };
 
-  const hasExtraMetadata = Boolean(pullRequestTitle || issueTitle || linesChanged || contributionType || (timeline && timeline.length > 0));
+  const hasExtraMetadata = Boolean(
+    pullRequestTitle ||
+    issueTitle ||
+    linesChanged ||
+    contributionType ||
+    (timeline && timeline.length > 0)
+  );
 
   return (
-    /* Adjusted layout bounds to max-w-xl to grant expanded width architecture constraints */
     <div className="group/os-card relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] shadow-sm transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.8)] max-w-xl w-full mx-auto">
-      
       <div>
-        {/* Optimized Slider Frame Setup */}
         <div className="relative h-44 w-full overflow-hidden bg-zinc-950 border-b border-zinc-900/50">
-          <div 
+          <div
             className="flex h-full w-full transition-transform duration-500 ease-out"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
@@ -157,24 +159,28 @@ export default function OpenSourceCard({
             ))}
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#0C0C0E] via-[#0C0C0E]/20 to-transparent pointer-events-none" />
-          
+
           <div className="absolute top-3 left-3 flex items-center gap-1.5 pointer-events-none">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900/90 text-zinc-400 backdrop-blur-md shadow-sm">
               <GitBranch size={12} />
             </div>
             {status && (
-              <span className={`inline-flex items-center rounded bg-zinc-900/90 px-1.5 py-0.5 text-[9px] font-semibold border backdrop-blur-md shadow-sm ${getStatusStyles(status)}`}>
+              <span
+                className={`inline-flex items-center rounded bg-zinc-900/90 px-1.5 py-0.5 text-[9px] font-semibold border backdrop-blur-md shadow-sm ${getStatusStyles(status)}`}
+              >
                 {status}
               </span>
             )}
           </div>
 
-          {!coverImage?.trim() && architectureDiagrams.length === 0 && contributionScreenshots.length === 0 && (
-            <div className="absolute bottom-3 left-3 right-3 flex items-center gap-1 rounded border border-blue-500/10 bg-blue-500/5 px-2 py-0.5 text-[9px] text-blue-400/90 backdrop-blur-md pointer-events-none">
-              <ImageIcon size={10} className="shrink-0" />
-              <span className="truncate">We recommend adding contribution screenshots</span>
-            </div>
-          )}
+          {!coverImage?.trim() &&
+            architectureDiagrams.length === 0 &&
+            contributionScreenshots.length === 0 && (
+              <div className="absolute bottom-3 left-3 right-3 flex items-center gap-1 rounded border border-blue-500/10 bg-blue-500/5 px-2 py-0.5 text-[9px] text-blue-400/90 backdrop-blur-md pointer-events-none">
+                <ImageIcon size={10} className="shrink-0" />
+                <span className="truncate">We recommend adding contribution screenshots</span>
+              </div>
+            )}
 
           {slideImages.length > 1 && (
             <>
@@ -205,16 +211,13 @@ export default function OpenSourceCard({
           )}
         </div>
 
-        {/* Card Body Space */}
         <div className="p-5 space-y-4">
           <div className="space-y-0.5">
             <h3 className="font-bold text-zinc-100 text-sm sm:text-base tracking-tight break-all truncate group-hover/os-card:text-white transition-colors">
               {repositoryName}
             </h3>
             {contributionTitle && (
-              <p className="text-xs font-medium text-zinc-400 truncate">
-                {contributionTitle}
-              </p>
+              <p className="text-xs font-medium text-zinc-400 truncate">{contributionTitle}</p>
             )}
           </div>
 
@@ -224,7 +227,6 @@ export default function OpenSourceCard({
             </p>
           )}
 
-          {/* Expandable Module Toggle Controller */}
           {hasExtraMetadata && (
             <button
               type="button"
@@ -236,7 +238,6 @@ export default function OpenSourceCard({
             </button>
           )}
 
-          {/* Conditional Drawer content wrapper */}
           {showMore && (
             <div className="space-y-3.5 pt-0.5 animate-fadeIn">
               {(pullRequestTitle || issueTitle || linesChanged || contributionType) && (
@@ -268,10 +269,11 @@ export default function OpenSourceCard({
                 </div>
               )}
 
-              {/* Internalized Card Milestone Timeline Nesting Module */}
               {timeline && timeline.length > 0 && (
                 <div className="space-y-2 rounded-lg border border-zinc-900 bg-zinc-950/40 p-3">
-                  <span className="text-[10px] font-medium tracking-wider text-zinc-600 uppercase block font-sans">Project Milestones</span>
+                  <span className="text-[10px] font-medium tracking-wider text-zinc-600 uppercase block font-sans">
+                    Project Milestones
+                  </span>
                   <div className="relative pl-3 border-l border-zinc-800 space-y-3">
                     {timeline.map((item) => (
                       <div key={item.id} className="relative text-xs space-y-0.5 group/node">
@@ -279,13 +281,17 @@ export default function OpenSourceCard({
                           <div className="h-1 w-1 rounded-full bg-zinc-500 group-hover/os-card:bg-blue-400 transition-colors" />
                         </div>
                         <div className="flex items-center justify-between gap-2">
-                          <div className="font-semibold text-zinc-300 truncate">{item.milestone}</div>
+                          <div className="font-semibold text-zinc-300 truncate">
+                            {item.milestone}
+                          </div>
                           <span className="text-[10px] font-mono bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800 text-zinc-400 shrink-0">
                             {item.progress}%
                           </span>
                         </div>
                         {item.description && (
-                          <p className="text-[11px] text-zinc-500 leading-relaxed font-sans">{item.description}</p>
+                          <p className="text-[11px] text-zinc-500 leading-relaxed font-sans">
+                            {item.description}
+                          </p>
                         )}
                       </div>
                     ))}
@@ -359,7 +365,9 @@ export default function OpenSourceCard({
 
         {showDeleteConfirm ? (
           <div className="flex flex-col gap-1 rounded-lg border border-zinc-800 bg-zinc-950 p-2 animate-fadeIn">
-            <p className="text-[10px] font-medium text-zinc-400 text-center">Confirm record deletion?</p>
+            <p className="text-[10px] font-medium text-zinc-400 text-center">
+              Confirm record deletion?
+            </p>
             <div className="flex gap-1.5">
               <button
                 type="button"
@@ -402,7 +410,6 @@ export default function OpenSourceCard({
           </div>
         )}
       </div>
-
     </div>
   );
 }

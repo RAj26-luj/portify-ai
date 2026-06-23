@@ -1,9 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { PortfolioStatus } from "@prisma/client";
 
-/**
- * ALWAYS USE USER ID (NOT portfolioId)
- */
 export async function getPortfolio(userId: string) {
   if (!userId) return null;
 
@@ -181,11 +178,6 @@ export async function getOrCreatePortfolio(userId: string, username: string) {
   return portfolio;
 }
 
-/**
- * PUBLIC PORTFOLIO (FIXED)
- * IMPORTANT: removed isPublic + PUBLISHED filter
- * so updates reflect instantly
- */
 export async function getPortfolioByUsername(username: string) {
   return prisma.portfolio.findFirst({
     where: {
@@ -249,9 +241,6 @@ export async function deletePortfolio(portfolioId: string) {
   });
 }
 
-/**
- * PORTFOLIO COMPLETION SCORE
- */
 export async function getPortfolioCompletion(userId: string) {
   const portfolio = await prisma.portfolio.findUnique({
     where: { userId },

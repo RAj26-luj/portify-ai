@@ -8,15 +8,12 @@ interface Props {
 }
 
 export default async function AchievementsPage({ params }: Props) {
-  // 1. Fetch public metadata checking union response frames layout rules
   const result = await getPortfolioByUsername(params.username);
 
-  // 🛡️ Discriminated Union Guard: Cleanly separates validation constraints before unpacking fields
   if (!result || !result.success || !result.data || !result.data.isPublic) {
     return notFound();
   }
 
-  // ✅ Safe Context:result.data is completely type-narrowed here
   const portfolio = result.data;
   const achievements = (portfolio as any).achievements ?? [];
 
@@ -40,24 +37,14 @@ export default async function AchievementsPage({ params }: Props) {
                 )}
               </div>
 
-              {a.issuer && (
-                <p className="text-sm text-gray-600">{a.issuer}</p>
-              )}
+              {a.issuer && <p className="text-sm text-gray-600">{a.issuer}</p>}
 
-              {a.description && (
-                <p className="text-xs text-gray-500">{a.description}</p>
-              )}
+              {a.description && <p className="text-xs text-gray-500">{a.description}</p>}
 
-              {a.rank && (
-                <p className="text-xs text-gray-500">Rank: {a.rank}</p>
-              )}
+              {a.rank && <p className="text-xs text-gray-500">Rank: {a.rank}</p>}
 
               {a.certificateUrl && (
-                <a
-                  href={a.certificateUrl}
-                  target="_blank"
-                  className="text-xs text-blue-600"
-                >
+                <a href={a.certificateUrl} target="_blank" className="text-xs text-blue-600">
                   View Certificate
                 </a>
               )}

@@ -8,15 +8,12 @@ interface Props {
 }
 
 export default async function CodingProfilesPage({ params }: Props) {
-  // 1. Fetch public portfolio specifications from server response envelope
   const result = await getPortfolioByUsername(params.username);
 
-  // 🛡️ Discriminated Union Guard: Enforces strict data availability and isPublic canvas matching rules
   if (!result || !result.success || !result.data || !result.data.isPublic) {
     return notFound();
   }
 
-  // ✅ Safe Context: Accessing .codingProfiles is guaranteed type-narrowed out of the success lane
   const portfolio = result.data;
   const profiles = (portfolio as any).codingProfiles ?? [];
 
@@ -34,9 +31,7 @@ export default async function CodingProfilesPage({ params }: Props) {
                 <p className="font-semibold">{p.platform}</p>
 
                 {p.rank && (
-                  <span className="text-[10px] px-2 py-1 bg-gray-100 rounded">
-                    {p.rank}
-                  </span>
+                  <span className="text-[10px] px-2 py-1 bg-gray-100 rounded">{p.rank}</span>
                 )}
               </div>
 
@@ -51,9 +46,7 @@ export default async function CodingProfilesPage({ params }: Props) {
 
               <div className="flex flex-wrap gap-2 pt-2 text-xs">
                 {p.problemsSolved && (
-                  <span className="px-2 py-1 bg-gray-100 rounded">
-                    Solved: {p.problemsSolved}
-                  </span>
+                  <span className="px-2 py-1 bg-gray-100 rounded">Solved: {p.problemsSolved}</span>
                 )}
 
                 {p.contestsAttended && (
@@ -64,11 +57,7 @@ export default async function CodingProfilesPage({ params }: Props) {
               </div>
 
               <div className="pt-2">
-                <a
-                  href={p.profileUrl}
-                  target="_blank"
-                  className="text-xs text-blue-600"
-                >
+                <a href={p.profileUrl} target="_blank" className="text-xs text-blue-600">
                   View Profile
                 </a>
               </div>

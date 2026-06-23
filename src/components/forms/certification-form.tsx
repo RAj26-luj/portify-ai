@@ -1,13 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Terminal, Calendar, Award, FileText, Image as ImageIcon, Globe, AlertCircle, CheckCircle2 } from "lucide-react";
 import {
-  createCertification,
-  updateCertification,
-} from "@/actions/certification";
+  Loader2,
+  Terminal,
+  Calendar,
+  Award,
+  FileText,
+  Image as ImageIcon,
+  Globe,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+import { createCertification, updateCertification } from "@/actions/certification";
 import { useUpload } from "@/hooks/use-upload";
 import { CLOUDINARY_FOLDERS } from "@/lib/cloudinary-folders";
+import { deleteCloudinaryUrl } from "@/actions/upload";
 
 type Props = {
   portfolioId?: string;
@@ -30,8 +38,7 @@ export default function CertificationForm({
   const [certificatePdf, setCertificatePdf] = useState("");
   const [issueDate, setIssueDate] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
-  
-  // Dynamic skill tag states
+
   const [skillsList, setSkillsList] = useState<string[]>([]);
   const [currentSkillInput, setCurrentSkillInput] = useState("");
 
@@ -39,11 +46,9 @@ export default function CertificationForm({
   const [loading, setLoading] = useState(false);
   const { upload } = useUpload();
 
-  // Interactive Validation & Delta State Flags
   const [isTouched, setIsTouched] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // ✅ load data when editing
   useEffect(() => {
     if (!initialData) return;
 
@@ -55,20 +60,19 @@ export default function CertificationForm({
     setCertificatePdf(initialData.certificatePdf || "");
 
     setIssueDate(
-      initialData.issueDate
-        ? new Date(initialData.issueDate).toISOString().split("T")[0]
-        : ""
+      initialData.issueDate ? new Date(initialData.issueDate).toISOString().split("T")[0] : ""
     );
 
     setExpiryDate(
-      initialData.expiryDate
-        ? new Date(initialData.expiryDate).toISOString().split("T")[0]
-        : ""
+      initialData.expiryDate ? new Date(initialData.expiryDate).toISOString().split("T")[0] : ""
     );
 
     if (Array.isArray(initialData.skillsCovered)) {
       setSkillsList(initialData.skillsCovered);
-    } else if (typeof initialData.skillsCovered === "string" && initialData.skillsCovered.trim() !== "") {
+    } else if (
+      typeof initialData.skillsCovered === "string" &&
+      initialData.skillsCovered.trim() !== ""
+    ) {
       setSkillsList(initialData.skillsCovered.split(",").map((s: string) => s.trim()));
     } else {
       setSkillsList([]);
@@ -77,7 +81,6 @@ export default function CertificationForm({
     setFeatured(initialData.featured || false);
   }, [initialData]);
 
-  // Track global dataset property deltas to safely configure form interaction buttons
   useEffect(() => {
     const isNameChanged = name.trim() !== (initialData?.name || "");
     const isIssuerChanged = issuer.trim() !== (initialData?.issuer || "");
@@ -100,24 +103,47 @@ export default function CertificationForm({
     const initialSkills = Array.isArray(initialData?.skillsCovered)
       ? initialData.skillsCovered
       : typeof initialData?.skillsCovered === "string" && initialData.skillsCovered.trim() !== ""
-      ? initialData.skillsCovered.split(",").map((s: string) => s.trim())
-      : [];
+        ? initialData.skillsCovered.split(",").map((s: string) => s.trim())
+        : [];
     const areSkillsChanged = JSON.stringify(skillsList) !== JSON.stringify(initialSkills);
 
     setHasChanges(
-      isNameChanged || isIssuerChanged || isCredIdChanged || isCredUrlChanged ||
-      isImageChanged || isPdfChanged || isIssueDateChanged || isExpiryDateChanged ||
-      isFeaturedChanged || areSkillsChanged
+      isNameChanged ||
+        isIssuerChanged ||
+        isCredIdChanged ||
+        isCredUrlChanged ||
+        isImageChanged ||
+        isPdfChanged ||
+        isIssueDateChanged ||
+        isExpiryDateChanged ||
+        isFeaturedChanged ||
+        areSkillsChanged
     );
-  }, [name, issuer, credentialId, credentialUrl, certificateImage, certificatePdf, issueDate, expiryDate, featured, skillsList, initialData]);
+  }, [
+    name,
+    issuer,
+    credentialId,
+    credentialUrl,
+    certificateImage,
+    certificatePdf,
+    issueDate,
+    expiryDate,
+    featured,
+    skillsList,
+    initialData,
+  ]);
 
-  // Reactive Custom Form Constraint Evaluation Flags
   const isNameInvalid = name.trim() === "";
   const isIssuerInvalid = issuer.trim() === "";
   const isIssueDateInvalid = !issueDate;
-  const isExpiryDateInvalid = !!(issueDate && expiryDate && new Date(expiryDate) < new Date(issueDate));
-  
-  const isFormInvalid = isNameInvalid || isIssuerInvalid || isIssueDateInvalid || isExpiryDateInvalid;
+  const isExpiryDateInvalid = !!(
+    issueDate &&
+    expiryDate &&
+    new Date(expiryDate) < new Date(issueDate)
+  );
+
+  const isFormInvalid =
+    isNameInvalid || isIssuerInvalid || isIssueDateInvalid || isExpiryDateInvalid;
 
   function handleAddSkill() {
     const trimmed = currentSkillInput.trim();
@@ -132,20 +158,20 @@ export default function CertificationForm({
   }
 
   async function handleImageUpload(file: File) {
-    const res = await upload(
-      file,
-      CLOUDINARY_FOLDERS.certificates,
-      "image"
-    );
+    if (certificateImage) {
+      await deleteCloudinaryUrl(certificateImage, "image");
+    }
+
+    const res = await upload(file, CLOUDINARY_FOLDERS.certificates, "image");
     return res.url;
   }
 
   async function handlePdfUpload(file: File) {
-    const res = await upload(
-      file,
-      CLOUDINARY_FOLDERS.certificates,
-      "document"
-    );
+    if (certificatePdf) {
+      await deleteCloudinaryUrl(certificatePdf, "raw");
+    }
+
+    const res = await upload(file, CLOUDINARY_FOLDERS.certificates, "document");
     return res.url;
   }
 
@@ -189,21 +215,18 @@ export default function CertificationForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 sm:p-4 select-none animate-fadeIn">
-      
-      {/* ELITE CYBERPUNK PREMIUM DARK SURFACED CONTAINER */}
-      <form 
-        onSubmit={handleSubmit} 
+      <form
+        onSubmit={handleSubmit}
         className="w-full max-w-sm sm:max-w-xl space-y-4 sm:space-y-5 rounded-xl bg-[#0C0C0E] p-4 sm:p-6 text-zinc-300 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] border border-white/10 max-h-[92vh] overflow-y-auto font-sans selection:bg-blue-500/30 selection:text-white"
       >
-        {/* HEADER */}
         <div className="flex justify-between items-center border-b border-white/5 pb-2.5 sm:pb-3">
           <h2 className="font-black text-base sm:text-xl text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tight flex items-center gap-1.5">
             <Award size={16} className="text-blue-400 shrink-0" />
             <span>{initialData?.id ? "Edit Certification" : "Add Certification"}</span>
           </h2>
 
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={onClose}
             className="text-zinc-500 hover:text-white transition-colors p-1 text-base sm:text-xl font-bold focus:outline-none"
           >
@@ -211,16 +234,20 @@ export default function CertificationForm({
           </button>
         </div>
 
-        {/* GUIDANCE INFO BLOCK */}
         <div className="bg-[#121214] border border-white/5 rounded-lg p-3 text-[11px] text-zinc-400 leading-relaxed font-sans">
-          <strong className="text-zinc-200">Certification Node Mapping:</strong> Fill out the credential metadata framework fields below to register this credential within your profile dashboard context layout view. We highly recommend completing the skills sector to enhance discovery telemetry.
+          <strong className="text-zinc-200">Certification Node Mapping:</strong> Fill out the
+          credential metadata framework fields below to register this credential within your profile
+          dashboard context layout view. We highly recommend completing the skills sector to enhance
+          discovery telemetry.
         </div>
 
-        {/* INPUT FIELDS AREA */}
         <div className="space-y-3.5 sm:space-y-4">
           <div className="flex flex-col gap-1">
             <label className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center justify-between">
-              <span>Certification Name <span className="text-red-400 font-sans font-bold">*(Required)</span></span>
+              <span>
+                Certification Name{" "}
+                <span className="text-red-400 font-sans font-bold">*(Required)</span>
+              </span>
               <div className="flex items-center gap-1.5">
                 {isTouched && isNameInvalid ? (
                   <span className="text-[9px] font-mono text-red-400 lowercase flex items-center gap-1 bg-red-500/5 px-1.5 py-0.5 rounded border border-red-500/10">
@@ -232,7 +259,9 @@ export default function CertificationForm({
                   </span>
                 ) : null}
                 {hasChanges && (
-                  <span className="text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1 py-0.5 rounded uppercase font-bold tracking-normal">edited</span>
+                  <span className="text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1 py-0.5 rounded uppercase font-bold tracking-normal">
+                    edited
+                  </span>
                 )}
                 <Terminal size={10} className="text-zinc-700 hidden sm:block" />
               </div>
@@ -250,12 +279,17 @@ export default function CertificationForm({
                 ⚠️ Field validation missed: Name index parameters cannot remain unpopulated.
               </p>
             )}
-            <span className="text-[10px] text-zinc-500 leading-tight">We highly recommend providing the precise credential name string to preserve maximum alignment metrics.</span>
+            <span className="text-[10px] text-zinc-500 leading-tight">
+              We highly recommend providing the precise credential name string to preserve maximum
+              alignment metrics.
+            </span>
           </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center justify-between">
-              <span>Issuer Entity <span className="text-red-400 font-sans font-bold">*(Required)</span></span>
+              <span>
+                Issuer Entity <span className="text-red-400 font-sans font-bold">*(Required)</span>
+              </span>
               <div className="flex items-center gap-1">
                 {isTouched && isIssuerInvalid ? (
                   <span className="text-[9px] font-mono text-red-400 lowercase flex items-center gap-1 bg-red-500/5 px-1.5 py-0.5 rounded border border-red-500/10">
@@ -281,13 +315,21 @@ export default function CertificationForm({
                 ⚠️ Field validation missed: Issuer entity parameters must be defined.
               </p>
             )}
-            <span className="text-[10px] text-zinc-500 leading-tight">The structural corporate authority body that verified this token (e.g. Microsoft, Google, Scrum Alliance).</span>
+            <span className="text-[10px] text-zinc-500 leading-tight">
+              The structural corporate authority body that verified this token (e.g. Microsoft,
+              Google, Scrum Alliance).
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div className="flex flex-col gap-1">
               <label className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono flex justify-between">
-                <span>Credential ID <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Credential ID{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={credentialId}
@@ -300,7 +342,12 @@ export default function CertificationForm({
 
             <div className="flex flex-col gap-1">
               <label className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono flex justify-between">
-                <span>Credential URL <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Credential URL{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={credentialUrl}
@@ -312,18 +359,25 @@ export default function CertificationForm({
             </div>
           </div>
 
-          {/* ASSET ACQUISITION HINT FOR FILE PREVIEWS */}
           <div className="text-[9px] sm:text-[10px] text-amber-400 font-mono bg-amber-500/5 border border-amber-500/10 rounded p-2.5 leading-normal flex items-start gap-1.5">
             <Globe size={12} className="shrink-0 mt-0.5 text-amber-500" />
             <span>
-              <strong>Emblem Asset Advice:</strong> For branding logos or credential icons, we recommend searching for the entity brand logo (e.g., AWS badge SVG) via Google Image Search, right-clicking to click <strong>&quot;Copy Image Address / URL&quot;</strong>, and storing it directly into live references.
+              <strong>Emblem Asset Advice:</strong> For branding logos or credential icons, we
+              recommend searching for the entity brand logo (e.g., AWS badge SVG) via Google Image
+              Search, right-clicking to click <strong>&quot;Copy Image Address / URL&quot;</strong>,
+              and storing it directly into live references.
             </span>
           </div>
 
           <div className="flex flex-col gap-1 border-t border-white/5 pt-3">
             <label className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-1">
               <ImageIcon size={11} className="text-zinc-600" />
-              <span>Certificate Image Thumbnail <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Certificate Image Thumbnail{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
             </label>
 
             <input
@@ -352,7 +406,12 @@ export default function CertificationForm({
           <div className="flex flex-col gap-1">
             <label className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-1">
               <FileText size={11} className="text-zinc-600" />
-              <span>Certificate PDF Document <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Certificate PDF Document{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
             </label>
 
             <input
@@ -384,12 +443,18 @@ export default function CertificationForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 border-t border-white/5 pt-3">
             <div className="flex flex-col gap-1">
               <label className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center justify-between">
-                <span>Issue Date <span className="text-red-400 font-sans font-bold">*(Required)</span></span>
+                <span>
+                  Issue Date <span className="text-red-400 font-sans font-bold">*(Required)</span>
+                </span>
                 <div>
                   {isTouched && isIssueDateInvalid ? (
-                    <span className="text-[9px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10">missing_date</span>
+                    <span className="text-[9px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10">
+                      missing_date
+                    </span>
                   ) : issueDate ? (
-                    <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/5 px-1 rounded border border-emerald-500/10">ready</span>
+                    <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/5 px-1 rounded border border-emerald-500/10">
+                      ready
+                    </span>
                   ) : null}
                 </div>
               </label>
@@ -405,9 +470,16 @@ export default function CertificationForm({
 
             <div className="flex flex-col gap-1">
               <label className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center justify-between">
-                <span>Expiry Date <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Expiry Date{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
                 {isTouched && isExpiryDateInvalid && (
-                  <span className="text-[9px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10">invalid_timeline</span>
+                  <span className="text-[9px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10">
+                    invalid_timeline
+                  </span>
                 )}
               </label>
               <input
@@ -426,10 +498,14 @@ export default function CertificationForm({
             </div>
           </div>
 
-          {/* DYNAMIC SKILL ADD BAR COMPONENT WITH ADD ICON BUTTON */}
           <div className="flex flex-col gap-1 border-t border-white/5 pt-3">
-            <label className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono">Skills Covered <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></label>
-            
+            <label className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono">
+              Skills Covered{" "}
+              <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                *(Optional)
+              </span>
+            </label>
+
             <div className="flex gap-2">
               <input
                 value={currentSkillInput}
@@ -454,7 +530,6 @@ export default function CertificationForm({
               </button>
             </div>
 
-            {/* DYNAMIC PILL CONTAINER */}
             {skillsList.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-1.5 bg-[#0A0A0B] border border-white/5 p-2 rounded-lg max-h-28 overflow-y-auto">
                 {skillsList.map((skill, index) => (
@@ -478,7 +553,6 @@ export default function CertificationForm({
           </div>
         </div>
 
-        {/* FEATURED CHECKBOX */}
         <div className="pt-1.5">
           <label className="flex items-center gap-2 text-xs sm:text-sm font-bold text-zinc-400 select-none cursor-pointer group">
             <input
@@ -488,11 +562,12 @@ export default function CertificationForm({
               className="w-4 h-4 border-white/10 rounded text-blue-600 focus:ring-0 focus:ring-offset-0 bg-[#0A0A0B] cursor-pointer"
               disabled={loading}
             />
-            <span className="group-hover:text-white transition-colors">Feature this certification on my main profile dashboard</span>
+            <span className="group-hover:text-white transition-colors">
+              Feature this certification on my main profile dashboard
+            </span>
           </label>
         </div>
 
-        {/* SUBMIT BUTTON */}
         <div className="flex gap-2 pt-2 border-t border-white/5">
           <button
             type="button"
@@ -502,7 +577,7 @@ export default function CertificationForm({
           >
             Cancel
           </button>
-          
+
           <button
             type="submit"
             disabled={loading || isFormInvalid || (!hasChanges && initialData?.id !== undefined)}
@@ -515,7 +590,7 @@ export default function CertificationForm({
               </>
             ) : !hasChanges && initialData?.id !== undefined ? (
               "No Changes Detected"
-          ) : initialData?.id ? (
+            ) : initialData?.id ? (
               "Update Certification"
             ) : (
               "Save Certification"

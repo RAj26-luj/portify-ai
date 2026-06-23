@@ -3,24 +3,30 @@
 import { prisma } from "@/lib/prisma";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
-/**
- * Transforms system publication data validation errors or internal database timeouts 
- * into structured, client-friendly signatures optimized for quick UI flash alerts.
- */
+// Error
 function handlePublicationServerError(error: any, fallbackMessage: string) {
   console.error("Publication Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("portfolioId required") || errorMessage.includes("portfolioId not found")) {
+  if (
+    errorMessage.includes("portfolioId required") ||
+    errorMessage.includes("portfolioId not found")
+  ) {
     return {
       success: false,
-      error: "Authentication reference token is missing. Could not link academic research to a portfolio profile.",
+      error:
+        "Authentication reference token is missing. Could not link academic research to a portfolio profile.",
     };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
-      error: "Research publication datastore is carrying out system maintenance. Please re-submit changes.",
+      error:
+        "Research publication datastore is carrying out system maintenance. Please re-submit changes.",
     };
   }
 
@@ -48,11 +54,17 @@ export async function createPublication(data: {
     const resolvedPortfolioId = data.portfolioId || (await getPortfolioId());
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Portfolio specification profile identification target not found." };
+      return {
+        success: false,
+        error: "Portfolio specification profile identification target not found.",
+      };
     }
 
     if (!data.title) {
-      return { success: false, error: "Research publication paper title field parameter is required." };
+      return {
+        success: false,
+        error: "Research publication paper title field parameter is required.",
+      };
     }
 
     const count = await prisma.publication.count({
@@ -83,7 +95,10 @@ export async function createPublication(data: {
 
     return { success: true, data: result };
   } catch (error) {
-    return handlePublicationServerError(error, "Failed to instantiate new research publication record item details.");
+    return handlePublicationServerError(
+      error,
+      "Failed to instantiate new research publication record item details."
+    );
   }
 }
 
@@ -108,7 +123,10 @@ export async function updatePublication(
 ) {
   try {
     if (!id) {
-      return { success: false, error: "Missing unique structural identification mapping reference string key." };
+      return {
+        success: false,
+        error: "Missing unique structural identification mapping reference string key.",
+      };
     }
 
     const result = await prisma.publication.update({
@@ -118,7 +136,10 @@ export async function updatePublication(
 
     return { success: true, data: result };
   } catch (error) {
-    return handlePublicationServerError(error, "Failed to apply scientific entry modifications back into database store.");
+    return handlePublicationServerError(
+      error,
+      "Failed to apply scientific entry modifications back into database store."
+    );
   }
 }
 
@@ -138,10 +159,7 @@ export async function getPublications(portfolioId: string) {
       where: {
         portfolioId: resolvedPortfolioId,
       },
-      orderBy: [
-        { displayOrder: "asc" },
-        { createdAt: "desc" },
-      ],
+      orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
     });
 
     return { success: true, data };
@@ -165,14 +183,21 @@ export async function getPublicationById(id: string) {
 
     return { success: true, data };
   } catch (error) {
-    return handlePublicationServerError(error, "Failed to cross-reference system parameter tracking records lines for this paper.");
+    return handlePublicationServerError(
+      error,
+      "Failed to cross-reference system parameter tracking records lines for this paper."
+    );
   }
 }
 
 export async function deletePublication(id: string) {
   try {
     if (!id) {
-      return { success: false, error: "Missing literature index reference trace tracking key pointer. Removal sequence aborted." };
+      return {
+        success: false,
+        error:
+          "Missing literature index reference trace tracking key pointer. Removal sequence aborted.",
+      };
     }
 
     const result = await prisma.publication.delete({
@@ -181,6 +206,9 @@ export async function deletePublication(id: string) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handlePublicationServerError(error, "The specified scientific index publication row could not be successfully cleared.");
+    return handlePublicationServerError(
+      error,
+      "The specified scientific index publication row could not be successfully cleared."
+    );
   }
 }

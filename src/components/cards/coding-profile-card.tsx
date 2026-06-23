@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  Code2, 
-  Trophy, 
-  Globe, 
-  CheckCircle2, 
-  Calendar, 
+import {
+  Code2,
+  Trophy,
+  Globe,
+  CheckCircle2,
+  Calendar,
   Award,
   Image as ImageIcon,
   Edit3,
   Trash2,
   Loader2,
   AlertTriangle,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 
 interface Props {
@@ -56,8 +56,8 @@ export default function CodingProfileCard({
   const [errorFeedback, setErrorFeedback] = useState<string | null>(null);
 
   const hasCustomImage = Boolean(iconUrl?.trim());
-  // Default fallback image icon URL if none is present
-  const defaultImageIconUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPVi6Wc7FmkkBMaKOsi7xaFYHKqtpOaEB7oX-Y04flig&s=10";
+  const defaultImageIconUrl =
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPVi6Wc7FmkkBMaKOsi7xaFYHKqtpOaEB7oX-Y04flig&s=10";
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -75,11 +75,10 @@ export default function CodingProfileCard({
 
   return (
     <>
-      {/* MOBILE COMPACT ROW LIST VIEW */}
       <div className="block sm:hidden p-3.5 rounded-xl border border-zinc-950 bg-[#070709] hover:bg-zinc-900/10 transition-all duration-200 w-full">
         <div className="flex items-start gap-3 justify-between">
           <div className="flex items-start gap-2.5 min-w-0 flex-1">
-            <div className="h-8 w-8 shrink-0 rounded-lg border border-zinc-800 bg-zinc-950 p-1 flex items-center justify-center mt-0.5 overflow-hidden">
+            <div className="h-8 w-8 shrink-0 rounded-lg border border-zinc-800 bg-zinc-955 p-1 flex items-center justify-center mt-0.5 overflow-hidden">
               <img
                 src={hasCustomImage ? iconUrl!.trim() : defaultImageIconUrl}
                 alt={`${platform} logo`}
@@ -89,29 +88,21 @@ export default function CodingProfileCard({
             </div>
 
             <div className="min-w-0 flex-1">
-              <h3 className="text-xs font-bold text-zinc-200 truncate">
-                {platform}
-              </h3>
-              <p className="text-[10px] font-medium text-zinc-500 truncate">
-                @{username}
-              </p>
-              
-              {/* Mini Metrics Row for Mobile View */}
+              <h3 className="text-xs font-bold text-zinc-200 truncate">{platform}</h3>
+              <p className="text-[10px] font-medium text-zinc-500 truncate">@{username}</p>
+
               {(currentRating !== undefined || problemsSolved !== undefined) && (
                 <div className="flex items-center gap-2 mt-1 text-[10px] font-mono text-zinc-600">
                   {currentRating !== undefined && (
                     <span className="text-amber-500/90 font-bold">★ {currentRating}</span>
                   )}
                   {currentRating !== undefined && problemsSolved !== undefined && <span>•</span>}
-                  {problemsSolved !== undefined && (
-                    <span>{problemsSolved} Solved</span>
-                  )}
+                  {problemsSolved !== undefined && <span>{problemsSolved} Solved</span>}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Mobile HUD Controls Actions */}
           <div className="flex items-center gap-1 shrink-0">
             <a
               href={profileUrl}
@@ -138,7 +129,6 @@ export default function CodingProfileCard({
           </div>
         </div>
 
-        {/* Server Action Feedback Architecture for Mobile */}
         {errorFeedback && (
           <div className="mt-2 flex items-center gap-1.5 rounded-md border border-red-500/10 bg-red-500/5 p-1.5 text-[10px] text-red-400">
             <AlertTriangle size={11} className="shrink-0" />
@@ -146,10 +136,11 @@ export default function CodingProfileCard({
           </div>
         )}
 
-        {/* Mobile Deletion Shield Confirmation Inline Card Drawer */}
         {showDeleteConfirm && (
-          <div className="mt-3 p-2 rounded-lg border border-zinc-800 bg-zinc-950 flex items-center justify-between gap-3 animate-fadeIn">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-tight">Confirm Purge?</span>
+          <div className="mt-3 p-2 rounded-lg border border-zinc-800 bg-zinc-955 flex items-center justify-between gap-3 animate-fadeIn">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-tight">
+              Confirm Purge?
+            </span>
             <div className="flex gap-1.5 shrink-0">
               <button
                 type="button"
@@ -172,15 +163,11 @@ export default function CodingProfileCard({
         )}
       </div>
 
-      {/* LAPTOP & DESKTOP FULL PRESENTATION CARD RUNTIME */}
-      {/* Note: Uses h-full and flex-col to expand dynamically to matching parent container layout heights */}
       <div className="hidden sm:flex group/code-card relative flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] p-4 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-zinc-700 hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.7)] max-w-sm w-full mx-auto h-full">
-        
         <div className="space-y-3 flex-1 flex flex-col justify-start">
-          {/* Compact Header Architecture */}
           <div className="flex items-center justify-between gap-2.5">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="h-10 w-10 shrink-0 rounded-lg border border-zinc-800 bg-zinc-950 p-1.5 flex items-center justify-center shadow-inner transition-colors group-hover/code-card:border-zinc-700 overflow-hidden">
+              <div className="h-10 w-10 shrink-0 rounded-lg border border-zinc-800 bg-zinc-955 p-1.5 flex items-center justify-center shadow-inner transition-colors group/code-card:border-zinc-700 overflow-hidden">
                 <img
                   src={hasCustomImage ? iconUrl!.trim() : defaultImageIconUrl}
                   alt={`${platform} logo`}
@@ -193,13 +180,10 @@ export default function CodingProfileCard({
                 <h3 className="font-semibold text-zinc-200 text-sm tracking-tight truncate group-hover/code-card:text-white transition-colors">
                   {platform}
                 </h3>
-                <p className="text-[11px] font-medium text-zinc-500 truncate">
-                  @{username}
-                </p>
+                <p className="text-[11px] font-medium text-zinc-500 truncate">@{username}</p>
               </div>
             </div>
 
-            {/* Interactive Live Redirection Anchor built around the Globe node */}
             <a
               href={profileUrl}
               target="_blank"
@@ -214,23 +198,30 @@ export default function CodingProfileCard({
             </a>
           </div>
 
-          {/* Dynamic Contextual Optimization Prompt */}
           {!hasCustomImage && (
             <div className="flex items-center gap-1.5 rounded-lg border border-blue-500/10 bg-blue-500/5 px-2 py-1 text-[10px] text-blue-400/90">
               <ImageIcon size={11} className="shrink-0 text-blue-400" />
-              <span className="truncate">We recommend adding a custom platform icon for optimized visualization</span>
+              <span className="truncate">
+                We recommend adding a custom platform icon for optimized visualization
+              </span>
             </div>
           )}
 
-          {/* Compact Dashboard Metrics Grid */}
-          {(currentRating !== undefined || maxRating !== undefined || rank || globalRank || problemsSolved !== undefined || contestsAttended !== undefined || activeSince) && (
+          {(currentRating !== undefined ||
+            maxRating !== undefined ||
+            rank ||
+            globalRank ||
+            problemsSolved !== undefined ||
+            contestsAttended !== undefined ||
+            activeSince) && (
             <div className="grid grid-cols-2 gap-1.5 text-[11px] mt-auto">
-              
               {currentRating !== undefined && (
                 <div className="flex items-center gap-1.5 rounded-md border border-zinc-900 bg-zinc-900/20 p-1.5">
                   <Trophy size={11} className="text-zinc-500 shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">Rating</div>
+                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">
+                      Rating
+                    </div>
                     <div className="font-medium text-zinc-300 truncate">{currentRating}</div>
                   </div>
                 </div>
@@ -240,7 +231,9 @@ export default function CodingProfileCard({
                 <div className="flex items-center gap-1.5 rounded-md border border-zinc-900 bg-zinc-900/20 p-1.5">
                   <Award size={11} className="text-zinc-500 shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">Peak</div>
+                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">
+                      Peak
+                    </div>
                     <div className="font-medium text-zinc-300 truncate">{maxRating}</div>
                   </div>
                 </div>
@@ -250,7 +243,9 @@ export default function CodingProfileCard({
                 <div className="flex items-center gap-1.5 rounded-md border border-zinc-900 bg-zinc-900/20 p-1.5">
                   <div className="h-1 w-1 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
                   <div className="min-w-0">
-                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">Tier</div>
+                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">
+                      Tier
+                    </div>
                     <div className="font-medium text-zinc-300 truncate">{rank}</div>
                   </div>
                 </div>
@@ -260,7 +255,9 @@ export default function CodingProfileCard({
                 <div className="flex items-center gap-1.5 rounded-md border border-zinc-900 bg-zinc-900/20 p-1.5">
                   <Globe size={11} className="text-zinc-500 shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">Global</div>
+                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">
+                      Global
+                    </div>
                     <div className="font-medium text-zinc-300 truncate">#{globalRank}</div>
                   </div>
                 </div>
@@ -270,7 +267,9 @@ export default function CodingProfileCard({
                 <div className="flex items-center gap-1.5 rounded-md border border-zinc-900 bg-zinc-900/20 p-1.5">
                   <CheckCircle2 size={11} className="text-zinc-500 shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">Solved</div>
+                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">
+                      Solved
+                    </div>
                     <div className="font-medium text-zinc-300 truncate">{problemsSolved}</div>
                   </div>
                 </div>
@@ -280,7 +279,9 @@ export default function CodingProfileCard({
                 <div className="flex items-center gap-1.5 rounded-md border border-zinc-900 bg-zinc-900/20 p-1.5">
                   <Code2 size={11} className="text-zinc-500 shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">Contests</div>
+                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">
+                      Contests
+                    </div>
                     <div className="font-medium text-zinc-300 truncate">{contestsAttended}</div>
                   </div>
                 </div>
@@ -290,7 +291,9 @@ export default function CodingProfileCard({
                 <div className="flex items-center gap-1.5 rounded-md border border-zinc-900 bg-zinc-900/20 p-1.5 col-span-2">
                   <Calendar size={11} className="text-zinc-500 shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">Active Since</div>
+                    <div className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">
+                      Active Since
+                    </div>
                     <div className="font-medium text-zinc-300 truncate">{activeSince}</div>
                   </div>
                 </div>
@@ -299,7 +302,6 @@ export default function CodingProfileCard({
           )}
         </div>
 
-        {/* Action Error Banner Layer */}
         {errorFeedback && (
           <div className="mt-2.5 flex items-center gap-1.5 rounded-md border border-red-500/10 bg-red-500/5 p-2 text-[11px] text-red-400">
             <AlertTriangle size={12} className="shrink-0" />
@@ -307,10 +309,11 @@ export default function CodingProfileCard({
           </div>
         )}
 
-        {/* Confirmation Overlay Inline State Panel */}
         {showDeleteConfirm ? (
-          <div className="mt-3 flex flex-col gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950 p-2 shrink-0">
-            <p className="text-[11px] font-medium text-zinc-400 px-1 text-center">Delete this profile?</p>
+          <div className="mt-3 flex flex-col gap-1.5 rounded-lg border border-zinc-800 bg-zinc-955 p-2 shrink-0">
+            <p className="text-[11px] font-medium text-zinc-400 px-1 text-center">
+              Delete this profile?
+            </p>
             <div className="flex gap-1.5">
               <button
                 type="button"
@@ -332,7 +335,6 @@ export default function CodingProfileCard({
             </div>
           </div>
         ) : (
-          /* High-Integrity Standard Controls Management Dock Layer */
           <div className="mt-3 flex flex-col gap-1 border-t border-zinc-900 pt-3 shrink-0">
             <div className="flex gap-1.5">
               <button

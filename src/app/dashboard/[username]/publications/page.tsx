@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { 
-  BookOpen, 
-  Plus, 
-  Loader2, 
-  AlertTriangle, 
-  LayoutGrid, 
-  List, 
-  Search, 
-  X, 
-  ArrowUpDown, 
+import {
+  BookOpen,
+  Plus,
+  Loader2,
+  AlertTriangle,
+  LayoutGrid,
+  List,
+  Search,
+  X,
+  ArrowUpDown,
   HelpCircle,
   Sparkles,
   Info,
@@ -20,16 +20,13 @@ import {
   Edit3,
   Trash2,
   Check,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 
 import PublicationForm from "@/components/forms/publication-form";
 import PublicationCard from "@/components/cards/publication-card";
 
-import {
-  getPublications,
-  deletePublication,
-} from "@/actions/publication";
+import { getPublications, deletePublication } from "@/actions/publication";
 
 import { getMyPortfolioId } from "@/actions/portfolio";
 
@@ -75,14 +72,12 @@ export default function PublicationsPage() {
   const [editing, setEditing] = useState<Publication | null>(null);
   const [formOpen, setFormOpen] = useState(false);
 
-  // High-Grade SaaS View Layout, Search Filter, & Operation Safeguard States
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"chronological" | "alphabetical">("chronological");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  
-  // Mobile Confirmation Workflow Safeguard State
+
   const [mobileConfirmDeleteId, setMobileConfirmDeleteId] = useState<string | null>(null);
 
   const load = async (pId?: string) => {
@@ -91,27 +86,32 @@ export default function PublicationsPage() {
       setError(null);
 
       let activeId = pId || portfolioId;
-      
-      // 1. Resolve master portfolio identifier envelope
+
       if (!activeId) {
         const portfolioResult = await getMyPortfolioId();
 
         if (!portfolioResult || !portfolioResult.success || !portfolioResult.data) {
-          throw new Error("error" in portfolioResult && typeof portfolioResult.error === "string" ? portfolioResult.error : "Portfolio context missing.");
+          throw new Error(
+            "error" in portfolioResult && typeof portfolioResult.error === "string"
+              ? portfolioResult.error
+              : "Portfolio context missing."
+          );
         }
 
         activeId = portfolioResult.data;
         setPortfolioId(activeId);
       }
 
-      // 2. Query publications list checking union types safely
       const result = await getPublications(activeId);
 
       if (!result || !result.success || !("data" in result) || !Array.isArray(result.data)) {
-        throw new Error("error" in result && typeof result.error === "string" ? result.error : "Failed to load publications.");
+        throw new Error(
+          "error" in result && typeof result.error === "string"
+            ? result.error
+            : "Failed to load publications."
+        );
       }
 
-      // ✅ Safe Narrowing: Typescript understands result.data matches the expected array structure
       setSections(
         result.data.map((publication: any) => ({
           id: publication.id,
@@ -126,7 +126,9 @@ export default function PublicationsPage() {
           publicationUrl: publication.publicationUrl ?? null,
           pdfUrl: publication.pdfUrl ?? null,
           publicationCover: publication.publicationCover ?? null,
-          publicationDate: publication.publicationDate ? new Date(publication.publicationDate) : null,
+          publicationDate: publication.publicationDate
+            ? new Date(publication.publicationDate)
+            : null,
           authors: Array.isArray(publication.authors) ? publication.authors : [],
           featured: !!publication.featured,
           displayOrder: typeof publication.displayOrder === "number" ? publication.displayOrder : 0,
@@ -135,26 +137,35 @@ export default function PublicationsPage() {
         }))
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load peer-reviewed publication indexes.");
+      setError(
+        err instanceof Error ? err.message : "Failed to load peer-reviewed publication indexes."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // 3. Mount core layout tracking metrics hooks
   useEffect(() => {
     (async () => {
       try {
         const result = await getMyPortfolioId();
 
         if (!result || !result.success || !result.data) {
-          throw new Error("error" in result && typeof result.error === "string" ? result.error : "Portfolio validation tracer split.");
+          throw new Error(
+            "error" in result && typeof result.error === "string"
+              ? result.error
+              : "Portfolio validation tracer split."
+          );
         }
 
         setPortfolioId(result.data);
         await load(result.data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to resolve active full-stack portfolio credentials token mapping.");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to resolve active full-stack portfolio credentials token mapping."
+        );
       }
     })();
   }, [username]);
@@ -169,24 +180,34 @@ export default function PublicationsPage() {
     }
 
     if (!isMobile) {
-      const confirmDelete = window.confirm("Are you sure you want to decouple this publication record permanently?");
+      const confirmDelete = window.confirm(
+        "Are you sure you want to decouple this publication record permanently?"
+      );
       if (!confirmDelete) return;
     }
 
     try {
       setProcessingId(id);
       setActionError(null);
-      
+
       const result = await deletePublication(id);
 
       if (!result.success) {
-        throw new Error("error" in result && typeof result.error === "string" ? result.error : "Action execution failed.");
+        throw new Error(
+          "error" in result && typeof result.error === "string"
+            ? result.error
+            : "Action execution failed."
+        );
       }
 
       setSections((prev) => prev.filter((item) => item.id !== id));
       setMobileConfirmDeleteId(null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Unable to safely purge selected research index node. Please try again.");
+      setActionError(
+        err instanceof Error
+          ? err.message
+          : "Unable to safely purge selected research index node. Please try again."
+      );
     } finally {
       setProcessingId(null);
     }
@@ -210,7 +231,8 @@ export default function PublicationsPage() {
 
   const filteredPublications = publications
     .filter((pub) => {
-      const matchCriteria = `${pub.title} ${pub.journal || ""} ${pub.publisher || ""} ${pub.conference || ""} ${pub.authors?.join(" ") || ""}`.toLowerCase();
+      const matchCriteria =
+        `${pub.title} ${pub.journal || ""} ${pub.publisher || ""} ${pub.conference || ""} ${pub.authors?.join(" ") || ""}`.toLowerCase();
       return matchCriteria.includes(searchQuery.toLowerCase());
     })
     .sort((a, b) => {
@@ -222,7 +244,8 @@ export default function PublicationsPage() {
       return dateB - dateA;
     });
 
-  const isResearchIncomplete = publications.length > 0 && publications.some(p => !p.doi || !p.abstract || !p.publicationUrl);
+  const isResearchIncomplete =
+    publications.length > 0 && publications.some((p) => !p.doi || !p.abstract || !p.publicationUrl);
 
   if (loading) {
     return (
@@ -231,7 +254,9 @@ export default function PublicationsPage() {
           <Loader2 className="h-7 w-7 sm:h-8 sm:w-8 animate-spin text-blue-500 z-10" />
           <div className="absolute h-7 w-7 sm:h-8 sm:w-8 border border-zinc-800 rounded-full animate-ping opacity-20" />
         </div>
-        <p className="text-[10px] sm:text-xs uppercase tracking-widest">// Re-indexing peer-reviewed research papers...</p>
+        <p className="text-[10px] sm:text-xs uppercase tracking-widest">
+          // Re-indexing peer-reviewed research papers...
+        </p>
       </div>
     );
   }
@@ -241,9 +266,13 @@ export default function PublicationsPage() {
       <div className="mx-auto max-w-xl my-6 sm:my-12 rounded-none sm:rounded-xl border-y sm:border border-red-500/10 bg-gradient-to-b from-red-500/5 to-transparent p-4 sm:p-5 shadow-2xl flex gap-3 items-start text-white font-sans w-full">
         <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
         <div className="space-y-2 flex-1 min-w-0">
-          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">Ecosystem Dynamic Sync Failure</h4>
-          <p className="text-[11px] sm:text-xs text-red-400/90 leading-relaxed break-words">{error}</p>
-          <button 
+          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
+            Ecosystem Dynamic Sync Failure
+          </h4>
+          <p className="text-[11px] sm:text-xs text-red-400/90 leading-relaxed break-words">
+            {error}
+          </p>
+          <button
             onClick={() => load(portfolioId)}
             className="w-full inline-flex h-8 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 px-3 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white"
           >
@@ -256,18 +285,19 @@ export default function PublicationsPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 text-white w-full max-w-[1440px] mx-auto font-sans antialiased px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-x-hidden">
-      
-      {/* PREMIUM ACTIONS CONTROL HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-4 sm:pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 shadow-sm">
               <BookOpen size={15} />
             </div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-zinc-100">Publications</h1>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-zinc-100">
+              Publications
+            </h1>
           </div>
           <p className="text-[11px] sm:text-xs text-zinc-500 font-medium leading-relaxed max-w-2xl">
-            Manage your research papers, conference drafts, journal logs, and academic articles highlighted across public themes.
+            Manage your research papers, conference drafts, journal logs, and academic articles
+            highlighted across public themes.
           </p>
         </div>
 
@@ -305,16 +335,19 @@ export default function PublicationsPage() {
         </div>
       </div>
 
-      {/* COMPACT INLINE ACTION ERROR PANEL */}
       {actionError && (
         <div className="flex items-start gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-3 text-xs text-red-400 animate-fadeIn w-full">
           <AlertTriangle size={14} className="shrink-0 mt-0.5" />
           <span className="font-medium flex-1 leading-normal">{actionError}</span>
-          <button onClick={() => setActionError(null)} className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2">✕</button>
+          <button
+            onClick={() => setActionError(null)}
+            className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* RECOMMENDED FILL SYSTEM COMPLIANCE WELL */}
       {isResearchIncomplete && (
         <div className="rounded-xl border border-blue-500/10 bg-gradient-to-r from-blue-500/[0.03] to-transparent p-4 flex gap-2.5 items-start animate-fadeIn w-full">
           <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
@@ -323,18 +356,19 @@ export default function PublicationsPage() {
               Missing Portfolio Resource Parameters Detected
             </p>
             <p className="text-[11px] sm:text-xs text-zinc-500 leading-relaxed">
-              We highly recommend filling all fields entirely. Attaching DOIs, abstracts, and direct manuscript links guarantees heavy academic verification weight which upgrades credibility.
+              We highly recommend filling all fields entirely. Attaching DOIs, abstracts, and direct
+              manuscript links guarantees heavy academic verification weight which upgrades
+              credibility.
             </p>
           </div>
         </div>
       )}
 
-      {/* FILTER CONTROL HUBS TOOLBAR */}
       {publications.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-900/50 pb-4">
           <div className="relative w-full sm:max-w-xs md:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 h-3.5 w-3.5" />
-            <input 
+            <input
               type="text"
               placeholder="Search by title, publisher, co-authors..."
               value={searchQuery}
@@ -342,7 +376,10 @@ export default function PublicationsPage() {
               className="w-full pl-9 pr-8 h-8.5 bg-[#09090b] border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors font-sans"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400"
+              >
                 <X size={12} />
               </button>
             )}
@@ -371,22 +408,22 @@ export default function PublicationsPage() {
         </div>
       )}
 
-      {/* RENDER TILES */}
       {filteredPublications.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/10 p-8 sm:p-12 text-center max-w-xl mx-auto my-4 animate-fadeIn w-full">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-900 text-zinc-500 mb-3 shadow-inner">
             <HelpCircle size={18} />
           </div>
           <h3 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
-            {publications.length === 0 ? "Publications Registry Empty" : "No classifications resolved"}
+            {publications.length === 0
+              ? "Publications Registry Empty"
+              : "No classifications resolved"}
           </h3>
-          
+
           <div className="text-[11px] sm:text-xs text-zinc-500 max-w-xs sm:max-w-sm mt-1.5 leading-relaxed font-sans space-y-2 w-full">
             <p>
-              {publications.length === 0 
+              {publications.length === 0
                 ? "Your research paper milestones are clear. Registering journal index blocks or conference materials provides empirical reference matrices that establish rigorous domain authority."
-                : "No matching registered publications found. Clear your active search filtering inputs to reset default catalogs."
-              }
+                : "No matching registered publications found. Clear your active search filtering inputs to reset default catalogs."}
             </p>
           </div>
 
@@ -406,11 +443,10 @@ export default function PublicationsPage() {
         </div>
       ) : (
         <>
-          {/* MOBILE CONDENSED LIST LAYER */}
           <div className="block sm:hidden space-y-2.5 animate-fadeIn">
             {filteredPublications.map((pub) => (
-              <div 
-                key={pub.id} 
+              <div
+                key={pub.id}
                 className="rounded-xl border border-zinc-800 bg-[#0C0C0E] p-4 space-y-3 shadow-sm relative overflow-hidden"
               >
                 {pub.featured && (
@@ -418,9 +454,11 @@ export default function PublicationsPage() {
                     FEATURED
                   </div>
                 )}
-                
+
                 <div className="space-y-1 pr-14">
-                  <h4 className="text-xs font-bold text-zinc-100 leading-snug tracking-tight break-words font-sans">{pub.title}</h4>
+                  <h4 className="text-xs font-bold text-zinc-100 leading-snug tracking-tight break-words font-sans">
+                    {pub.title}
+                  </h4>
                   {(pub.journal || pub.conference || pub.publisher) && (
                     <p className="text-[9px] font-mono font-bold text-blue-400 uppercase tracking-wide truncate">
                       {pub.journal || pub.conference || pub.publisher}
@@ -455,7 +493,11 @@ export default function PublicationsPage() {
                           onClick={() => handleDelete(pub.id, true)}
                           className="h-6 rounded bg-red-600 text-white font-mono text-[9px] font-bold uppercase tracking-wider px-2.5 inline-flex items-center gap-1"
                         >
-                          {processingId === pub.id ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
+                          {processingId === pub.id ? (
+                            <Loader2 size={10} className="animate-spin" />
+                          ) : (
+                            <Check size={10} />
+                          )}
                           <span>Execute</span>
                         </button>
                       </div>
@@ -463,9 +505,14 @@ export default function PublicationsPage() {
                   ) : (
                     <div className="flex items-center justify-between gap-3 w-full">
                       <span className="text-[9px] font-mono text-zinc-600">
-                        {pub.publicationDate ? new Date(pub.publicationDate).toLocaleDateString("en-US", { year: "numeric", month: "short" }) : "—"}
+                        {pub.publicationDate
+                          ? new Date(pub.publicationDate).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                            })
+                          : "—"}
                       </span>
-                      
+
                       <div className="flex items-center gap-1.5 shrink-0">
                         <button
                           type="button"
@@ -491,7 +538,6 @@ export default function PublicationsPage() {
             ))}
           </div>
 
-          {/* DESKTOP RESPONSIVE CONFIGURATIONS SYSTEM */}
           <div className="hidden sm:block">
             {viewMode === "grid" ? (
               <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 animate-fadeIn">
@@ -521,17 +567,27 @@ export default function PublicationsPage() {
                     {filteredPublications.map((pub) => (
                       <tr key={pub.id} className="hover:bg-zinc-900/30 transition-colors group/row">
                         <td className="py-3.5 px-4 min-w-[200px]">
-                          <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-xs">{pub.title}</div>
-                          {pub.doi && <span className="text-[10px] text-zinc-500 font-mono block mt-0.5 truncate max-w-xs">DOI: {pub.doi}</span>}
+                          <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-xs">
+                            {pub.title}
+                          </div>
+                          {pub.doi && (
+                            <span className="text-[10px] text-zinc-500 font-mono block mt-0.5 truncate max-w-xs">
+                              DOI: {pub.doi}
+                            </span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4 text-zinc-400 max-w-xs truncate font-medium">
-                          {pub.journal || pub.conference || pub.publisher || <span className="text-zinc-700 italic">Independent manuscript</span>}
+                          {pub.journal || pub.conference || pub.publisher || (
+                            <span className="text-zinc-700 italic">Independent manuscript</span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4">
                           {pub.authors && pub.authors.length > 0 ? (
                             <div className="flex items-center gap-1 text-zinc-400">
                               <User size={11} className="text-zinc-600 shrink-0" />
-                              <span className="truncate max-w-[140px] font-medium">{pub.authors.join(", ")}</span>
+                              <span className="truncate max-w-[140px] font-medium">
+                                {pub.authors.join(", ")}
+                              </span>
                             </div>
                           ) : (
                             <span className="text-zinc-700 font-mono">—</span>
@@ -541,16 +597,25 @@ export default function PublicationsPage() {
                           {pub.publicationDate ? (
                             <div className="flex items-center gap-1.5">
                               <Calendar size={11} className="text-zinc-700 shrink-0" />
-                              <span>{new Date(pub.publicationDate).toLocaleDateString("en-US", { year: "numeric", month: "short" })}</span>
+                              <span>
+                                {new Date(pub.publicationDate).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "short",
+                                })}
+                              </span>
                             </div>
                           ) : (
                             <span className="text-zinc-700">—</span>
                           )}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-mono font-bold border ${
-                            pub.featured ? "bg-amber-500/5 border-amber-500/10 text-amber-400" : "bg-zinc-900 border-zinc-800 text-zinc-500"
-                          }`}>
+                          <span
+                            className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-mono font-bold border ${
+                              pub.featured
+                                ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
+                                : "bg-zinc-900 border-zinc-800 text-zinc-500"
+                            }`}
+                          >
                             {pub.featured ? "FEATURED" : "STANDARD"}
                           </span>
                         </td>
@@ -569,7 +634,11 @@ export default function PublicationsPage() {
                               onClick={() => handleDelete(pub.id)}
                               className="text-[11px] font-semibold text-red-500/90 hover:text-red-400 transition-colors bg-red-950/10 hover:bg-red-500/20 px-2 py-1 rounded border border-red-900/10 disabled:opacity-35 inline-flex items-center justify-center min-w-[50px]"
                             >
-                              {processingId === pub.id ? <Loader2 size={10} className="animate-spin" /> : "Purge"}
+                              {processingId === pub.id ? (
+                                <Loader2 size={10} className="animate-spin" />
+                              ) : (
+                                "Purge"
+                              )}
                             </button>
                           </div>
                         </td>
@@ -583,16 +652,16 @@ export default function PublicationsPage() {
         </>
       )}
 
-      {/* FORM HANDLER POPUP MODAL ARCHITECTURE CONTROLLER */}
       {formOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
           <div className="max-h-[100vh] sm:max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-t-2xl sm:rounded-xl border-t sm:border border-zinc-800 bg-[#0C0C0E] p-0 text-white shadow-2xl relative">
-            
             <div className="w-full sticky top-0 bg-[#0C0C0E] z-20 flex items-center justify-between border-b border-zinc-900/80 px-4 py-3.5 sm:px-6">
               <div className="flex items-center gap-2">
                 <Sparkles size={14} className="text-blue-400 animate-pulse" />
                 <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-400 font-mono pr-4">
-                  {editing ? "Modify Publication Parameters" : "Incorporate Peer-Reviewed Paper Node"}
+                  {editing
+                    ? "Modify Publication Parameters"
+                    : "Incorporate Peer-Reviewed Paper Node"}
                 </h2>
               </div>
               <button
@@ -610,7 +679,9 @@ export default function PublicationsPage() {
             <div className="mb-4 rounded-lg bg-zinc-950 border border-zinc-900 p-2.5 text-[10px] sm:text-[11px] text-zinc-400 flex gap-2 items-start hidden sm:flex mx-6 mt-4">
               <Info size={13} className="text-blue-400 shrink-0 mt-0.5" />
               <p className="leading-normal">
-                We highly recommend completing all optional resource fields entirely. Providing code repository coordinates, functional specifications, and cover captures maximizes your project evaluation rank on your active public theme canvas template.
+                We highly recommend completing all optional resource fields entirely. Providing code
+                repository coordinates, functional specifications, and cover captures maximizes your
+                project evaluation rank on your active public theme canvas template.
               </p>
             </div>
 

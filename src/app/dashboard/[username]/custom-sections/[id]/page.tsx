@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { 
-  Plus, 
-  Loader2, 
-  AlertTriangle, 
-  List, 
+import {
+  Plus,
+  Loader2,
+  AlertTriangle,
+  List,
   FolderOpen,
   Search,
   X,
@@ -17,21 +17,15 @@ import {
   Save,
   Trash2,
   Check,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 
-import {
-  getCustomSectionById,
-  updateCustomSection,
-} from "@/actions/custom-section";
+import { getCustomSectionById, updateCustomSection } from "@/actions/custom-section";
 
 import CustomSectionItemForm from "@/components/forms/custom-section-item-form";
 import CustomSectionItemCard from "@/components/cards/custom-section-item-card";
 
-import {
-  getCustomSectionItems,
-  deleteCustomSectionItem,
-} from "@/actions/custom-section-item";
+import { getCustomSectionItems, deleteCustomSectionItem } from "@/actions/custom-section-item";
 
 type CustomSection = {
   id: string;
@@ -66,7 +60,6 @@ export default function CustomSectionDetailPage() {
   const [isSavingTitle, setIsSavingTitle] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // Mobile Confirmation Workflow Safeguard State
   const [mobileConfirmDeleteId, setMobileConfirmDeleteId] = useState<string | null>(null);
 
   async function loadData() {
@@ -74,25 +67,21 @@ export default function CustomSectionDetailPage() {
     try {
       setLoading(true);
       setActionError(null);
-      
-      // 1. Resolve master custom section context using contract type rules
+
       const sectionResult = await getCustomSectionById(String(id));
-      
-      // 🛡️ Safe Key-In Narrowing Guard: Forces TypeScript to unlock subkeys from general union responses
+
       if (
-        !sectionResult || 
-        !sectionResult.success || 
-        !("data" in sectionResult) || 
+        !sectionResult ||
+        !sectionResult.success ||
+        !("data" in sectionResult) ||
         !sectionResult.data
       ) {
         setSection(null);
         return;
       }
 
-      // 2. Query relative item lines under the resolved section branch context
       const itemsResult = await getCustomSectionItems(String(id));
 
-      // ✅ Safe Context: Accessing .id and .title is now 100% allowed by the compiler
       setSection({
         id: sectionResult.data.id,
         title: sectionResult.data.title,
@@ -100,11 +89,10 @@ export default function CustomSectionDetailPage() {
       setViewMode("grid");
       setTitle(sectionResult.data.title);
 
-      // 🛡️ Safe Key-In Array Narrowing Guard
       if (
-        itemsResult && 
-        itemsResult.success && 
-        "data" in itemsResult && 
+        itemsResult &&
+        itemsResult.success &&
+        "data" in itemsResult &&
         Array.isArray(itemsResult.data)
       ) {
         setItems(itemsResult.data as CustomSectionItem[]);
@@ -129,10 +117,8 @@ export default function CustomSectionDetailPage() {
       setIsSavingTitle(true);
       setActionError(null);
 
-      // Commit changes directly using action modules layouts
       const result = await updateCustomSection(section.id, { title: title.trim() });
 
-      // 🛡️ Safe Error Operator Key-In Check
       if (!result.success) {
         throw new Error(
           "error" in result && typeof result.error === "string"
@@ -141,9 +127,13 @@ export default function CustomSectionDetailPage() {
         );
       }
 
-      setSection(prev => prev ? { ...prev, title: title.trim() } : null);
+      setSection((prev) => (prev ? { ...prev, title: title.trim() } : null));
     } catch (error) {
-      setActionError(error instanceof Error ? error.message : "Unable to push section layout title parameters to server.");
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : "Unable to push section layout title parameters to server."
+      );
     } finally {
       setIsSavingTitle(false);
     }
@@ -172,7 +162,8 @@ export default function CustomSectionDetailPage() {
 
   const filteredItems = items
     .filter((item) => {
-      const matchCriteria = `${item.title} ${item.subtitle || ""} ${item.description || ""}`.toLowerCase();
+      const matchCriteria =
+        `${item.title} ${item.subtitle || ""} ${item.description || ""}`.toLowerCase();
       return matchCriteria.includes(searchQuery.toLowerCase());
     })
     .sort((a, b) => {
@@ -201,9 +192,12 @@ export default function CustomSectionDetailPage() {
       <div className="mx-auto max-w-xl my-6 sm:my-12 rounded-none sm:rounded-xl border-y sm:border border-zinc-800 bg-zinc-950/20 p-4 sm:p-6 shadow-2xl flex gap-3 items-start text-white font-sans w-full">
         <AlertTriangle className="h-5 w-5 text-zinc-500 shrink-0 mt-0.5" />
         <div className="space-y-1.5 flex-1 min-w-0">
-          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">Index Branch Unresolved</h4>
+          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
+            Index Branch Unresolved
+          </h4>
           <p className="text-[11px] sm:text-xs text-zinc-500 leading-relaxed break-words">
-            The targeted modular section database schema layout reference does not exist or has been decoupled.
+            The targeted modular section database schema layout reference does not exist or has been
+            decoupled.
           </p>
         </div>
       </div>
@@ -212,14 +206,14 @@ export default function CustomSectionDetailPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 text-white w-full max-w-[1440px] mx-auto font-sans antialiased px-0 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-x-hidden">
-      
-      {/* SECTION SETTINGS HUD CONFIGURATION WORKFLOW */}
       <div className="rounded-none sm:rounded-xl border-y sm:border border-zinc-800 bg-[#0C0C0E] p-4 sm:p-6 space-y-3 sm:space-y-4 shadow-sm relative overflow-hidden w-full">
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
-        
+
         <div className="flex items-center gap-2 px-4 sm:px-0">
           <Settings size={14} className="text-zinc-500" />
-          <h2 className="text-[10px] sm:text-xs font-bold font-mono text-zinc-400 uppercase tracking-widest">Section Blueprint Configuration</h2>
+          <h2 className="text-[10px] sm:text-xs font-bold font-mono text-zinc-400 uppercase tracking-widest">
+            Section Blueprint Configuration
+          </h2>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center px-4 sm:px-0">
@@ -233,36 +227,44 @@ export default function CustomSectionDetailPage() {
               className="w-full bg-[#070709] border border-zinc-800 rounded-lg px-3 py-2.5 text-xs sm:text-sm text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-zinc-700 disabled:opacity-50 transition-colors font-sans"
             />
           </div>
-          
+
           <button
             type="button"
             disabled={isSavingTitle || title.trim() === section.title}
             onClick={saveTitle}
             className="inline-flex h-10 sm:h-9 items-center justify-center gap-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 px-4 text-xs font-mono font-bold uppercase tracking-wider shadow-sm transition-colors focus:outline-none select-none shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            {isSavingTitle ? <Loader2 size={12} className="animate-spin text-blue-400" /> : <Save size={12} />}
+            {isSavingTitle ? (
+              <Loader2 size={12} className="animate-spin text-blue-400" />
+            ) : (
+              <Save size={12} />
+            )}
             <span>Commit Title</span>
           </button>
         </div>
       </div>
 
-      {/* ERROR FEEDBACK BAR */}
       {actionError && (
         <div className="flex items-start gap-2 rounded-none sm:rounded-lg border-y sm:border border-red-500/10 bg-red-500/5 p-4 sm:p-3 text-xs text-red-400 animate-fadeIn w-full">
           <AlertTriangle size={14} className="shrink-0 mt-0.5" />
           <span className="font-medium flex-1 leading-normal">{actionError}</span>
-          <button onClick={() => setActionError(null)} className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2">✕</button>
+          <button
+            onClick={() => setActionError(null)}
+            className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* CONTROL HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-4 pt-2 px-4 sm:px-0">
         <div className="space-y-0.5">
           <h2 className="text-base sm:text-lg font-black tracking-tight text-zinc-100 flex items-center gap-2">
             <span>{section.title} Grid Elements</span>
           </h2>
           <p className="text-[11px] sm:text-xs text-zinc-500 font-medium leading-relaxed">
-            Populate custom index tracks, metrics logs, parameters, or external hyperlinks mapped specifically into this customized layer framework.
+            Populate custom index tracks, metrics logs, parameters, or external hyperlinks mapped
+            specifically into this customized layer framework.
           </p>
         </div>
 
@@ -279,12 +281,11 @@ export default function CustomSectionDetailPage() {
         </button>
       </div>
 
-      {/* FILTER CONTROL HUB BAR */}
       {items.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-900/50 pb-4 px-4 sm:px-0">
           <div className="relative w-full sm:max-w-xs md:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 h-3.5 w-3.5" />
-            <input 
+            <input
               type="text"
               placeholder="Search custom item entries..."
               value={searchQuery}
@@ -292,7 +293,10 @@ export default function CustomSectionDetailPage() {
               className="w-full pl-9 pr-8 h-8.5 bg-[#09090b] border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors font-sans"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400"
+              >
                 <X size={12} />
               </button>
             )}
@@ -342,7 +346,6 @@ export default function CustomSectionDetailPage() {
         </div>
       )}
 
-      {/* RENDER GRID / LIST TILES */}
       {filteredItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-none sm:rounded-xl border-y sm:border border-dashed border-zinc-800 bg-zinc-950/10 p-8 sm:p-12 text-center max-w-xl mx-auto my-4 animate-fadeIn w-full">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-900 text-zinc-500 mb-3 shadow-inner">
@@ -351,13 +354,12 @@ export default function CustomSectionDetailPage() {
           <h3 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
             {items.length === 0 ? "Custom Section Context Empty" : "No tracking logs found"}
           </h3>
-          
+
           <div className="text-[11px] sm:text-xs text-zinc-500 max-w-xs sm:max-w-sm mt-1.5 leading-relaxed font-sans space-y-2 w-full">
             <p>
-              {items.length === 0 
+              {items.length === 0
                 ? `Your customized layer layout index "${section.title}" currently has no nested parameters. Adding items lets you present custom work fields outside mandatory platform brackets.`
-                : "No matching registered parameters found. Clear or adjust your filters to re-index defaults."
-              }
+                : "No matching registered parameters found. Clear or adjust your filters to re-index defaults."}
             </p>
           </div>
 
@@ -377,20 +379,25 @@ export default function CustomSectionDetailPage() {
         </div>
       ) : (
         <>
-          {/* MOBILE SLIM LIST ITERATOR LAYER */}
           <div className="block sm:hidden space-y-2.5 animate-fadeIn">
             {filteredItems.map((item) => (
-              <div 
-                key={item.id} 
+              <div
+                key={item.id}
                 className="rounded-none border-y border-zinc-800 bg-[#0C0C0E] p-4 space-y-3 shadow-sm relative overflow-hidden"
               >
                 <div className="space-y-1 pr-4">
-                  <h4 className="text-xs font-bold text-zinc-100 leading-snug tracking-tight break-words font-sans">{item.title}</h4>
+                  <h4 className="text-xs font-bold text-zinc-100 leading-snug tracking-tight break-words font-sans">
+                    {item.title}
+                  </h4>
                   {item.subtitle && (
-                    <p className="text-[10px] font-medium text-zinc-500 truncate font-sans">{item.subtitle}</p>
+                    <p className="text-[10px] font-medium text-zinc-500 truncate font-sans">
+                      {item.subtitle}
+                    </p>
                   )}
                   {item.description && (
-                    <p className="text-[10px] text-zinc-400 font-sans line-clamp-2 pt-0.5 leading-relaxed break-words">{item.description}</p>
+                    <p className="text-[10px] text-zinc-400 font-sans line-clamp-2 pt-0.5 leading-relaxed break-words">
+                      {item.description}
+                    </p>
                   )}
                 </div>
 
@@ -422,10 +429,18 @@ export default function CustomSectionDetailPage() {
                   ) : (
                     <div className="flex items-center justify-between gap-3 w-full">
                       <div className="flex gap-1">
-                        {item.imageUrl && <span className="text-[8px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-500 rounded px-1">IMG</span>}
-                        {item.attachmentUrl && <span className="text-[8px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-500 rounded px-1">DOC</span>}
+                        {item.imageUrl && (
+                          <span className="text-[8px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-500 rounded px-1">
+                            IMG
+                          </span>
+                        )}
+                        {item.attachmentUrl && (
+                          <span className="text-[8px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-500 rounded px-1">
+                            DOC
+                          </span>
+                        )}
                       </div>
-                      
+
                       <div className="flex items-center gap-1.5 shrink-0">
                         <button
                           type="button"
@@ -452,7 +467,6 @@ export default function CustomSectionDetailPage() {
             ))}
           </div>
 
-          {/* DESKTOP RESPONSIVE VIEWS */}
           <div className="hidden sm:block">
             {viewMode === "grid" ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 animate-fadeIn">
@@ -487,19 +501,40 @@ export default function CustomSectionDetailPage() {
                   </thead>
                   <tbody className="divide-y divide-zinc-900 text-xs font-sans">
                     {filteredItems.map((item) => (
-                      <tr key={item.id} className="hover:bg-zinc-900/30 transition-colors group/row">
+                      <tr
+                        key={item.id}
+                        className="hover:bg-zinc-900/30 transition-colors group/row"
+                      >
                         <td className="py-3.5 px-4">
-                          <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-xs">{item.title}</div>
+                          <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-xs">
+                            {item.title}
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 text-zinc-400 max-w-xs truncate font-medium">
-                          {item.subtitle || <span className="text-zinc-700 font-normal italic">Unset</span>}
+                          {item.subtitle || (
+                            <span className="text-zinc-700 font-normal italic">Unset</span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4">
                           <div className="flex flex-wrap gap-1.5">
-                            {item.imageUrl && <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-500 rounded px-1.5 py-0.5">IMAGE</span>}
-                            {item.iconUrl && <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-500 rounded px-1.5 py-0.5">GLYPH</span>}
-                            {item.attachmentUrl && <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-500 rounded px-1.5 py-0.5">DOC</span>}
-                            {!item.imageUrl && !item.iconUrl && !item.attachmentUrl && <span className="text-zinc-700 font-mono text-[10px]">—</span>}
+                            {item.imageUrl && (
+                              <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-500 rounded px-1.5 py-0.5">
+                                IMAGE
+                              </span>
+                            )}
+                            {item.iconUrl && (
+                              <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-500 rounded px-1.5 py-0.5">
+                                GLYPH
+                              </span>
+                            )}
+                            {item.attachmentUrl && (
+                              <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-500 rounded px-1.5 py-0.5">
+                                DOC
+                              </span>
+                            )}
+                            {!item.imageUrl && !item.iconUrl && !item.attachmentUrl && (
+                              <span className="text-zinc-700 font-mono text-[10px]">—</span>
+                            )}
                           </div>
                         </td>
                         <td className="py-3.5 px-4 text-right shrink-0">
@@ -533,11 +568,9 @@ export default function CustomSectionDetailPage() {
         </>
       )}
 
-      {/* FORM DIALOGUE MODAL PANEL OVERLAY DRAWER */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm p-0 sm:p-4 flex items-end sm:items-center justify-center animate-fadeIn">
           <div className="w-full max-w-4xl rounded-t-2xl sm:rounded-xl border-t sm:border border-zinc-800 bg-[#0C0C0E] p-0 text-white shadow-2xl max-h-[100vh] sm:max-h-[90vh] overflow-y-auto relative">
-            
             <div className="w-full sticky top-0 bg-[#0C0C0E] z-20 flex items-center justify-between border-b border-zinc-900/80 px-4 py-3.5 sm:px-6">
               <div className="flex items-center gap-2">
                 <Sparkles size={14} className="text-blue-400 animate-pulse" />

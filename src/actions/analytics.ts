@@ -4,27 +4,25 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
-/**
- * Standard server exception handler translating structural database and analytics exceptions
- * into resilient, friendly user interface response payload signatures.
- */
+// Error
 function handleAnalyticsServerError(error: any, fallbackMessage: string) {
   console.error("Analytics Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
-    return { 
-      success: false, 
-      error: "The analytical data sync failed. Database logging engine is temporarily busy." 
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
+    return {
+      success: false,
+      error: "The analytical data sync failed. Database logging engine is temporarily busy.",
     };
   }
   return { success: false, error: fallbackMessage };
 }
 
-export async function recordView(
-  portfolioId: string,
-  data?: { visitorHash?: string }
-) {
+export async function recordView(portfolioId: string, data?: { visitorHash?: string }) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -39,10 +37,12 @@ export async function recordView(
       )?.portfolio?.id;
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Identification target profile could not be verified to log metrics." };
+      return {
+        success: false,
+        error: "Identification target profile could not be verified to log metrics.",
+      };
     }
 
-    // Atomic increment optimization block (Replaces Changes 1, 2, 3, and 4)
     await prisma.analytics.update({
       where: {
         portfolioId: resolvedPortfolioId,
@@ -79,7 +79,7 @@ export async function getAnalytics(portfolioId: string) {
           contactRequests: 0,
           projectClicks: 0,
           recentViews: [],
-        }
+        },
       };
     }
 
@@ -89,11 +89,7 @@ export async function getAnalytics(portfolioId: string) {
       },
     });
 
-    const [
-      messages,
-      resumeDownloads,
-      projectClicks,
-    ] = await Promise.all([
+    const [messages, resumeDownloads, projectClicks] = await Promise.all([
       prisma.contactMessage.count({
         where: {
           portfolioId: resolvedPortfolioId,
@@ -121,8 +117,8 @@ export async function getAnalytics(portfolioId: string) {
         resumeDownloads: analytics?.resumeDownloads ?? resumeDownloads,
         contactRequests: analytics?.contactRequests ?? messages,
         projectClicks: analytics?.projectClicks ?? projectClicks,
-        recentViews: [], // Cleanly defaulted out since PortfolioView records are omitted
-      }
+        recentViews: [],
+      },
     };
   } catch (error) {
     console.error("Failed to load historical charts insight metrics:", error);
@@ -136,15 +132,12 @@ export async function getAnalytics(portfolioId: string) {
         contactRequests: 0,
         projectClicks: 0,
         recentViews: [],
-      }
+      },
     };
   }
 }
 
-export async function trackProjectClick(
-  portfolioId: string,
-  projectId: string
-) {
+export async function trackProjectClick(portfolioId: string, projectId: string) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -159,7 +152,10 @@ export async function trackProjectClick(
       )?.portfolio?.id;
 
     if (!resolvedPortfolioId || !projectId) {
-      return { success: false, error: "Required tracking targets missing. Click registration abort." };
+      return {
+        success: false,
+        error: "Required tracking targets missing. Click registration abort.",
+      };
     }
 
     await prisma.projectClick.create({
@@ -192,7 +188,10 @@ export async function trackProjectClick(
       success: true,
     };
   } catch (error) {
-    return handleAnalyticsServerError(error, "Failed to compile background interaction click records.");
+    return handleAnalyticsServerError(
+      error,
+      "Failed to compile background interaction click records."
+    );
   }
 }
 
@@ -212,7 +211,7 @@ export async function getPortfolioStats(portfolioId: string) {
           resumeDownloads: 0,
           contactRequests: 0,
           projectClicks: 0,
-        }
+        },
       };
     }
 
@@ -230,7 +229,7 @@ export async function getPortfolioStats(portfolioId: string) {
         resumeDownloads: analytics?.resumeDownloads ?? 0,
         contactRequests: analytics?.contactRequests ?? 0,
         projectClicks: analytics?.projectClicks ?? 0,
-      }
+      },
     };
   } catch (error) {
     console.error("Failed to query baseline counters stream stats:", error);
@@ -243,7 +242,7 @@ export async function getPortfolioStats(portfolioId: string) {
         resumeDownloads: 0,
         contactRequests: 0,
         projectClicks: 0,
-      }
+      },
     };
   }
 }

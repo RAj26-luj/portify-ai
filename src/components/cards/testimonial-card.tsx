@@ -56,11 +56,13 @@ export default function TestimonialCard({
   // --- LIST VIEW PRESET ---
   if (isListView) {
     return (
-      <div className={`transition-all duration-200 border border-zinc-800 bg-[#0C0C0E] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-zinc-700/60 w-full ${isDeleting ? "opacity-50 pointer-events-none" : ""}`}>
+      <div
+        className={`transition-all duration-200 border border-zinc-800 bg-[#0C0C0E] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-zinc-700/60 w-full ${isDeleting ? "opacity-50 pointer-events-none" : ""}`}
+      >
         <div className="flex items-center gap-4 min-w-0 flex-1">
           {profileImage ? (
-            <img 
-              src={profileImage} 
+            <img
+              src={profileImage}
               alt={authorName}
               className="w-10 h-10 rounded-full object-cover border border-zinc-800 shrink-0"
             />
@@ -79,7 +81,8 @@ export default function TestimonialCard({
               )}
             </div>
             <p className="text-xs text-zinc-400 truncate">
-              {authorRole}{company ? ` at ${company}` : ""}
+              {authorRole}
+              {company ? ` at ${company}` : ""}
             </p>
           </div>
         </div>
@@ -110,7 +113,17 @@ export default function TestimonialCard({
               <button
                 type="button"
                 onClick={() =>
-                  onEdit?.({ id, authorName, authorRole, company, testimonial, profileImage, linkedinUrl, companyLogo, featured })
+                  onEdit?.({
+                    id,
+                    authorName,
+                    authorRole,
+                    company,
+                    testimonial,
+                    profileImage,
+                    linkedinUrl,
+                    companyLogo,
+                    featured,
+                  })
                 }
                 className="px-2.5 py-1.5 text-xs font-medium border border-zinc-800 hover:border-zinc-700 bg-zinc-900 text-zinc-300 rounded-md transition"
               >
@@ -132,12 +145,14 @@ export default function TestimonialCard({
 
   // --- GRID VIEW PRESET ---
   return (
-    <div className={`group/testimonial-card relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] p-5 sm:p-6 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-zinc-700 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.6)] w-full max-w-sm mx-auto ${isDeleting ? "opacity-50 pointer-events-none" : ""}`}>
-      <div className="space-y-4">
-        <div className="flex items-start justify-between gap-3">
+    <div
+      className={`group/testimonial-card relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] p-5 sm:p-6 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-zinc-700 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.6)] w-full max-w-sm mx-auto h-full ${isDeleting ? "opacity-50 pointer-events-none" : ""}`}
+    >
+      <div className="space-y-4 flex-1 flex flex-col justify-start">
+        <div className="flex items-start justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             {profileImage ? (
-              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-zinc-800 bg-zinc-950 shadow-inner">
+              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-zinc-800 bg-zinc-955 shadow-inner">
                 <img
                   src={profileImage}
                   alt={authorName}
@@ -146,7 +161,7 @@ export default function TestimonialCard({
                 />
               </div>
             ) : (
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-gradient-to-b from-zinc-800 to-zinc-900 text-zinc-300 font-bold text-sm uppercase shadow-md">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-955 text-zinc-300 font-bold text-sm uppercase shadow-md">
                 {authorName?.charAt(0) || "?"}
               </div>
             )}
@@ -174,7 +189,7 @@ export default function TestimonialCard({
         </div>
 
         {companyLogo && (
-          <div className="pt-0.5 flex items-center min-h-[1.5rem]">
+          <div className="pt-0.5 flex items-center min-h-[1.5rem] shrink-0">
             <img
               src={companyLogo}
               alt={`${company || "Company"} identity asset`}
@@ -183,28 +198,28 @@ export default function TestimonialCard({
           </div>
         )}
 
-        <div className="relative pt-1">
+        <div className="relative pt-1 flex-1">
           <p className="text-xs sm:text-sm leading-relaxed text-zinc-400 font-sans italic pl-3 border-l border-zinc-800 group-hover/testimonial-card:text-zinc-300 transition-colors duration-300 selection:bg-blue-500/30">
             “{testimonial}”
           </p>
         </div>
 
         {linkedinUrl && (
-          <div className="pt-1 pl-3">
+          <div className="pt-1 pl-3 shrink-0">
             <a
               href={linkedinUrl}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 text-[10px] font-mono text-zinc-500 hover:text-blue-400 transition-colors"
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 className="h-[11px] w-[11px] text-zinc-600 shrink-0 group-hover/testimonial-card:text-blue-500 transition-colors"
               >
                 <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
@@ -217,7 +232,7 @@ export default function TestimonialCard({
         )}
       </div>
 
-      <div className="mt-5">
+      <div className="mt-5 shrink-0">
         {errorFeedback && (
           <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-2 text-xs text-red-400 animate-fadeIn">
             <AlertTriangle size={12} className="shrink-0" />
@@ -226,14 +241,16 @@ export default function TestimonialCard({
         )}
 
         {showDeleteConfirm ? (
-          <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2 animate-fadeIn">
-            <p className="text-[11px] font-medium text-zinc-400 px-1 text-center">Confirm record deletion pipeline?</p>
+          <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-955 p-2 animate-fadeIn">
+            <p className="text-[11px] font-medium text-zinc-400 px-1 text-center">
+              Confirm record deletion pipeline?
+            </p>
             <div className="flex gap-2">
               <button
                 type="button"
                 disabled={isDeleting}
                 onClick={handleDelete}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md bg-red-600 hover:bg-red-500 disabled:bg-red-800/50 text-white py-1 text-xs font-medium shadow-sm transition-colors focus:outline-none select-none"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md bg-red-600 hover:bg-red-500 disabled:bg-red-800/50 text-white py-1.5 text-xs font-medium shadow-sm transition-colors focus:outline-none select-none"
               >
                 {isDeleting ? <Loader2 size={11} className="animate-spin" /> : null}
                 <span>{isDeleting ? "Purging..." : "Yes, Purge"}</span>
@@ -242,7 +259,7 @@ export default function TestimonialCard({
                 type="button"
                 disabled={isDeleting}
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 inline-flex items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 text-zinc-300 py-1 text-xs font-medium transition-colors focus:outline-none select-none"
+                className="flex-1 inline-flex items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 text-zinc-300 py-1.5 text-xs font-medium transition-colors focus:outline-none select-none"
               >
                 Cancel
               </button>
@@ -253,7 +270,17 @@ export default function TestimonialCard({
             <button
               type="button"
               onClick={() =>
-                onEdit?.({ id, authorName, authorRole, company, testimonial, profileImage, linkedinUrl, companyLogo, featured })
+                onEdit?.({
+                  id,
+                  authorName,
+                  authorRole,
+                  company,
+                  testimonial,
+                  profileImage,
+                  linkedinUrl,
+                  companyLogo,
+                  featured,
+                })
               }
               className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 hover:text-white text-zinc-300 px-3 py-1.5 text-xs font-medium transition-colors shadow-sm focus:outline-none select-none"
             >
@@ -264,7 +291,7 @@ export default function TestimonialCard({
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="inline-flex items-center justify-center h-7 w-7 rounded-md border border-zinc-800 bg-zinc-900/30 hover:bg-red-500/10 hover:border-red-500/20 text-zinc-500 hover:text-red-400 transition-colors select-none"
+              className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-zinc-800 bg-zinc-900/30 hover:bg-red-500/10 hover:border-red-500/20 text-zinc-500 hover:text-red-400 transition-colors select-none"
               title="Delete Testimonial"
             >
               <Trash2 size={12} />

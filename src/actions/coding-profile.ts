@@ -3,21 +3,26 @@
 import { prisma } from "@/lib/prisma";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
-/**
- * Standard server exception handler translating database operations or analytical tracking errors
- * into consistent, customer-friendly payload messages ideal for instant UI flash alerts.
- */
+// Error
 function handleCodingProfileServerError(error: any, fallbackMessage: string) {
   console.error("Coding Profile Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("portfolioId required") || errorMessage.includes("portfolioId not found")) {
+  if (
+    errorMessage.includes("portfolioId required") ||
+    errorMessage.includes("portfolioId not found")
+  ) {
     return {
       success: false,
-      error: "Authentication mapping missing. Could not tie this coding profile to an active portfolio account.",
+      error:
+        "Authentication mapping missing. Could not tie this coding profile to an active portfolio account.",
     };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
       error: "Algorithmic data synchronization failed. Database service is currently busy.",
@@ -48,15 +53,24 @@ export async function createCodingProfile(data: {
     const resolvedPortfolioId = data.portfolioId || (await getPortfolioId());
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Portfolio profile reference identification target not found." };
+      return {
+        success: false,
+        error: "Portfolio profile reference identification target not found.",
+      };
     }
 
     if (!data.platform) {
-      return { success: false, error: "Platform selection is required (e.g., CodeChef, LeetCode, Codeforces)." };
+      return {
+        success: false,
+        error: "Platform selection is required (e.g., CodeChef, LeetCode, Codeforces).",
+      };
     }
 
     if (!data.username) {
-      return { success: false, error: "Platform handle username metric is required to connect tracking details." };
+      return {
+        success: false,
+        error: "Platform handle username metric is required to connect tracking details.",
+      };
     }
 
     const count = await prisma.codingProfile.count({
@@ -87,7 +101,10 @@ export async function createCodingProfile(data: {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleCodingProfileServerError(error, "Failed to instantiate competitive coding platform index profile.");
+    return handleCodingProfileServerError(
+      error,
+      "Failed to instantiate competitive coding platform index profile."
+    );
   }
 }
 
@@ -112,7 +129,10 @@ export async function updateCodingProfile(
 ) {
   try {
     if (!id) {
-      return { success: false, error: "Missing coding profile item tracking identifier specification reference." };
+      return {
+        success: false,
+        error: "Missing coding profile item tracking identifier specification reference.",
+      };
     }
 
     const result = await prisma.codingProfile.update({
@@ -122,14 +142,20 @@ export async function updateCodingProfile(
 
     return { success: true, data: result };
   } catch (error) {
-    return handleCodingProfileServerError(error, "Failed to modify statistical parameters inside this coding metrics record.");
+    return handleCodingProfileServerError(
+      error,
+      "Failed to modify statistical parameters inside this coding metrics record."
+    );
   }
 }
 
 export async function deleteCodingProfile(id: string) {
   try {
     if (!id) {
-      return { success: false, error: "Identification key reference missing. Deletion sequence aborted." };
+      return {
+        success: false,
+        error: "Identification key reference missing. Deletion sequence aborted.",
+      };
     }
 
     const result = await prisma.codingProfile.delete({
@@ -138,7 +164,10 @@ export async function deleteCodingProfile(id: string) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleCodingProfileServerError(error, "Could not completely delete the specified competitive profile matrix.");
+    return handleCodingProfileServerError(
+      error,
+      "Could not completely delete the specified competitive profile matrix."
+    );
   }
 }
 
@@ -184,23 +213,29 @@ export async function getCodingProfileById(id: string) {
 
     return { success: true, data };
   } catch (error) {
-    return handleCodingProfileServerError(error, "Failed to load individual technical profiling tracking log.");
+    return handleCodingProfileServerError(
+      error,
+      "Failed to load individual technical profiling tracking log."
+    );
   }
 }
 
-export async function reorderCodingProfiles(
-  portfolioId: string,
-  codingProfileIds: string[]
-) {
+export async function reorderCodingProfiles(portfolioId: string, codingProfileIds: string[]) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Target portfolio connection reference identification was not resolved." };
+      return {
+        success: false,
+        error: "Target portfolio connection reference identification was not resolved.",
+      };
     }
 
     if (!codingProfileIds || codingProfileIds.length === 0) {
-      return { success: true, message: "Empty sequencing order stack provided. Sequence unchanged." };
+      return {
+        success: true,
+        message: "Empty sequencing order stack provided. Sequence unchanged.",
+      };
     }
 
     await prisma.$transaction(
@@ -218,7 +253,10 @@ export async function reorderCodingProfiles(
       success: true,
     };
   } catch (error) {
-    return handleCodingProfileServerError(error, "Failed to persist chronological board sorting rules configuration.");
+    return handleCodingProfileServerError(
+      error,
+      "Failed to persist chronological board sorting rules configuration."
+    );
   }
 }
 
@@ -238,10 +276,7 @@ export async function getTopCodingProfiles(portfolioId: string) {
       where: {
         portfolioId: resolvedPortfolioId,
       },
-      orderBy: [
-        { currentRating: "desc" },
-        { displayOrder: "asc" },
-      ],
+      orderBy: [{ currentRating: "desc" }, { displayOrder: "asc" }],
     });
 
     return { success: true, data };

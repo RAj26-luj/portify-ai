@@ -1,13 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Terminal, Calendar, Award, GitPullRequest, Layers, Image as ImageIcon, Globe, Plus, X, AlertCircle, CheckCircle2 } from "lucide-react";
 import {
-  createOpenSourceProject,
-  updateOpenSourceProject,
-} from "@/actions/open-source";
+  Loader2,
+  Terminal,
+  Calendar,
+  Award,
+  GitPullRequest,
+  Layers,
+  Image as ImageIcon,
+  Globe,
+  Plus,
+  X,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+import { createOpenSourceProject, updateOpenSourceProject } from "@/actions/open-source";
 import { useUpload } from "@/hooks/use-upload";
 import { CLOUDINARY_FOLDERS } from "@/lib/cloudinary-folders";
+import { deleteCloudinaryUrl } from "@/actions/upload";
 
 type TimelineItem = {
   id?: string;
@@ -34,11 +45,7 @@ type Props = {
     coverImage?: string;
     architectureDiagrams?: string[];
     contributionScreenshots?: string[];
-    status?:
-      | "PLANNING"
-      | "IN_PROGRESS"
-      | "COMPLETED"
-      | "MAINTAINED";
+    status?: "PLANNING" | "IN_PROGRESS" | "COMPLETED" | "MAINTAINED";
     timeline?: TimelineItem[];
   };
 
@@ -46,12 +53,7 @@ type Props = {
   onClose?: () => void;
 };
 
-export default function OpenSourceForm({
-  portfolioId,
-  initialData,
-  onSuccess,
-  onClose,
-}: Props) {
+export default function OpenSourceForm({ portfolioId, initialData, onSuccess, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const { upload } = useUpload();
 
@@ -66,9 +68,7 @@ export default function OpenSourceForm({
   const [linesChanged, setLinesChanged] = useState(initialData?.linesChanged ?? "");
   const [coverImage, setCoverImage] = useState(initialData?.coverImage ?? "");
 
-  const [impactMetrics, setImpactMetrics] = useState(
-    initialData?.impactMetrics?.join("\n") ?? ""
-  );
+  const [impactMetrics, setImpactMetrics] = useState(initialData?.impactMetrics?.join("\n") ?? "");
 
   const [architectureDiagrams, setArchitectureDiagrams] = useState<string[]>(
     initialData?.architectureDiagrams ?? []
@@ -78,59 +78,88 @@ export default function OpenSourceForm({
     initialData?.contributionScreenshots ?? []
   );
 
-  const [status, setStatus] = useState<
-    "PLANNING" | "IN_PROGRESS" | "COMPLETED" | "MAINTAINED"
-  >(initialData?.status ?? "PLANNING");
-
-  // --- Timeline State Management ---
-  const [timeline, setTimeline] = useState<TimelineItem[]>(
-    initialData?.timeline ?? []
+  const [status, setStatus] = useState<"PLANNING" | "IN_PROGRESS" | "COMPLETED" | "MAINTAINED">(
+    initialData?.status ?? "PLANNING"
   );
+
+  const [timeline, setTimeline] = useState<TimelineItem[]>(initialData?.timeline ?? []);
   const [newMilestone, setNewMilestone] = useState("");
   const [newProgress, setNewProgress] = useState(0);
   const [newMilestoneDesc, setNewMilestoneDesc] = useState("");
 
-  // High-fidelity validation interaction mapping states
   const [isTouched, setIsTouched] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Monitors state parameters for complete delta change evaluation
   useEffect(() => {
     const isRepoNameChanged = repositoryName.trim() !== (initialData?.repositoryName ?? "");
     const isRepoUrlChanged = repositoryUrl.trim() !== (initialData?.repositoryUrl ?? "");
     const isPrUrlChanged = pullRequestUrl.trim() !== (initialData?.pullRequestUrl ?? "");
     const isPrTitleChanged = pullRequestTitle.trim() !== (initialData?.pullRequestTitle ?? "");
     const isIssueChanged = issueTitle.trim() !== (initialData?.issueTitle ?? "");
-    const isContribTitleChanged = contributionTitle.trim() !== (initialData?.contributionTitle ?? "");
+    const isContribTitleChanged =
+      contributionTitle.trim() !== (initialData?.contributionTitle ?? "");
     const isContribTypeChanged = contributionType.trim() !== (initialData?.contributionType ?? "");
     const isDescChanged = description.trim() !== (initialData?.description ?? "");
     const isLinesChanged = linesChanged.trim() !== (initialData?.linesChanged ?? "");
     const isCoverChanged = coverImage.trim() !== (initialData?.coverImage ?? "");
-    const isMetricsChanged = impactMetrics.trim() !== (initialData?.impactMetrics?.join("\n") ?? "");
+    const isMetricsChanged =
+      impactMetrics.trim() !== (initialData?.impactMetrics?.join("\n") ?? "");
     const isStatusChanged = status !== (initialData?.status ?? "PLANNING");
 
-    const areDiagramsChanged = JSON.stringify(architectureDiagrams) !== JSON.stringify(initialData?.architectureDiagrams ?? []);
-    const areScreenshotsChanged = JSON.stringify(contributionScreenshots) !== JSON.stringify(initialData?.contributionScreenshots ?? []);
-    const isTimelineChanged = JSON.stringify(timeline) !== JSON.stringify(initialData?.timeline ?? []);
+    const areDiagramsChanged =
+      JSON.stringify(architectureDiagrams) !==
+      JSON.stringify(initialData?.architectureDiagrams ?? []);
+    const areScreenshotsChanged =
+      JSON.stringify(contributionScreenshots) !==
+      JSON.stringify(initialData?.contributionScreenshots ?? []);
+    const isTimelineChanged =
+      JSON.stringify(timeline) !== JSON.stringify(initialData?.timeline ?? []);
 
     setHasChanges(
-      isRepoNameChanged || isRepoUrlChanged || isPrUrlChanged || isPrTitleChanged ||
-      isIssueChanged || isContribTitleChanged || isContribTypeChanged || isDescChanged ||
-      isLinesChanged || isCoverChanged || isMetricsChanged || isStatusChanged ||
-      areDiagramsChanged || areScreenshotsChanged || isTimelineChanged
+      isRepoNameChanged ||
+        isRepoUrlChanged ||
+        isPrUrlChanged ||
+        isPrTitleChanged ||
+        isIssueChanged ||
+        isContribTitleChanged ||
+        isContribTypeChanged ||
+        isDescChanged ||
+        isLinesChanged ||
+        isCoverChanged ||
+        isMetricsChanged ||
+        isStatusChanged ||
+        areDiagramsChanged ||
+        areScreenshotsChanged ||
+        isTimelineChanged
     );
-  }, [repositoryName, repositoryUrl, pullRequestUrl, pullRequestTitle, issueTitle, contributionTitle, contributionType, description, linesChanged, coverImage, impactMetrics, architectureDiagrams, contributionScreenshots, status, timeline, initialData]);
+  }, [
+    repositoryName,
+    repositoryUrl,
+    pullRequestUrl,
+    pullRequestTitle,
+    issueTitle,
+    contributionTitle,
+    contributionType,
+    description,
+    linesChanged,
+    coverImage,
+    impactMetrics,
+    architectureDiagrams,
+    contributionScreenshots,
+    status,
+    timeline,
+    initialData,
+  ]);
 
-  // Reactive Custom Form Constraint Evaluation Flags
   const isRepoNameInvalid = repositoryName.trim() === "";
   const isRepoUrlInvalid = repositoryUrl.trim() !== "" && !repositoryUrl.trim().startsWith("http");
   const isPrUrlInvalid = pullRequestUrl.trim() !== "" && !pullRequestUrl.trim().startsWith("http");
-  
+
   const isFormInvalid = isRepoNameInvalid || isRepoUrlInvalid || isPrUrlInvalid;
 
   const addTimelineItem = () => {
     if (!newMilestone.trim()) return;
-    
+
     setTimeline((prev) => [
       ...prev,
       {
@@ -151,11 +180,7 @@ export default function OpenSourceForm({
   };
 
   async function handleMediaUpload(file: File, type: "image" | "document") {
-    const res = await upload(
-      file,
-      CLOUDINARY_FOLDERS.openSource,
-      type
-    );
+    const res = await upload(file, CLOUDINARY_FOLDERS.openSource, type);
     return res.url;
   }
 
@@ -211,24 +236,21 @@ export default function OpenSourceForm({
   const inputStyle =
     "w-full rounded-lg border border-white/5 bg-[#0A0A0B] p-2.5 sm:p-3 text-zinc-200 placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:border-blue-500/60 focus:bg-[#0E0E10] focus:shadow-[0_0_20px_rgba(59,130,246,0.04)] transition-all duration-200 disabled:opacity-40 shadow-inner font-sans";
 
-  const labelStyle = 
+  const labelStyle =
     "mb-1 flex items-center justify-between text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 group-hover/input:text-zinc-300 transition-colors";
 
-  const descriptionStyle = 
+  const descriptionStyle =
     "text-[10px] sm:text-xs text-zinc-500 font-sans leading-normal block mt-1";
 
-  const scrapeRecommendationStyle = 
+  const scrapeRecommendationStyle =
     "text-[9px] sm:text-[10px] text-amber-400 font-mono bg-amber-500/5 border border-amber-500/10 rounded p-2.5 mt-1 leading-normal flex items-start gap-1.5";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 sm:p-4 select-none animate-fadeIn">
-      
-      {/* ELITE CYBERPUNK PREMIUM DARK SURFACED CONTAINER */}
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm sm:max-w-xl space-y-4 sm:space-y-5 bg-[#0C0C0E] p-4 sm:p-6 text-zinc-300 rounded-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] border border-white/10 max-h-[92vh] overflow-y-auto font-sans selection:bg-blue-500/30 selection:text-white"
       >
-        {/* HEADER */}
         <div className="flex justify-between items-center border-b border-white/5 pb-2.5 sm:pb-3">
           <div>
             <h2 className="font-black text-base sm:text-xl text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tight flex items-center gap-1.5">
@@ -238,7 +260,9 @@ export default function OpenSourceForm({
             <p className="text-[11px] sm:text-xs text-zinc-500 mt-0.5 font-medium leading-tight font-mono uppercase tracking-wider">
               Log public open-source contributions telemetry
               {hasChanges && (
-                <span className="ml-2 text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1.5 py-0.5 rounded uppercase font-bold tracking-normal">upstream_deltas</span>
+                <span className="ml-2 text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1.5 py-0.5 rounded uppercase font-bold tracking-normal">
+                  upstream_deltas
+                </span>
               )}
             </p>
           </div>
@@ -255,23 +279,32 @@ export default function OpenSourceForm({
           )}
         </div>
 
-        {/* GUIDANCE INFO BLOCK */}
         <div className="bg-[#121214] border border-white/5 rounded-lg p-3 text-[11px] text-zinc-400 leading-relaxed font-sans">
-          <strong className="text-zinc-200">Open-Source Upstream Matrix Node:</strong> Register pull requests, upstream core feature overrides, or subsystem refactors here. Document code mutations accurately to update your profile metrics graph.
+          <strong className="text-zinc-200">Open-Source Upstream Matrix Node:</strong> Register pull
+          requests, upstream core feature overrides, or subsystem refactors here. Document code
+          mutations accurately to update your profile metrics graph.
         </div>
 
-        {/* CORE PLATFORM IDENTIFIERS */}
         <div className="space-y-3.5 sm:space-y-4 border border-white/5 p-3 sm:p-4 rounded-xl bg-[#070708]">
-          <h3 className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Upstream Coordinates</h3>
+          <h3 className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">
+            Upstream Coordinates
+          </h3>
 
           <div className="flex flex-col gap-1 group/input">
             <label className={labelStyle}>
-              <span>Repository Identifier Namespace <span className="text-red-400 font-sans font-bold">*(Required)</span></span>
+              <span>
+                Repository Identifier Namespace{" "}
+                <span className="text-red-400 font-sans font-bold">*(Required)</span>
+              </span>
               <div className="flex items-center gap-1.5">
                 {isTouched && isRepoNameInvalid ? (
-                  <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5"><AlertCircle size={9} /> missing_namespace</span>
+                  <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5">
+                    <AlertCircle size={9} /> missing_namespace
+                  </span>
                 ) : repositoryName.trim() ? (
-                  <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/5 px-1 rounded border border-emerald-500/10 lowercase flex items-center gap-0.5"><CheckCircle2 size={9} /> linked</span>
+                  <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/5 px-1 rounded border border-emerald-500/10 lowercase flex items-center gap-0.5">
+                    <CheckCircle2 size={9} /> linked
+                  </span>
                 ) : null}
                 <Terminal size={10} className="text-zinc-700 hidden sm:block" />
               </div>
@@ -285,17 +318,28 @@ export default function OpenSourceForm({
               disabled={loading}
             />
             {isTouched && isRepoNameInvalid && (
-              <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Field missing: Core repository tracking string token parameter must be provided.</p>
+              <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">
+                ⚠️ Field missing: Core repository tracking string token parameter must be provided.
+              </p>
             )}
-            <span className={descriptionStyle}>Provide the absolute focal workspace core framework directory token name string.</span>
+            <span className={descriptionStyle}>
+              Provide the absolute focal workspace core framework directory token name string.
+            </span>
           </div>
 
           <div className="flex flex-col gap-1 group/input">
             <label className={labelStyle}>
-              <span>Target Repository Host Link <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Target Repository Host Link{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
               <div className="flex items-center gap-1.5">
                 {isTouched && isRepoUrlInvalid && (
-                  <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5"><AlertCircle size={9} /> syntax_invalid</span>
+                  <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5">
+                    <AlertCircle size={9} /> syntax_invalid
+                  </span>
                 )}
                 <Globe size={10} className="text-zinc-700 hidden sm:block" />
               </div>
@@ -309,19 +353,28 @@ export default function OpenSourceForm({
               disabled={loading}
             />
             {isTouched && isRepoUrlInvalid && (
-              <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Protocol failure: Target route must resolve using an absolute formatting configuration header (http:// or https://).</p>
+              <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">
+                ⚠️ Protocol failure: Target route must resolve using an absolute formatting
+                configuration header (http:// or https://).
+              </p>
             )}
           </div>
         </div>
 
-        {/* RESTRUCTURING PATCH DATA METADATA */}
         <div className="space-y-3.5 sm:space-y-4 border border-white/5 p-3 sm:p-4 rounded-xl bg-[#070708]">
-          <h3 className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Patch Set Configuration</h3>
+          <h3 className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">
+            Patch Set Configuration
+          </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Pull Request Title <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Pull Request Title{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={pullRequestTitle}
@@ -334,9 +387,16 @@ export default function OpenSourceForm({
 
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Pull Request URL Path <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Pull Request URL Path{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
                 {isTouched && isPrUrlInvalid && (
-                  <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5"><AlertCircle size={9} /> syntax_invalid</span>
+                  <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5">
+                    <AlertCircle size={9} /> syntax_invalid
+                  </span>
                 )}
               </label>
               <input
@@ -348,7 +408,10 @@ export default function OpenSourceForm({
                 disabled={loading}
               />
               {isTouched && isPrUrlInvalid && (
-                <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Protocol failure: Link vector must utilize an absolute http/https protocol header.</p>
+                <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">
+                  ⚠️ Protocol failure: Link vector must utilize an absolute http/https protocol
+                  header.
+                </p>
               )}
             </div>
           </div>
@@ -356,7 +419,12 @@ export default function OpenSourceForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Upstream Issue Title <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Upstream Issue Title{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={issueTitle}
@@ -369,7 +437,12 @@ export default function OpenSourceForm({
 
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Contribution Header <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Contribution Header{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={contributionTitle}
@@ -384,7 +457,12 @@ export default function OpenSourceForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Contribution Architecture Class <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Contribution Architecture Class{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={contributionType}
@@ -397,7 +475,12 @@ export default function OpenSourceForm({
 
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Delta Code Lines Mutation <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Delta Code Lines Mutation{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={linesChanged}
@@ -411,7 +494,12 @@ export default function OpenSourceForm({
 
           <div className="flex flex-col gap-1 group/input">
             <label className={labelStyle}>
-              <span>Analytical Text Summary Description <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Analytical Text Summary Description{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
             </label>
             <textarea
               value={description}
@@ -424,20 +512,31 @@ export default function OpenSourceForm({
           </div>
         </div>
 
-        {/* TIMELINE TRACKING WORKSPACE BLOCK */}
         <div className="space-y-3.5 sm:space-y-4 border border-white/5 p-3 sm:p-4 rounded-xl bg-[#070708]">
-          <h3 className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Upstream Pipeline Timeline Milestones <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></h3>
-          
+          <h3 className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">
+            Upstream Pipeline Timeline Milestones{" "}
+            <span className="text-zinc-600 font-sans font-normal lowercase italic">
+              *(Optional)
+            </span>
+          </h3>
+
           {timeline.length > 0 && (
             <div className="space-y-1.5 max-h-28 overflow-y-auto">
               {timeline.map((item, index) => (
-                <div key={index} className="flex justify-between items-start bg-[#0A0A0B] border border-white/5 p-2 rounded-lg text-xs font-sans animate-fadeIn">
+                <div
+                  key={index}
+                  className="flex justify-between items-start bg-[#0A0A0B] border border-white/5 p-2 rounded-lg text-xs font-sans animate-fadeIn"
+                >
                   <div className="space-y-0.5">
                     <span className="font-semibold text-zinc-200">{item.milestone}</span>
                     <span className="ml-1.5 text-[10px] font-mono font-bold px-1.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/20">
                       {item.progress}%
                     </span>
-                    {item.description && <p className="text-[11px] text-zinc-500 font-sans leading-tight mt-0.5">{item.description}</p>}
+                    {item.description && (
+                      <p className="text-[11px] text-zinc-500 font-sans leading-tight mt-0.5">
+                        {item.description}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -494,21 +593,29 @@ export default function OpenSourceForm({
           </div>
         </div>
 
-        {/* FILE PACK PAYLOAD MOUNT GRAPHICS */}
         <div className="space-y-3.5 sm:space-y-4 border border-white/5 p-3 sm:p-4 rounded-xl bg-[#070708]">
-          <h3 className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Upstream Media Assets</h3>
+          <h3 className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">
+            Upstream Media Assets
+          </h3>
 
-          {/* GOOGLE IMAGE ACQUISITION SCRAPER NOTIFICATION */}
           <div className={scrapeRecommendationStyle}>
             <Globe size={11} className="shrink-0 mt-0.5 text-amber-400" />
             <span>
-              <strong>Emblem Mapping Advice:</strong> To render project logos or upstream repository cover blocks without manual file system arrays, perform a Google Image discovery query for the asset framework logo, execute <strong>&quot;Copy Image Address / URL&quot;</strong>, and link endpoints as needed.
+              <strong>Emblem Mapping Advice:</strong> To render project logos or upstream repository
+              cover blocks without manual file system arrays, perform a Google Image discovery query
+              for the asset framework logo, execute{" "}
+              <strong>&quot;Copy Image Address / URL&quot;</strong>, and link endpoints as needed.
             </span>
           </div>
 
           <div className="flex flex-col gap-1 group/input">
             <label className={labelStyle}>
-              <span>Upstream System Cover Image <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Upstream System Cover Image{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
             </label>
             <input
               type="file"
@@ -517,22 +624,35 @@ export default function OpenSourceForm({
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
+                const oldUrl = coverImage;
                 const url = await handleMediaUpload(file, "image");
                 setCoverImage(url);
+                if (oldUrl && oldUrl !== url) {
+                  await deleteCloudinaryUrl(oldUrl, "image");
+                }
                 e.target.value = "";
               }}
               className="w-full text-[11px] font-mono text-zinc-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-mono file:font-bold file:uppercase file:tracking-wider file:bg-[#121214] file:text-zinc-300 hover:file:bg-zinc-800 border border-white/5 p-1 rounded-lg bg-[#0A0A0B]"
             />
             {coverImage && (
               <div className="mt-1.5 p-1 bg-zinc-950 border border-white/5 rounded w-fit animate-fadeIn">
-                <img src={coverImage} alt="Project Cover" className="w-20 h-12 rounded object-cover opacity-80" />
+                <img
+                  src={coverImage}
+                  alt="Project Cover"
+                  className="w-20 h-12 rounded object-cover opacity-80"
+                />
               </div>
             )}
           </div>
 
           <div className="flex flex-col gap-1 group/input">
             <label className={labelStyle}>
-              <span>Architecture Diagrams <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Architecture Diagrams{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
               <Layers size={10} className="text-zinc-700 hidden sm:block" />
             </label>
             <input
@@ -552,11 +672,18 @@ export default function OpenSourceForm({
               <div className="flex flex-wrap gap-1.5 mt-1.5 max-h-20 overflow-y-auto bg-[#0A0A0B] border border-white/5 p-1.5 rounded-lg">
                 {architectureDiagrams.map((url, idx) => (
                   <div key={idx} className="relative shrink-0 animate-fadeIn">
-                    <img src={url} alt="Diagram" className="w-12 h-12 object-cover rounded-md border border-white/5" />
+                    <img
+                      src={url}
+                      alt="Diagram"
+                      className="w-12 h-12 object-cover rounded-md border border-white/5"
+                    />
                     <button
                       type="button"
                       disabled={loading}
-                      onClick={() => setArchitectureDiagrams((p) => p.filter((_, i) => i !== idx))}
+                      onClick={async () => {
+                        setArchitectureDiagrams((p) => p.filter((_, i) => i !== idx));
+                        await deleteCloudinaryUrl(url, "image");
+                      }}
                       className="absolute -top-1.5 -right-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold"
                     >
                       ✕
@@ -569,7 +696,12 @@ export default function OpenSourceForm({
 
           <div className="flex flex-col gap-1 group/input">
             <label className={labelStyle}>
-              <span>Contribution Verification Screenshots <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Contribution Verification Screenshots{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
               <ImageIcon size={10} className="text-zinc-700 hidden sm:block" />
             </label>
             <input
@@ -589,11 +721,18 @@ export default function OpenSourceForm({
               <div className="flex flex-wrap gap-1.5 mt-1.5 max-h-20 overflow-y-auto bg-[#0A0A0B] border border-white/5 p-1.5 rounded-lg">
                 {contributionScreenshots.map((url, idx) => (
                   <div key={idx} className="relative shrink-0 animate-fadeIn">
-                    <img src={url} alt="Screenshot" className="w-12 h-12 object-cover rounded-md border border-white/5" />
+                    <img
+                      src={url}
+                      alt="Screenshot"
+                      className="w-12 h-12 object-cover rounded-md border border-white/5"
+                    />
                     <button
                       type="button"
                       disabled={loading}
-                      onClick={() => setContributionScreenshots((p) => p.filter((_, i) => i !== idx))}
+                      onClick={async () => {
+                        setContributionScreenshots((p) => p.filter((_, i) => i !== idx));
+                        await deleteCloudinaryUrl(url, "image");
+                      }}
                       className="absolute -top-1.5 -right-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold"
                     >
                       ✕
@@ -605,10 +744,14 @@ export default function OpenSourceForm({
           </div>
         </div>
 
-        {/* IMPACT PERFORMANCE MEASUREMENT MATRICES */}
         <div className="flex flex-col gap-1 border-t border-white/5 pt-4 group/input">
           <label className={labelStyle}>
-            <span>Core Analytical Impact Metrics <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+            <span>
+              Core Analytical Impact Metrics{" "}
+              <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                *(Optional)
+              </span>
+            </span>
             <Award size={10} className="text-zinc-700 hidden sm:block" />
           </label>
           <textarea
@@ -619,13 +762,18 @@ export default function OpenSourceForm({
             className={`${inputStyle} resize-none`}
             disabled={loading}
           />
-          <span className={descriptionStyle}>Log clear statements separated by newlines. (e.g. Architected full-stack validation logic reducing data errors).</span>
+          <span className={descriptionStyle}>
+            Log clear statements separated by newlines. (e.g. Architected full-stack validation
+            logic reducing data errors).
+          </span>
         </div>
 
-        {/* PROJECT STATUS RUNTIME SECTOR */}
         <div className="flex flex-col gap-1 border-t border-white/5 pt-4 group/input">
           <label className={labelStyle}>
-            <span>Upstream Component Operation Status <span className="text-red-400 font-sans font-bold">*(Required)</span></span>
+            <span>
+              Upstream Component Operation Status{" "}
+              <span className="text-red-400 font-sans font-bold">*(Required)</span>
+            </span>
           </label>
           <select
             value={status}
@@ -633,14 +781,21 @@ export default function OpenSourceForm({
             className={`${inputStyle} text-zinc-400 color-scheme-dark`}
             disabled={loading}
           >
-            <option value="PLANNING" className="bg-[#0C0C0E]">PLANNING</option>
-            <option value="IN_PROGRESS" className="bg-[#0C0C0E]">IN_PROGRESS</option>
-            <option value="COMPLETED" className="bg-[#0C0C0E]">COMPLETED</option>
-            <option value="MAINTAINED" className="bg-[#0C0C0E]">MAINTAINED</option>
+            <option value="PLANNING" className="bg-[#0C0C0E]">
+              PLANNING
+            </option>
+            <option value="IN_PROGRESS" className="bg-[#0C0C0E]">
+              IN_PROGRESS
+            </option>
+            <option value="COMPLETED" className="bg-[#0C0C0E]">
+              COMPLETED
+            </option>
+            <option value="MAINTAINED" className="bg-[#0C0C0E]">
+              MAINTAINED
+            </option>
           </select>
         </div>
 
-        {/* OPERATIONS DISPATCH TRIGGER DRAWERS */}
         <div className="pt-2 flex gap-2 border-t border-white/5">
           {onClose && (
             <button

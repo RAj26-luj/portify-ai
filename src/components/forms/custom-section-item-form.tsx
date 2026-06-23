@@ -1,13 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Terminal, Layers, FileText, Image as ImageIcon, Link as LinkIcon, Globe, ShieldAlert, AlertCircle, CheckCircle2 } from "lucide-react";
 import {
-  createCustomSectionItem,
-  updateCustomSectionItem,
-} from "@/actions/custom-section-item";
+  Loader2,
+  Terminal,
+  Layers,
+  FileText,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Globe,
+  ShieldAlert,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+import { createCustomSectionItem, updateCustomSectionItem } from "@/actions/custom-section-item";
 import { useUpload } from "@/hooks/use-upload";
 import { CLOUDINARY_FOLDERS } from "@/lib/cloudinary-folders";
+import { deleteCloudinaryUrl } from "@/actions/upload";
 
 interface Props {
   customSectionId: string;
@@ -40,16 +49,14 @@ export default function CustomSectionItemForm({
   const [iconUrl, setIconUrl] = useState(item?.iconUrl ?? "");
   const [attachmentUrl, setAttachmentUrl] = useState(item?.attachmentUrl ?? "");
   const [externalUrl, setExternalUrl] = useState(item?.externalUrl ?? "");
-  
+
   const [loading, setLoading] = useState(false);
-  
-  // Interactive Validation & Delta State Flags
+
   const [hasChanges, setHasChanges] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
 
   const { upload } = useUpload();
 
-  // Monitors state parameters for deep delta mismatch evaluation
   useEffect(() => {
     const isTitleChanged = title.trim() !== (item?.title ?? "");
     const isSubtitleChanged = subtitle.trim() !== (item?.subtitle ?? "");
@@ -60,32 +67,31 @@ export default function CustomSectionItemForm({
     const isExternalChanged = externalUrl.trim() !== (item?.externalUrl ?? "");
 
     setHasChanges(
-      isTitleChanged || isSubtitleChanged || isDescChanged || isImageChanged ||
-      isIconChanged || isAttachmentChanged || isExternalChanged
+      isTitleChanged ||
+        isSubtitleChanged ||
+        isDescChanged ||
+        isImageChanged ||
+        isIconChanged ||
+        isAttachmentChanged ||
+        isExternalChanged
     );
   }, [title, subtitle, description, imageUrl, iconUrl, attachmentUrl, externalUrl, item]);
 
-  // Reactive Custom Form Constraint Evaluation Flags
   const isTitleInvalid = title.trim() === "";
-  const isExternalUrlInvalid = externalUrl.trim() !== "" && !externalUrl.trim().startsWith("http://") && !externalUrl.trim().startsWith("https://");
-  
+  const isExternalUrlInvalid =
+    externalUrl.trim() !== "" &&
+    !externalUrl.trim().startsWith("http://") &&
+    !externalUrl.trim().startsWith("https://");
+
   const isFormInvalid = isTitleInvalid || isExternalUrlInvalid;
 
   async function uploadImage(file: File) {
-    const result = await upload(
-      file,
-      CLOUDINARY_FOLDERS.customSections,
-      "image"
-    );
+    const result = await upload(file, CLOUDINARY_FOLDERS.customSections, "image");
     return result.url;
   }
 
   async function uploadDocument(file: File) {
-    const result = await upload(
-      file,
-      CLOUDINARY_FOLDERS.customSections,
-      "document"
-    );
+    const result = await upload(file, CLOUDINARY_FOLDERS.customSections, "document");
     return result.url;
   }
 
@@ -135,13 +141,13 @@ export default function CustomSectionItemForm({
   const inputStyle =
     "w-full rounded-lg border border-white/5 bg-[#0A0A0B] p-2.5 sm:p-3 text-zinc-200 placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:border-blue-500/60 focus:bg-[#0E0E10] focus:shadow-[0_0_20px_rgba(59,130,246,0.04)] transition-all duration-200 disabled:opacity-40 shadow-inner font-sans";
 
-  const labelStyle = 
+  const labelStyle =
     "mb-1 flex items-center justify-between text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 group-hover/input:text-zinc-300 transition-colors";
 
-  const descriptionStyle = 
+  const descriptionStyle =
     "text-[10px] sm:text-xs text-zinc-500 font-sans leading-normal block mt-1";
 
-  const scrapeRecommendationStyle = 
+  const scrapeRecommendationStyle =
     "text-[9px] sm:text-[10px] text-amber-400 font-mono bg-amber-500/5 border border-amber-500/10 rounded p-2.5 mt-1 leading-normal flex items-start gap-1.5";
 
   return (
@@ -149,22 +155,23 @@ export default function CustomSectionItemForm({
       onSubmit={handleSubmit}
       className="space-y-4 sm:space-y-6 text-zinc-300 bg-[#0C0C0E] p-4 sm:p-6 rounded-none sm:rounded-xl max-w-full overflow-x-hidden selection:bg-blue-500/30 selection:text-white font-sans select-none animate-fadeIn"
     >
-      {/* HEADER SECTION CONTEXT INFO */}
       <div className="bg-[#121214] border border-white/5 rounded-lg p-3 sm:p-4 mb-1">
         <h4 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
           <Layers size={13} className="text-blue-400" />
           <span>Custom Block Component Workspace Layer</span>
         </h4>
         <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-          Dynamically mount an active schema node item within this customized area container. Configure your item context blocks efficiently below. Only input files or parameters required for this node layer.
+          Dynamically mount an active schema node item within this customized area container.
+          Configure your item context blocks efficiently below. Only input files or parameters
+          required for this node layer.
         </p>
       </div>
 
-      {/* Input Group: Title */}
       <div className="space-y-1 group/input">
         <label className={labelStyle}>
           <span className="flex items-center gap-1">
-            Item Title / Heading <span className="text-red-400 font-sans font-bold">*(Required)</span>
+            Item Title / Heading{" "}
+            <span className="text-red-400 font-sans font-bold">*(Required)</span>
           </span>
           <div className="flex items-center gap-1.5">
             {isTouched && isTitleInvalid ? (
@@ -177,7 +184,9 @@ export default function CustomSectionItemForm({
               </span>
             ) : null}
             {hasChanges && (
-              <span className="text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1 py-0.5 rounded uppercase font-bold tracking-normal">edited</span>
+              <span className="text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1 py-0.5 rounded uppercase font-bold tracking-normal">
+                edited
+              </span>
             )}
             <Terminal size={10} className="text-zinc-700 hidden sm:block" />
           </div>
@@ -193,16 +202,24 @@ export default function CustomSectionItemForm({
         />
         {isTouched && isTitleInvalid && (
           <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">
-            ⚠️ Validation Error: Component heading element criteria not satisfied. Entry string can not be left empty.
+            ⚠️ Validation Error: Component heading element criteria not satisfied. Entry string can
+            not be left empty.
           </p>
         )}
-        <span className={descriptionStyle}>The main operational header identity mapping string for this data component. Displays as the primary card title layout field.</span>
+        <span className={descriptionStyle}>
+          The main operational header identity mapping string for this data component. Displays as
+          the primary card title layout field.
+        </span>
       </div>
 
-      {/* Input Group: Subtitle */}
       <div className="space-y-1 group/input">
         <label className={labelStyle}>
-          <span className="flex items-center gap-1">Subtitle Node <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+          <span className="flex items-center gap-1">
+            Subtitle Node{" "}
+            <span className="text-zinc-600 font-sans font-normal lowercase italic">
+              *(Optional)
+            </span>
+          </span>
         </label>
 
         <input
@@ -212,13 +229,20 @@ export default function CustomSectionItemForm({
           disabled={loading}
           className={inputStyle}
         />
-        <span className={descriptionStyle}>Small supporting descriptive metric string metadata rendered directly below the prime header level.</span>
+        <span className={descriptionStyle}>
+          Small supporting descriptive metric string metadata rendered directly below the prime
+          header level.
+        </span>
       </div>
 
-      {/* Input Group: Description */}
       <div className="space-y-1 group/input">
         <label className={labelStyle}>
-          <span className="flex items-center gap-1">Body Description Summary <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+          <span className="flex items-center gap-1">
+            Body Description Summary{" "}
+            <span className="text-zinc-600 font-sans font-normal lowercase italic">
+              *(Optional)
+            </span>
+          </span>
         </label>
 
         <textarea
@@ -229,28 +253,39 @@ export default function CustomSectionItemForm({
           disabled={loading}
           className={`${inputStyle} resize-none`}
         />
-        <span className={descriptionStyle}>The principal text segment core content payload users will parse inside your public matrix layout section views.</span>
+        <span className={descriptionStyle}>
+          The principal text segment core content payload users will parse inside your public matrix
+          layout section views.
+        </span>
       </div>
 
-      {/* Main Image Segment */}
       <div className="border-t border-white/5 pt-4 sm:pt-5 space-y-3">
         <div>
           <h3 className="text-xs sm:text-sm font-bold font-mono uppercase tracking-wider text-zinc-300 flex items-center gap-1">
             <ImageIcon size={12} className="text-blue-400" />
             <span>Focal Presentation Graphics</span>
           </h3>
-          <span className={descriptionStyle}>Mount a prominent structural image layer payload to represent this system node block item.</span>
+          <span className={descriptionStyle}>
+            Mount a prominent structural image layer payload to represent this system node block
+            item.
+          </span>
         </div>
 
         <div className="space-y-1 group/input">
           <label className={labelStyle}>
-            <span>Upload Main Image <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+            <span>
+              Upload Main Image{" "}
+              <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                *(Optional)
+              </span>
+            </span>
           </label>
 
           <div className={scrapeRecommendationStyle}>
             <ShieldAlert size={12} className="shrink-0 mt-0.5 text-amber-400" />
             <span>
-              <strong>Item Banner Scope:</strong> Displays as a full landscape display block image inside custom showcase nodes.
+              <strong>Item Banner Scope:</strong> Displays as a full landscape display block image
+              inside custom showcase nodes.
             </span>
           </div>
 
@@ -262,8 +297,12 @@ export default function CustomSectionItemForm({
               const file = e.target.files?.[0];
               if (!file) return;
               try {
+                const oldUrl = imageUrl;
                 const url = await uploadImage(file);
                 setImageUrl(url);
+                if (oldUrl && oldUrl !== url) {
+                  await deleteCloudinaryUrl(oldUrl, "image");
+                }
               } catch {
                 console.error("Image asset file upload pipeline exception.");
               }
@@ -284,25 +323,35 @@ export default function CustomSectionItemForm({
         </div>
       </div>
 
-      {/* Logo / Icon Segment */}
       <div className="border-t border-white/5 pt-4 sm:pt-5 space-y-3">
         <div>
           <h3 className="text-xs sm:text-sm font-bold font-mono uppercase tracking-wider text-zinc-300 flex items-center gap-1">
             <Terminal size={12} className="text-blue-400" />
             <span>Logo Graphic Emblem Asset</span>
           </h3>
-          <span className={descriptionStyle}>Provide an identity marker emblem, tool icon vector, or brand insignia node payload reference.</span>
+          <span className={descriptionStyle}>
+            Provide an identity marker emblem, tool icon vector, or brand insignia node payload
+            reference.
+          </span>
         </div>
 
         <div className="space-y-1 group/input">
           <label className={labelStyle}>
-            <span>Upload Icon Vector File <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+            <span>
+              Upload Icon Vector File{" "}
+              <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                *(Optional)
+              </span>
+            </span>
           </label>
 
           <div className={scrapeRecommendationStyle}>
             <Globe size={11} className="shrink-0 mt-0.5 text-amber-400" />
             <span>
-              <strong>Emblem Scrape Advice:</strong> If your asset resides on a remote channel network environment, find the logo via Google Images, execute <strong>&quot;Copy Image Address / URL&quot;</strong>, and paste the parameters string token directly down here.
+              <strong>Emblem Scrape Advice:</strong> If your asset resides on a remote channel
+              network environment, find the logo via Google Images, execute{" "}
+              <strong>&quot;Copy Image Address / URL&quot;</strong>, and paste the parameters string
+              token directly down here.
             </span>
           </div>
 
@@ -314,8 +363,12 @@ export default function CustomSectionItemForm({
               const file = e.target.files?.[0];
               if (!file) return;
               try {
+                const oldUrl = iconUrl;
                 const url = await uploadImage(file);
                 setIconUrl(url);
+                if (oldUrl && oldUrl !== url) {
+                  await deleteCloudinaryUrl(oldUrl, "image");
+                }
               } catch {
                 console.error("Icon logo element file upload failure.");
               }
@@ -336,7 +389,6 @@ export default function CustomSectionItemForm({
         </div>
       </div>
 
-      {/* Links & Attachments Segment */}
       <div className="border-t border-white/5 pt-4 sm:pt-5 space-y-3.5 sm:space-y-4">
         <h3 className="text-xs sm:text-sm font-bold font-mono uppercase tracking-wider text-zinc-300 flex items-center gap-1">
           <LinkIcon size={12} className="text-blue-400" />
@@ -345,9 +397,16 @@ export default function CustomSectionItemForm({
 
         <div className="space-y-1 group/input">
           <label className={labelStyle}>
-            <span>External Production Website URL <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+            <span>
+              External Production Website URL{" "}
+              <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                *(Optional)
+              </span>
+            </span>
             {isTouched && isExternalUrlInvalid && (
-              <span className="text-[9px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10">syntax_invalid</span>
+              <span className="text-[9px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10">
+                syntax_invalid
+              </span>
             )}
           </label>
 
@@ -361,15 +420,24 @@ export default function CustomSectionItemForm({
           />
           {isTouched && isExternalUrlInvalid && (
             <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">
-              ⚠️ Protocol warning: Link node path must resolve using an absolute formatting configuration header (http:// or https://).
+              ⚠️ Protocol warning: Link node path must resolve using an absolute formatting
+              configuration header (http:// or https://).
             </p>
           )}
-          <span className={descriptionStyle}>Link nodes leading out to active production environments, repositories, target certificate registries, or live sub-applications.</span>
+          <span className={descriptionStyle}>
+            Link nodes leading out to active production environments, repositories, target
+            certificate registries, or live sub-applications.
+          </span>
         </div>
 
         <div className="space-y-1 group/input pt-1">
           <label className={labelStyle}>
-            <span>Upload Supplementary Document Blob Attachment <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+            <span>
+              Upload Supplementary Document Blob Attachment{" "}
+              <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                *(Optional)
+              </span>
+            </span>
           </label>
 
           <input
@@ -380,8 +448,12 @@ export default function CustomSectionItemForm({
               const file = e.target.files?.[0];
               if (!file) return;
               try {
+                const oldUrl = attachmentUrl;
                 const url = await uploadDocument(file);
                 setAttachmentUrl(url);
+                if (oldUrl && oldUrl !== url) {
+                  await deleteCloudinaryUrl(oldUrl, "raw");
+                }
               } catch {
                 console.error("Document asset context file pipeline upload failure.");
               }
@@ -389,7 +461,10 @@ export default function CustomSectionItemForm({
             }}
             className="w-full text-[11px] font-mono text-zinc-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-[#121214] file:text-zinc-300 hover:file:bg-zinc-800 border border-white/5 p-1 rounded-lg bg-[#0A0A0B]"
           />
-          <span className={descriptionStyle}>Upload complementary context files (e.g. project reports, presentations, slide decks, whitepapers, or alternative resume documents).</span>
+          <span className={descriptionStyle}>
+            Upload complementary context files (e.g. project reports, presentations, slide decks,
+            whitepapers, or alternative resume documents).
+          </span>
 
           {attachmentUrl && (
             <div className="mt-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-2.5 text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 animate-fadeIn">
@@ -400,7 +475,6 @@ export default function CustomSectionItemForm({
         </div>
       </div>
 
-      {/* Button Configuration Desk */}
       <div className="pt-2 flex flex-col sm:flex-row gap-3 border-t border-white/5 font-mono text-xs font-bold uppercase tracking-wider">
         {onCancel && (
           <button

@@ -2,28 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { 
-  Sliders, 
-  ArrowUp, 
-  ArrowDown, 
-  Loader2, 
-  AlertTriangle, 
-  LayoutGrid, 
-  List, 
-  Info, 
-  Lock, 
-  Eye, 
-  EyeOff, 
+import {
+  Sliders,
+  ArrowUp,
+  ArrowDown,
+  Loader2,
+  AlertTriangle,
+  LayoutGrid,
+  List,
+  Info,
+  Lock,
+  Eye,
+  EyeOff,
   RefreshCw,
   GripVertical,
-  X
+  X,
 } from "lucide-react";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 import {
   getSectionSettings,
   updateSectionSetting,
   reorderSectionSettings,
-  resetSectionSettings, 
+  resetSectionSettings,
 } from "@/actions/section-setting";
 import { getCustomSections, updateCustomSection } from "@/actions/custom-section";
 
@@ -48,33 +48,48 @@ export default function SectionSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
-  
-  // Inline confirmation state flag
+
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   async function loadSettings() {
     try {
       setLoading(true);
       setError(null);
-      
-      // 1. Resolve master portfolio identifier string primitive safely
+
       const pid = await getPortfolioId();
-      
+
       if (!pid) {
         throw new Error("Active portfolio specifications tracing vector was not resolved.");
       }
       setPortfolioId(pid);
 
-      // 2. Fetch parallel layout arrays safely inside response envelope checks
       const settingsResult = await getSectionSettings(pid);
       const customSectionsResult = await getCustomSections(pid);
 
-      if (!settingsResult || !settingsResult.success || !("data" in settingsResult) || !Array.isArray(settingsResult.data)) {
-        throw new Error("error" in settingsResult && typeof settingsResult.error === "string" ? settingsResult.error : "Failed compiling default section layouts.");
+      if (
+        !settingsResult ||
+        !settingsResult.success ||
+        !("data" in settingsResult) ||
+        !Array.isArray(settingsResult.data)
+      ) {
+        throw new Error(
+          "error" in settingsResult && typeof settingsResult.error === "string"
+            ? settingsResult.error
+            : "Failed compiling default section layouts."
+        );
       }
 
-      if (!customSectionsResult || !customSectionsResult.success || !("data" in customSectionsResult) || !Array.isArray(customSectionsResult.data)) {
-        throw new Error("error" in customSectionsResult && typeof customSectionsResult.error === "string" ? customSectionsResult.error : "Failed compiling custom user layers.");
+      if (
+        !customSectionsResult ||
+        !customSectionsResult.success ||
+        !("data" in customSectionsResult) ||
+        !Array.isArray(customSectionsResult.data)
+      ) {
+        throw new Error(
+          "error" in customSectionsResult && typeof customSectionsResult.error === "string"
+            ? customSectionsResult.error
+            : "Failed compiling custom user layers."
+        );
       }
 
       const unique = new Map<string, SectionSetting>();
@@ -101,14 +116,16 @@ export default function SectionSettingsPage() {
 
       const items = Array.from(unique.values());
 
-      const customSectionSettings: SectionSetting[] = customSectionsResult.data.map((section: any) => ({
-        id: `custom-${section.id}`,
-        sectionKey: `custom_${section.id}`,
-        title: section.title,
-        isEnabled: !!section.isVisible,
-        mandatory: false,
-        displayOrder: typeof section.displayOrder === "number" ? section.displayOrder : 0,
-      }));
+      const customSectionSettings: SectionSetting[] = customSectionsResult.data.map(
+        (section: any) => ({
+          id: `custom-${section.id}`,
+          sectionKey: `custom_${section.id}`,
+          title: section.title,
+          isEnabled: !!section.isVisible,
+          mandatory: false,
+          displayOrder: typeof section.displayOrder === "number" ? section.displayOrder : 0,
+        })
+      );
 
       const hero = items.find((x) => x.sectionKey.toLowerCase() === "hero");
       const about = items.find((x) => x.sectionKey.toLowerCase() === "about");
@@ -134,26 +151,33 @@ export default function SectionSettingsPage() {
         ...customSectionSettings.sort((a, b) => a.displayOrder - b.displayOrder),
       ];
 
-      const ordered = [
-        hero,
-        about,
-        experience,
-        education,
-        ...middle,
-        contact,
-      ].filter(Boolean) as SectionSetting[];
+      const ordered = [hero, about, experience, education, ...middle, contact].filter(
+        Boolean
+      ) as SectionSetting[];
 
       if (ordered.length === 0) {
         const resetResult = await resetSectionSettings(pid);
-        
+
         if (!resetResult.success) {
-          throw new Error("error" in resetResult && typeof resetResult.error === "string" ? resetResult.error : "Failed running template reset triggers.");
+          throw new Error(
+            "error" in resetResult && typeof resetResult.error === "string"
+              ? resetResult.error
+              : "Failed running template reset triggers."
+          );
         }
 
         const refreshedResult = await getSectionSettings(pid);
-        
-        if (!refreshedResult.success || !("data" in refreshedResult) || !Array.isArray(refreshedResult.data)) {
-          throw new Error("error" in refreshedResult && typeof refreshedResult.error === "string" ? refreshedResult.error : "Failed pulling data layers.");
+
+        if (
+          !refreshedResult.success ||
+          !("data" in refreshedResult) ||
+          !Array.isArray(refreshedResult.data)
+        ) {
+          throw new Error(
+            "error" in refreshedResult && typeof refreshedResult.error === "string"
+              ? refreshedResult.error
+              : "Failed pulling data layers."
+          );
         }
 
         setSettings(
@@ -188,9 +212,13 @@ export default function SectionSettingsPage() {
       setSaving(true);
       setError(null);
       const resetResult = await resetSectionSettings(portfolioId);
-      
+
       if (!resetResult.success) {
-        throw new Error("error" in resetResult && typeof resetResult.error === "string" ? resetResult.error : "Failed layout reset operation.");
+        throw new Error(
+          "error" in resetResult && typeof resetResult.error === "string"
+            ? resetResult.error
+            : "Failed layout reset operation."
+        );
       }
 
       setShowResetConfirm(false);
@@ -214,7 +242,11 @@ export default function SectionSettingsPage() {
         });
 
         if (!result.success) {
-          throw new Error("error" in result && typeof result.error === "string" ? result.error : "Custom tier modification dropped.");
+          throw new Error(
+            "error" in result && typeof result.error === "string"
+              ? result.error
+              : "Custom tier modification dropped."
+          );
         }
 
         setSettings((prev) =>
@@ -240,7 +272,11 @@ export default function SectionSettingsPage() {
       });
 
       if (!result.success) {
-        throw new Error("error" in result && typeof result.error === "string" ? result.error : "Core tracking tier modification dropped.");
+        throw new Error(
+          "error" in result && typeof result.error === "string"
+            ? result.error
+            : "Core tracking tier modification dropped."
+        );
       }
 
       setSettings((prev) =>
@@ -278,28 +314,36 @@ export default function SectionSettingsPage() {
       setSaving(true);
       const reorderResult = await reorderSectionSettings(
         portfolioId,
-        items
-          .filter((item) => item.sectionKey !== "education")
-          .map((item) => item.id)
+        items.filter((item) => item.sectionKey !== "education").map((item) => item.id)
       );
 
       if (!reorderResult.success) {
-        throw new Error("error" in reorderResult && typeof reorderResult.error === "string" ? reorderResult.error : "Reorder sequence rejected.");
+        throw new Error(
+          "error" in reorderResult && typeof reorderResult.error === "string"
+            ? reorderResult.error
+            : "Reorder sequence rejected."
+        );
       }
 
-      const customUpdates = items.map((item, idx) => {
-        if (item.sectionKey.startsWith("custom_")) {
-          const customId = item.sectionKey.replace("custom_", "");
-          return updateCustomSection(customId, { displayOrder: idx });
-        }
-        return null;
-      }).filter(Boolean);
+      const customUpdates = items
+        .map((item, idx) => {
+          if (item.sectionKey.startsWith("custom_")) {
+            const customId = item.sectionKey.replace("custom_", "");
+            return updateCustomSection(customId, { displayOrder: idx });
+          }
+          return null;
+        })
+        .filter(Boolean);
 
       if (customUpdates.length > 0) {
         const customResults = await Promise.all(customUpdates);
-        const customFailed = customResults.find(r => r && !r.success);
+        const customFailed = customResults.find((r) => r && !r.success);
         if (customFailed) {
-          throw new Error("error" in customFailed && typeof customFailed.error === "string" ? customFailed.error : "Sub-ordering elements mapping crashed.");
+          throw new Error(
+            "error" in customFailed && typeof customFailed.error === "string"
+              ? customFailed.error
+              : "Sub-ordering elements mapping crashed."
+          );
         }
       }
     } catch (err) {
@@ -313,7 +357,9 @@ export default function SectionSettingsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[55vh] gap-4 bg-[#050505] text-zinc-500 border border-zinc-900 rounded-xl select-none font-mono p-4 text-center">
         <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-blue-500" />
-        <p className="text-[10px] sm:text-xs uppercase tracking-widest">// Synchronizing structural section nodes...</p>
+        <p className="text-[10px] sm:text-xs uppercase tracking-widest">
+          // Synchronizing structural section nodes...
+        </p>
       </div>
     );
   }
@@ -323,9 +369,11 @@ export default function SectionSettingsPage() {
       <div className="mx-auto max-w-xl my-6 sm:my-12 rounded-xl border border-red-500/10 bg-gradient-to-b from-red-500/5 to-transparent p-4 sm:p-5 shadow-2xl flex gap-3 items-start text-white">
         <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-400 shrink-0 mt-0.5" />
         <div className="space-y-2 flex-1">
-          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">Configuration Integration Sync Failure</h4>
+          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
+            Configuration Integration Sync Failure
+          </h4>
           <p className="text-[11px] sm:text-xs text-red-400/90 leading-relaxed">{error}</p>
-          <button 
+          <button
             onClick={loadSettings}
             className="inline-flex h-7 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 px-2.5 text-[11px] font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
           >
@@ -340,19 +388,20 @@ export default function SectionSettingsPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 text-white max-w-4xl mx-auto font-sans antialiased px-4 sm:px-6 py-4 sm:py-6">
-      
-      {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 border-b border-zinc-900 pb-4 sm:pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2 sm:gap-2.5">
             <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 shadow-sm shrink-0">
               <Sliders size={14} className="sm:w-[15px] sm:h-[15px]" />
             </div>
-            <h1 className="text-base sm:text-xl font-bold tracking-tight text-zinc-100">Section Orchestrator</h1>
+            <h1 className="text-base sm:text-xl font-bold tracking-tight text-zinc-100">
+              Section Orchestrator
+            </h1>
             {saving && <RefreshCw className="w-3 h-3 animate-spin text-zinc-500 mt-0.5" />}
           </div>
           <p className="text-[11px] sm:text-xs text-zinc-500 font-medium leading-normal">
-            Arrange your portfolio workspace elements to align layout sections matching your personal preferences.
+            Arrange your portfolio workspace elements to align layout sections matching your
+            personal preferences.
           </p>
         </div>
 
@@ -374,12 +423,11 @@ export default function SectionSettingsPage() {
             </button>
           </div>
 
-          {/* DYNAMIC INLINE CONFIRMATION ACTION ENGINE */}
           {!showResetConfirm ? (
             <button
               onClick={() => setShowResetConfirm(true)}
               disabled={saving}
-              className="px-2.5 py-1.5 sm:px-3.5 rounded-lg border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-800 text-[11px] sm:text-xs font-semibold text-zinc-300 transition-all active:scale-[0.98] disabled:opacity-40 select-none"
+              className="px-2.5 py-1.5 sm:px-3.5 rounded-lg border border-zinc-900/40 hover:bg-zinc-800 text-[11px] sm:text-xs font-semibold text-zinc-300 transition-all active:scale-[0.98] disabled:opacity-40 select-none"
             >
               Reset Order
             </button>
@@ -406,25 +454,29 @@ export default function SectionSettingsPage() {
         </div>
       </div>
 
-      {/* COMPLIANCE RULES ALERT WELL */}
       <div className="rounded-xl border border-zinc-800 bg-gradient-to-r from-zinc-900/40 to-transparent p-3 sm:p-4 flex gap-2.5 sm:gap-3.5 items-start">
         <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-400 shrink-0 mt-0.5" />
         <div className="space-y-1 text-[11px] sm:text-xs">
           <p className="font-bold tracking-wide text-zinc-200">Visibility Constraints</p>
           <p className="text-zinc-500 leading-relaxed font-sans hidden sm:block">
-            The section layout architecture has some mandatory sections that cannot be changed, disabled, or deleted (<strong className="text-zinc-400 italic">Hero Banner, About Narrative, and Contact Inbound Nodes</strong>). These remain completely locked down to keep portfolio template navigation functional.
+            The section layout architecture has some mandatory sections that cannot be changed,
+            disabled, or deleted (
+            <strong className="text-zinc-400 italic">
+              Hero Banner, About Narrative, and Contact Inbound Nodes
+            </strong>
+            ). These remain completely locked down to keep portfolio template navigation functional.
           </p>
           <p className="text-zinc-500 leading-normal font-sans sm:hidden">
-            Core sections (<span className="text-zinc-400 italic">Hero, About, Contact</span>) are fixed to maintain essential routing mechanics.
+            Core sections (<span className="text-zinc-400 italic">Hero, About, Contact</span>) are
+            fixed to maintain essential routing mechanics.
           </p>
         </div>
       </div>
 
-      {/* MATRIX DISPLAY GRID */}
-      <div 
+      <div
         className={
-          viewMode === "grid" 
-            ? "grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2" 
+          viewMode === "grid"
+            ? "grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2"
             : "space-y-2 sm:space-y-3 max-w-3xl mx-auto"
         }
       >
@@ -437,7 +489,6 @@ export default function SectionSettingsPage() {
           const educationSection = settings.find((s) => s.sectionKey.toLowerCase() === "education");
           const isCareerBlock = key === "experience";
 
-          // --- SPLIT TIMELINE COMBINATION NODE ELEMENT ---
           if (isCareerBlock) {
             return (
               <div
@@ -453,7 +504,9 @@ export default function SectionSettingsPage() {
                       <h3 className="text-[11px] sm:text-xs font-bold text-zinc-200 uppercase tracking-wider font-mono truncate">
                         Experience &amp; Education Track
                       </h3>
-                      <p className="text-[10px] sm:text-[11px] text-zinc-500 truncate">Timeline chronology records</p>
+                      <p className="text-[10px] sm:text-[11px] text-zinc-500 truncate">
+                        Timeline chronology records
+                      </p>
                     </div>
                   </div>
 
@@ -481,9 +534,10 @@ export default function SectionSettingsPage() {
                 </div>
 
                 <div className="space-y-2 sm:space-y-3.5 pl-5 sm:pl-6">
-                  {/* Experience Section Sub-tier */}
                   <div className="flex items-center justify-between gap-3 rounded-lg bg-zinc-950 p-2 sm:p-3 border border-zinc-900">
-                    <span className="text-[11px] sm:text-xs font-medium text-zinc-300 truncate">Work History</span>
+                    <span className="text-[11px] sm:text-xs font-medium text-zinc-300 truncate">
+                      Work History
+                    </span>
                     <button
                       disabled={saving}
                       onClick={() => toggleSection(setting)}
@@ -498,10 +552,11 @@ export default function SectionSettingsPage() {
                     </button>
                   </div>
 
-                  {/* Education Section Sub-tier */}
                   {educationSection && (
                     <div className="flex items-center justify-between gap-3 rounded-lg bg-zinc-950 p-2 sm:p-3 border border-zinc-900">
-                      <span className="text-[11px] sm:text-xs font-medium text-zinc-300 truncate">Academic Track</span>
+                      <span className="text-[11px] sm:text-xs font-medium text-zinc-300 truncate">
+                        Academic Track
+                      </span>
                       <button
                         disabled={saving}
                         onClick={() => toggleSection(educationSection)}
@@ -523,19 +578,20 @@ export default function SectionSettingsPage() {
 
           const isCustom = setting.sectionKey.startsWith("custom_");
 
-          // --- REGULAR LAYOUT ROWS ---
           return (
-            <div 
-              key={setting.id} 
+            <div
+              key={setting.id}
               className={`border border-zinc-800 rounded-xl p-3 sm:p-4 bg-[#0C0C0E] flex items-center justify-between gap-3 hover:border-zinc-700/80 transition-all shadow-sm group/item ${
                 isFixed ? "bg-[#09090b]/40 opacity-95" : ""
               }`}
             >
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <GripVertical className={`text-zinc-700 w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isFixed ? "opacity-20 cursor-not-allowed" : "cursor-move group-hover/item:text-zinc-500 transition-colors"}`} />
+                <GripVertical
+                  className={`text-zinc-700 w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isFixed ? "opacity-20 cursor-not-allowed" : "cursor-move group-hover/item:text-zinc-500 transition-colors"}`}
+                />
                 <div className="min-w-0 flex items-center gap-2">
                   <p className="text-[11px] sm:text-xs font-bold text-zinc-200 uppercase tracking-wider truncate font-mono">
-                    {isCustom ? setting.title : (setting.title || setting.sectionKey)}
+                    {isCustom ? setting.title : setting.title || setting.sectionKey}
                   </p>
                   {isCustom && (
                     <span className="text-[8px] font-sans font-semibold border border-zinc-800 bg-zinc-900 px-1 py-0.2 rounded text-zinc-500 shrink-0 hidden xs:inline-block">

@@ -1,13 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Terminal, BookOpen, Calendar, Award, FileText, Image as ImageIcon, Globe, Plus, X, AlertCircle, CheckCircle2 } from "lucide-react";
 import {
-  createPublication,
-  updatePublication,
-} from "@/actions/publication";
+  Loader2,
+  Terminal,
+  BookOpen,
+  Calendar,
+  Award,
+  FileText,
+  Image as ImageIcon,
+  Globe,
+  Plus,
+  X,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+import { createPublication, updatePublication } from "@/actions/publication";
 import { useUpload } from "@/hooks/use-upload";
 import { CLOUDINARY_FOLDERS } from "@/lib/cloudinary-folders";
+import { deleteCloudinaryUrl } from "@/actions/upload";
 
 type Props = {
   portfolioId: string;
@@ -25,64 +36,44 @@ type Props = {
     pdfUrl?: string | null;
     conference?: string | null;
     publicationCover?: string | null;
-    authors?: string[] | string; // ✨ FIXED: Allowed string type along with string[]
+    authors?: string[] | string;
   };
   onSuccess?: () => void;
   onClose?: () => void;
 };
 
-export default function PublicationForm({
-  portfolioId,
-  initialData,
-  onSuccess,
-  onClose,
-}: Props) {
+export default function PublicationForm({ portfolioId, initialData, onSuccess, onClose }: Props) {
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [journal, setJournal] = useState(initialData?.journal ?? "");
   const [publisher, setPublisher] = useState(initialData?.publisher ?? "");
   const [doi, setDoi] = useState(initialData?.doi ?? "");
-  const [citations, setCitations] = useState<number>(
-    initialData?.citations ?? 0
-  );
+  const [citations, setCitations] = useState<number>(initialData?.citations ?? 0);
   const [abstract, setAbstract] = useState(initialData?.abstract ?? "");
-  const [publicationUrl, setPublicationUrl] = useState(
-    initialData?.publicationUrl ?? ""
-  );
+  const [publicationUrl, setPublicationUrl] = useState(initialData?.publicationUrl ?? "");
   const [pdfUrl, setPdfUrl] = useState(initialData?.pdfUrl ?? "");
-  const [conference, setConference] = useState(
-    initialData?.conference ?? ""
-  );
-  const [publicationCover, setPublicationCover] = useState(
-    initialData?.publicationCover ?? ""
-  );
+  const [conference, setConference] = useState(initialData?.conference ?? "");
+  const [publicationCover, setPublicationCover] = useState(initialData?.publicationCover ?? "");
 
-  // Dynamic state management for Authors array
   const [authorsList, setAuthorsList] = useState<string[]>([]);
   const [currentAuthorInput, setCurrentAuthorInput] = useState("");
 
   const [publicationDate, setPublicationDate] = useState(
     initialData?.publicationDate
-      ? new Date(initialData.publicationDate)
-          .toISOString()
-          .split("T")[0]
+      ? new Date(initialData.publicationDate).toISOString().split("T")[0]
       : ""
   );
 
-  const [featured, setFeatured] = useState(
-    initialData?.featured ?? false
-  );
+  const [featured, setFeatured] = useState(initialData?.featured ?? false);
 
   const [loading, setLoading] = useState(false);
   const { upload } = useUpload();
 
-  // High-fidelity validation interaction mapping states
   const [isTouched, setIsTouched] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  
-  // Load and cleanly split editing strings or array blocks into state
+
   useEffect(() => {
     if (!initialData) return;
-    
+
     if (Array.isArray(initialData.authors)) {
       setAuthorsList(initialData.authors);
     } else if (typeof initialData.authors === "string" && initialData.authors.trim() !== "") {
@@ -92,7 +83,6 @@ export default function PublicationForm({
     }
   }, [initialData]);
 
-  // Track global dataset property deltas to safely configure form interaction buttons
   useEffect(() => {
     const isTitleChanged = title.trim() !== (initialData?.title ?? "");
     const isJournalChanged = journal.trim() !== (initialData?.journal ?? "");
@@ -114,25 +104,51 @@ export default function PublicationForm({
     const initialAuthors = Array.isArray(initialData?.authors)
       ? initialData.authors
       : typeof initialData?.authors === "string" && initialData.authors.trim() !== ""
-      ? initialData.authors.split(",").map((a) => a.trim())
-      : [];
+        ? initialData.authors.split(",").map((a) => a.trim())
+        : [];
     const areAuthorsChanged = JSON.stringify(authorsList) !== JSON.stringify(initialAuthors);
 
     setHasChanges(
-      isTitleChanged || isJournalChanged || isPublisherChanged || isDoiChanged ||
-      isCitationsChanged || isAbstractChanged || isUrlChanged || isPdfChanged ||
-      isConferenceChanged || isCoverChanged || isDateChanged || isFeaturedChanged || areAuthorsChanged
+      isTitleChanged ||
+        isJournalChanged ||
+        isPublisherChanged ||
+        isDoiChanged ||
+        isCitationsChanged ||
+        isAbstractChanged ||
+        isUrlChanged ||
+        isPdfChanged ||
+        isConferenceChanged ||
+        isCoverChanged ||
+        isDateChanged ||
+        isFeaturedChanged ||
+        areAuthorsChanged
     );
-  }, [title, journal, publisher, doi, citations, abstract, publicationUrl, pdfUrl, conference, publicationCover, publicationDate, featured, authorsList, initialData]);
+  }, [
+    title,
+    journal,
+    publisher,
+    doi,
+    citations,
+    abstract,
+    publicationUrl,
+    pdfUrl,
+    conference,
+    publicationCover,
+    publicationDate,
+    featured,
+    authorsList,
+    initialData,
+  ]);
 
-  // Reactive Custom Form Constraint Evaluation Flags
   const isTitleInvalid = title.trim() === "";
   const isCitationsInvalid = citations < 0;
-  const isPublicationUrlInvalid = publicationUrl.trim() !== "" && !publicationUrl.trim().startsWith("http://") && !publicationUrl.trim().startsWith("https://");
-  
+  const isPublicationUrlInvalid =
+    publicationUrl.trim() !== "" &&
+    !publicationUrl.trim().startsWith("http://") &&
+    !publicationUrl.trim().startsWith("https://");
+
   const isFormInvalid = isTitleInvalid || isCitationsInvalid || isPublicationUrlInvalid;
 
-  // Push an author into the list array
   function handleAddAuthor() {
     const trimmed = currentAuthorInput.trim();
     if (trimmed && !authorsList.includes(trimmed)) {
@@ -141,7 +157,6 @@ export default function PublicationForm({
     setCurrentAuthorInput("");
   }
 
-  // Drop a specific author out of the list array
   function handleRemoveAuthor(authorToRemove: string) {
     setAuthorsList((prev) => prev.filter((a) => a !== authorToRemove));
   }
@@ -168,9 +183,7 @@ export default function PublicationForm({
         conference: conference.trim() || undefined,
         publicationCover: publicationCover.trim() || undefined,
 
-        publicationDate: publicationDate
-          ? new Date(publicationDate)
-          : undefined,
+        publicationDate: publicationDate ? new Date(publicationDate) : undefined,
 
         authors: authorsList.map((a) => a.trim()).filter(Boolean),
 
@@ -210,52 +223,41 @@ export default function PublicationForm({
   }
 
   async function handleCoverUpload(file: File) {
-    const res = await upload(
-      file,
-      CLOUDINARY_FOLDERS.publications,
-      "image"
-    );
+    const res = await upload(file, CLOUDINARY_FOLDERS.publications, "image");
     return res.url;
   }
 
   async function handlePdfUpload(file: File) {
-    const res = await upload(
-      file,
-      CLOUDINARY_FOLDERS.publications,
-      "document"
-    );
+    const res = await upload(file, CLOUDINARY_FOLDERS.publications, "document");
     return res.url;
   }
 
   const inputStyle =
     "w-full rounded-lg border border-white/5 bg-[#0A0A0B] p-2.5 sm:p-3 text-zinc-200 placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:border-blue-500/60 focus:bg-[#0E0E10] focus:shadow-[0_0_20px_rgba(59,130,246,0.04)] transition-all duration-200 disabled:opacity-40 shadow-inner font-sans";
 
-  const labelStyle = 
+  const labelStyle =
     "mb-1 flex items-center justify-between text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 group-hover/input:text-zinc-300 transition-colors";
 
-  const descriptionStyle = 
+  const descriptionStyle =
     "text-[10px] sm:text-xs text-zinc-500 font-sans leading-normal block mt-1";
 
-  const scrapeRecommendationStyle = 
+  const scrapeRecommendationStyle =
     "text-[9px] sm:text-[10px] text-amber-400 font-mono bg-amber-500/5 border border-amber-500/10 rounded p-2.5 mt-1 leading-normal flex items-start gap-1.5";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 sm:p-4 select-none animate-fadeIn">
-      
-      {/* ELITE CYBERPUNK PREMIUM DARK SURFACED CONTAINER */}
-      <form 
-        onSubmit={handleSubmit} 
+      <form
+        onSubmit={handleSubmit}
         className="w-full max-w-sm sm:max-w-xl space-y-4 sm:space-y-5 rounded-xl bg-[#0C0C0E] p-4 sm:p-6 text-zinc-300 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] border border-white/10 max-h-[92vh] overflow-y-auto font-sans selection:bg-blue-500/30 selection:text-white"
       >
-        {/* HEADER */}
         <div className="flex justify-between items-center border-b border-white/5 pb-2.5 sm:pb-3">
           <h2 className="font-black text-base sm:text-xl text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tight flex items-center gap-1.5">
             <BookOpen size={18} className="text-blue-400 shrink-0" />
             <span>{initialData?.id ? "Edit Publication Entry" : "Add Publication Entry"}</span>
           </h2>
 
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={onClose}
             className="text-zinc-500 hover:text-white transition-colors p-1 text-base sm:text-xl font-bold focus:outline-none"
           >
@@ -263,24 +265,33 @@ export default function PublicationForm({
           </button>
         </div>
 
-        {/* GUIDANCE INFO BLOCK */}
         <div className="bg-[#121214] border border-white/5 rounded-lg p-3 text-[11px] text-zinc-400 leading-relaxed font-sans">
-          <strong className="text-zinc-200">Academic & Research Publication Track:</strong> Register your research papers, journal articles, or conference proceedings. Documenting DOIs, citations, and abstracts builds a high-fidelity academic history matrix.
+          <strong className="text-zinc-200">Academic & Research Publication Track:</strong> Register
+          your research papers, journal articles, or conference proceedings. Documenting DOIs,
+          citations, and abstracts builds a high-fidelity academic history matrix.
         </div>
 
-        {/* INPUT FIELDS AREA */}
         <div className="space-y-3.5 sm:space-y-4">
           <div className="flex flex-col gap-1 group/input">
             <label className={labelStyle}>
-              <span>Publication Title <span className="text-red-400 font-sans font-bold">*(Required)</span></span>
+              <span>
+                Publication Title{" "}
+                <span className="text-red-400 font-sans font-bold">*(Required)</span>
+              </span>
               <div className="flex items-center gap-1">
                 {isTouched && isTitleInvalid ? (
-                  <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5"><AlertCircle size={9} /> missing_title</span>
+                  <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5">
+                    <AlertCircle size={9} /> missing_title
+                  </span>
                 ) : title.trim() ? (
-                  <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/5 px-1 rounded border border-emerald-500/10 lowercase flex items-center gap-0.5"><CheckCircle2 size={9} /> name_ready</span>
+                  <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/5 px-1 rounded border border-emerald-500/10 lowercase flex items-center gap-0.5">
+                    <CheckCircle2 size={9} /> name_ready
+                  </span>
                 ) : null}
                 {hasChanges && (
-                  <span className="text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1 py-0.5 rounded uppercase font-bold tracking-normal">edited</span>
+                  <span className="text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1 py-0.5 rounded uppercase font-bold tracking-normal">
+                    edited
+                  </span>
                 )}
                 <Terminal size={10} className="text-zinc-700 hidden sm:block" />
               </div>
@@ -294,15 +305,24 @@ export default function PublicationForm({
               disabled={loading}
             />
             {isTouched && isTitleInvalid && (
-              <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Field missing: Absolute name string parameter mapping required.</p>
+              <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">
+                ⚠️ Field missing: Absolute name string parameter mapping required.
+              </p>
             )}
-            <span className={descriptionStyle}>Provide the absolute official name string of your published work or paper.</span>
+            <span className={descriptionStyle}>
+              Provide the absolute official name string of your published work or paper.
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 border border-white/5 p-3 sm:p-4 rounded-xl bg-[#070708]">
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Journal Name <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Journal Name{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={journal}
@@ -315,7 +335,12 @@ export default function PublicationForm({
 
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Publisher <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Publisher{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={publisher}
@@ -330,7 +355,12 @@ export default function PublicationForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 border border-white/5 p-3 sm:p-4 rounded-xl bg-[#070708]">
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Digital Object Identifier (DOI) <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Digital Object Identifier (DOI){" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={doi}
@@ -343,9 +373,16 @@ export default function PublicationForm({
 
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Verified Citations Count <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Verified Citations Count{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
                 {isTouched && isCitationsInvalid && (
-                  <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5"><AlertCircle size={9} /> negative_bound</span>
+                  <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5">
+                    <AlertCircle size={9} /> negative_bound
+                  </span>
                 )}
                 <Award size={10} className="text-zinc-700 hidden sm:block" />
               </label>
@@ -359,14 +396,21 @@ export default function PublicationForm({
                 disabled={loading}
               />
               {isTouched && isCitationsInvalid && (
-                <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Arithmetic failure: Citations count metric cannot resolve to negative sums.</p>
+                <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">
+                  ⚠️ Arithmetic failure: Citations count metric cannot resolve to negative sums.
+                </p>
               )}
             </div>
           </div>
 
           <div className="flex flex-col gap-1 group/input">
             <label className={labelStyle}>
-              <span>Paper Abstract Text <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Paper Abstract Text{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
             </label>
             <textarea
               value={abstract}
@@ -380,9 +424,16 @@ export default function PublicationForm({
 
           <div className="flex flex-col gap-1 group/input">
             <label className={labelStyle}>
-              <span>External Publication URL Address <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                External Publication URL Address{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
               {isTouched && isPublicationUrlInvalid && (
-                <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5"><AlertCircle size={9} /> syntax_invalid</span>
+                <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5">
+                  <AlertCircle size={9} /> syntax_invalid
+                </span>
               )}
               <Globe size={10} className="text-zinc-700 hidden sm:block" />
             </label>
@@ -395,14 +446,21 @@ export default function PublicationForm({
               disabled={loading}
             />
             {isTouched && isPublicationUrlInvalid && (
-              <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Protocol Exception: Vector path must reference an absolute formatting header layout (http:// or https://).</p>
+              <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">
+                ⚠️ Protocol Exception: Vector path must reference an absolute formatting header
+                layout (http:// or https://).
+              </p>
             )}
           </div>
 
-          {/* DYNAMIC FILE BLOB HANDLING OVERRIDES */}
           <div className="flex flex-col gap-1 group/input border border-white/5 p-3 sm:p-4 rounded-xl bg-[#070708]">
             <label className={labelStyle}>
-              <span>Full Manuscript PDF Document <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Full Manuscript PDF Document{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
               <FileText size={11} className="text-zinc-600" />
             </label>
 
@@ -414,8 +472,13 @@ export default function PublicationForm({
                 const file = e.target.files?.[0];
                 if (!file) return;
 
+                const oldUrl = pdfUrl;
                 const url = await handlePdfUpload(file);
                 setPdfUrl(url);
+
+                if (oldUrl && oldUrl !== url) {
+                  await deleteCloudinaryUrl(oldUrl, "raw");
+                }
 
                 e.target.value = "";
               }}
@@ -437,7 +500,12 @@ export default function PublicationForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 border border-white/5 p-3 sm:p-4 rounded-xl bg-[#070708]">
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Conference Hosting Venue <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Conference Hosting Venue{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
               </label>
               <input
                 value={conference}
@@ -450,7 +518,12 @@ export default function PublicationForm({
 
             <div className="flex flex-col gap-1 group/input">
               <label className={labelStyle}>
-                <span>Cover Thumbnail Image <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+                <span>
+                  Cover Thumbnail Image{" "}
+                  <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                    *(Optional)
+                  </span>
+                </span>
                 <ImageIcon size={11} className="text-zinc-600" />
               </label>
 
@@ -462,8 +535,13 @@ export default function PublicationForm({
                   const file = e.target.files?.[0];
                   if (!file) return;
 
+                  const oldUrl = publicationCover;
                   const url = await handleCoverUpload(file);
                   setPublicationCover(url);
+
+                  if (oldUrl && oldUrl !== url) {
+                    await deleteCloudinaryUrl(oldUrl, "image");
+                  }
 
                   e.target.value = "";
                 }}
@@ -482,17 +560,24 @@ export default function PublicationForm({
             </div>
           </div>
 
-          {/* GOOGLE IMAGE WEB REFERENCE SCRAPER INLINE INSTRUCTIONS */}
           <div className={scrapeRecommendationStyle}>
             <Globe size={11} className="shrink-0 mt-0.5 text-amber-400" />
             <span>
-              <strong>Cover Graphic Advice:</strong> If your paper possesses an external cover vector or institutional publisher badge hosted online, find it on Google Images, right-click, select <strong>&quot;Copy Image Address / URL&quot;</strong>, and pass the string parameter direct here if local image files are absent.
+              <strong>Cover Graphic Advice:</strong> If your paper possesses an external cover
+              vector or institutional publisher badge hosted online, find it on Google Images,
+              right-click, select <strong>&quot;Copy Image Address / URL&quot;</strong>, and pass
+              the string parameter direct here if local image files are absent.
             </span>
           </div>
 
           <div className="flex flex-col gap-1 group/input">
             <label className={labelStyle}>
-              <span>Chronological Publication Date <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Chronological Publication Date{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
               <Calendar size={10} className="text-zinc-700 hidden sm:block" />
             </label>
             <input
@@ -504,19 +589,23 @@ export default function PublicationForm({
             />
           </div>
 
-          {/* DYNAMIC AUTHOR ADD BAR WITH PLUS ICON BUTTON */}
           <div className="flex flex-col gap-1 border-t border-white/5 pt-3 group/input">
             <label className={labelStyle}>
-              <span>Co-Authors / Research Team <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+              <span>
+                Co-Authors / Research Team{" "}
+                <span className="text-zinc-600 font-sans font-normal lowercase italic">
+                  *(Optional)
+                </span>
+              </span>
             </label>
-            
+
             <div className="flex gap-2">
               <input
                 value={currentAuthorInput}
                 onChange={(e) => setCurrentAuthorInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    e.preventDefault(); 
+                    e.preventDefault();
                     handleAddAuthor();
                   }
                 }}
@@ -534,7 +623,6 @@ export default function PublicationForm({
               </button>
             </div>
 
-            {/* DYNAMIC AUTHOR CHIP PILLS CONTAINER */}
             {authorsList.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-1.5 bg-[#0A0A0B] border border-white/5 p-2 rounded-lg max-h-28 overflow-y-auto">
                 {authorsList.map((author, index) => (
@@ -558,7 +646,6 @@ export default function PublicationForm({
           </div>
         </div>
 
-        {/* FEATURED CHECKBOX */}
         <div className="pt-1.5">
           <label className="flex items-center gap-2 text-xs sm:text-sm font-bold text-zinc-400 select-none cursor-pointer group">
             <input
@@ -568,11 +655,12 @@ export default function PublicationForm({
               disabled={loading}
               className="w-4 h-4 border-white/10 rounded text-blue-600 focus:ring-0 focus:ring-offset-0 bg-[#0A0A0B] cursor-pointer"
             />
-            <span className="group-hover:text-white transition-colors">Feature this publication on my main profile dashboard</span>
+            <span className="group-hover:text-white transition-colors">
+              Feature this publication on my main profile dashboard
+            </span>
           </label>
         </div>
 
-        {/* SUBMIT BUTTON */}
         <div className="flex gap-2 pt-2 border-t border-white/5">
           <button
             type="button"
@@ -582,7 +670,7 @@ export default function PublicationForm({
           >
             Cancel
           </button>
-          
+
           <button
             type="submit"
             disabled={loading || isFormInvalid || (!hasChanges && initialData?.id !== undefined)}

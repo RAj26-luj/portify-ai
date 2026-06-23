@@ -19,15 +19,12 @@ export default function RegisterPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Asynchronous Email Verification States
   const [emailValid, setEmailValid] = useState<boolean | null>(null);
   const [checkingEmail, setCheckingEmail] = useState(false);
 
-  // Interactive Mask Input Visibility States
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Real-time Core Password Validation States
   const [strengthScore, setStrengthScore] = useState(0);
   const [criteria, setCriteria] = useState({
     minLength: false,
@@ -37,7 +34,6 @@ export default function RegisterPage() {
     hasSpecial: false,
   });
 
-  // Custom Frontend UI State Validation Hooks
   const [validationErrors, setValidationErrors] = useState<{
     name?: string;
     email?: string;
@@ -45,7 +41,6 @@ export default function RegisterPage() {
     confirmPassword?: string;
   }>({});
 
-  // Dynamic Crypto Evaluation Logic Loop
   useEffect(() => {
     const checks = {
       minLength: password.length >= 8,
@@ -66,7 +61,7 @@ export default function RegisterPage() {
     try {
       setCheckingEmail(true);
       setError(null);
-      
+
       const errors = { ...validationErrors };
       delete errors.email;
       setValidationErrors(errors);
@@ -85,7 +80,10 @@ export default function RegisterPage() {
 
       if (data.exists) {
         setEmailValid(false);
-        setValidationErrors(prev => ({ ...prev, email: "Email parameter is already bound to another registered identity instance." }));
+        setValidationErrors((prev) => ({
+          ...prev,
+          email: "Email parameter is already bound to another registered identity instance.",
+        }));
         return;
       }
 
@@ -183,38 +181,36 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen w-full flex flex-col items-center justify-center bg-[#050505] text-zinc-300 px-4 py-6 sm:p-8 antialiased selection:bg-blue-500/30 selection:text-white relative overflow-hidden md:[perspective:1200px] select-none">
-      
-      {/* Cinematic Background Lighting Grids */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:2rem_2rem] sm:bg-[size:4rem_4rem] pointer-events-none z-0" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[700px] h-[280px] sm:h-[700px] bg-gradient-to-tr from-blue-600/10 via-purple-500/5 to-transparent blur-[80px] sm:blur-[140px] rounded-full pointer-events-none z-0 animate-pulse duration-[8000ms]" />
 
-      {/* Floating Home Link Key */}
       <div className="absolute top-4 sm:top-6 left-4 sm:left-8 z-50 w-[calc(100%-2rem)] sm:w-auto">
         <Link
           href="/"
           className="group/back inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl bg-[#0F0F0F]/80 backdrop-blur-md border border-white/5 hover:border-blue-500/20 text-zinc-400 hover:text-white text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.6)] active:scale-95 md:[transform-style:preserve-3d] md:hover:[transform:translateZ(15px)]"
         >
-          <ArrowLeft size={12} className="transform group-hover/back:-translate-x-0.5 transition-transform text-zinc-500 group-hover/back:text-blue-400 sm:w-[13px] sm:h-[13px]" />
+          <ArrowLeft
+            size={12}
+            className="transform group-hover/back:-translate-x-0.5 transition-transform text-zinc-500 group-hover/back:text-blue-400 sm:w-[13px] sm:h-[13px]"
+          />
           <span>Return Home Base</span>
         </Link>
       </div>
 
-      {/* Core Glassmorphic Surface Container */}
       <div className="w-full max-w-sm sm:max-w-lg p-5 sm:p-11 bg-gradient-to-b from-[#121214]/90 to-[#0C0C0E]/95 border border-white/5 sm:border-white/10 sm:border-t-white/[0.15] rounded-xl sm:rounded-2xl shadow-[0_35px_60px_-15px_rgba(0,0,0,0.9)] relative z-10 mt-16 mb-6 transition-all duration-500 md:[transform-style:preserve-3d] md:hover:[transform:rotateX(4deg)_rotateY(-2deg)_translateZ(8px)] hover:border-white/10 sm:hover:border-white/20 group/card">
-        
-        {/* Dynamic Inner Decoration Meta Indicators */}
         <div className="flex items-center justify-between mb-5 sm:mb-8 md:[transform:translateZ(30px)] gap-2">
           <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-gradient-to-b from-blue-500/10 to-transparent border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
             <ShieldCheck size={16} className="sm:hidden" />
             <ShieldCheck size={20} className="hidden sm:block" />
           </div>
           <div className="inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-zinc-900/80 border border-white/5 font-mono text-[8px] sm:text-[9px] font-bold tracking-widest text-zinc-500 uppercase truncate">
-            <span className={`w-1 h-1 rounded-full shrink-0 ${emailValid === true && strengthScore === 5 ? "bg-emerald-500" : "bg-blue-500"}`} />
+            <span
+              className={`w-1 h-1 rounded-full shrink-0 ${emailValid === true && strengthScore === 5 ? "bg-emerald-500" : "bg-blue-500"}`}
+            />
             <span className="truncate">WORKSPACE_REGISTRATION</span>
           </div>
         </div>
 
-        {/* Header Typography Deck */}
         <div className="mb-6 sm:mb-8 md:[transform:translateZ(25px)]">
           <h1 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-500 mb-1.5">
             Create Account
@@ -224,23 +220,28 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Input Validation Form Block */}
-        <form onSubmit={handleRegister} className="space-y-4 sm:space-y-5 md:[transform:translateZ(20px)]">
-          
-          {/* Input Block: Full Name */}
+        <form
+          onSubmit={handleRegister}
+          className="space-y-4 sm:space-y-5 md:[transform:translateZ(20px)]"
+        >
           <div className="space-y-1.5">
-            <label className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 px-0.5">Full Name</label>
+            <label className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 px-0.5">
+              Full Name
+            </label>
             <input
               type="text"
               placeholder="Raj Kumar"
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                if(validationErrors.name) setValidationErrors(prev => ({ ...prev, name: undefined }));
+                if (validationErrors.name)
+                  setValidationErrors((prev) => ({ ...prev, name: undefined }));
               }}
               disabled={loading}
               className={`w-full p-2.5 sm:p-3.5 bg-[#0A0A0B] border rounded-lg sm:rounded-xl text-white placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:bg-[#0E0E10] transition-all duration-200 disabled:opacity-40 ${
-                validationErrors.name ? "border-red-500/50 focus:border-red-500" : "border-white/5 focus:border-blue-500/60"
+                validationErrors.name
+                  ? "border-red-500/50 focus:border-red-500"
+                  : "border-white/5 focus:border-blue-500/60"
               }`}
               required
             />
@@ -252,12 +253,17 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Input Block: Email Address */}
           <div className="space-y-1.5 relative">
             <div className="flex justify-between items-center px-0.5">
-              <label className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500">Email Address</label>
-              {checkingEmail && <Loader2 size={11} className="text-amber-400 animate-spin shrink-0" />}
-              {!checkingEmail && emailValid === true && <Check size={11} className="text-emerald-400 font-bold shrink-0" />}
+              <label className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500">
+                Email Address
+              </label>
+              {checkingEmail && (
+                <Loader2 size={11} className="text-amber-400 animate-spin shrink-0" />
+              )}
+              {!checkingEmail && emailValid === true && (
+                <Check size={11} className="text-emerald-400 font-bold shrink-0" />
+              )}
             </div>
             <input
               type="email"
@@ -266,16 +272,17 @@ export default function RegisterPage() {
               onChange={(e) => {
                 setEmail(e.target.value);
                 setEmailValid(null);
-                if(validationErrors.email) setValidationErrors(prev => ({ ...prev, email: undefined }));
+                if (validationErrors.email)
+                  setValidationErrors((prev) => ({ ...prev, email: undefined }));
               }}
               onBlur={checkEmail}
               disabled={loading}
               className={`w-full p-2.5 sm:p-3.5 bg-[#0A0A0B] border rounded-lg sm:rounded-xl text-white placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:bg-[#0E0E10] transition-all duration-200 disabled:opacity-40 font-sans shadow-inner truncate ${
                 validationErrors.email || emailValid === false
                   ? "border-red-500/40 focus:border-red-500"
-                  : emailValid === true 
-                  ? "border-emerald-500/40 focus:border-emerald-500" 
-                  : "border-white/5 focus:border-blue-500/60"
+                  : emailValid === true
+                    ? "border-emerald-500/40 focus:border-emerald-500"
+                    : "border-white/5 focus:border-blue-500/60"
               }`}
               required
             />
@@ -286,7 +293,9 @@ export default function RegisterPage() {
               </p>
             )}
             {!validationErrors.email && checkingEmail && (
-              <p className="text-[10px] font-mono font-medium text-zinc-500 mt-1 animate-pulse">// Checking email...</p>
+              <p className="text-[10px] font-mono font-medium text-zinc-500 mt-1 animate-pulse">
+                // Checking email...
+              </p>
             )}
             {!validationErrors.email && !checkingEmail && emailValid === true && (
               <p className="text-[10px] font-mono font-medium text-emerald-400 mt-1 flex items-center gap-1.5">
@@ -296,9 +305,10 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Input Block: Password Engine */}
           <div className="space-y-1.5">
-            <label className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 px-0.5">Password</label>
+            <label className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 px-0.5">
+              Password
+            </label>
             <div className="relative flex items-center">
               <input
                 type={showPassword ? "text" : "password"}
@@ -306,11 +316,14 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  if(validationErrors.password) setValidationErrors(prev => ({ ...prev, password: undefined }));
+                  if (validationErrors.password)
+                    setValidationErrors((prev) => ({ ...prev, password: undefined }));
                 }}
                 disabled={loading}
                 className={`w-full p-2.5 sm:p-3.5 pr-10 bg-[#0A0A0B] border rounded-lg sm:rounded-xl text-white placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:bg-[#0E0E10] transition-all duration-200 disabled:opacity-40 font-sans shadow-inner ${
-                  validationErrors.password ? "border-red-500/50 focus:border-red-500" : "border-white/5 focus:border-blue-500/60"
+                  validationErrors.password
+                    ? "border-red-500/50 focus:border-red-500"
+                    : "border-white/5 focus:border-blue-500/60"
                 }`}
                 required
               />
@@ -331,16 +344,17 @@ export default function RegisterPage() {
               </p>
             )}
 
-            {/* PASSWORD METRIC DISPATCHER MODULE */}
             {password.length > 0 && (
               <div className="mt-2.5 p-2.5 sm:p-3.5 rounded-lg sm:rounded-xl bg-[#0A0A0B] border border-white/5 space-y-2 animate-fadeIn">
                 <div className="flex justify-between items-center text-[9px] sm:text-[10px] font-mono uppercase tracking-wider gap-2">
                   <span className="text-zinc-600">Password Vector:</span>
-                  <span className={`truncate font-bold ${strengthScore === 5 ? "text-emerald-400" : "text-zinc-500"}`}>
+                  <span
+                    className={`truncate font-bold ${strengthScore === 5 ? "text-emerald-400" : "text-zinc-500"}`}
+                  >
                     {strengthScore === 5 ? "Approved" : `${strengthScore}/5 Requirements`}
                   </span>
                 </div>
-                
+
                 <div className="grid grid-cols-5 gap-1 h-1">
                   {[...Array(5)].map((_, i) => (
                     <div
@@ -357,23 +371,33 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="pt-2 border-t border-white/[0.04] flex flex-col gap-1 text-[9px] sm:text-[10px] font-mono max-h-24 overflow-y-auto">
-                  <div className={`flex items-center gap-1.5 ${criteria.minLength ? "text-emerald-400" : "text-zinc-600"}`}>
+                  <div
+                    className={`flex items-center gap-1.5 ${criteria.minLength ? "text-emerald-400" : "text-zinc-600"}`}
+                  >
                     {criteria.minLength ? <Check size={10} strokeWidth={3} /> : <X size={10} />}
                     <span>Min 8 Characters</span>
                   </div>
-                  <div className={`flex items-center gap-1.5 ${criteria.hasUpper ? "text-emerald-400" : "text-zinc-600"}`}>
+                  <div
+                    className={`flex items-center gap-1.5 ${criteria.hasUpper ? "text-emerald-400" : "text-zinc-600"}`}
+                  >
                     {criteria.hasUpper ? <Check size={10} strokeWidth={3} /> : <X size={10} />}
                     <span>Uppercase Letter</span>
                   </div>
-                  <div className={`flex items-center gap-1.5 ${criteria.hasLower ? "text-emerald-400" : "text-zinc-600"}`}>
+                  <div
+                    className={`flex items-center gap-1.5 ${criteria.hasLower ? "text-emerald-400" : "text-zinc-600"}`}
+                  >
                     {criteria.hasLower ? <Check size={10} strokeWidth={3} /> : <X size={10} />}
                     <span>Lowercase Letter</span>
                   </div>
-                  <div className={`flex items-center gap-1.5 ${criteria.hasNumber ? "text-emerald-400" : "text-zinc-600"}`}>
+                  <div
+                    className={`flex items-center gap-1.5 ${criteria.hasNumber ? "text-emerald-400" : "text-zinc-600"}`}
+                  >
                     {criteria.hasNumber ? <Check size={10} strokeWidth={3} /> : <X size={10} />}
                     <span>Numeric Digit</span>
                   </div>
-                  <div className={`flex items-center gap-1.5 ${criteria.hasSpecial ? "text-emerald-400" : "text-zinc-600"}`}>
+                  <div
+                    className={`flex items-center gap-1.5 ${criteria.hasSpecial ? "text-emerald-400" : "text-zinc-600"}`}
+                  >
                     {criteria.hasSpecial ? <Check size={10} strokeWidth={3} /> : <X size={10} />}
                     <span>Special Symbol</span>
                   </div>
@@ -382,9 +406,10 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Input Block: Confirm Password Key */}
           <div className="space-y-1.5">
-            <label className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 px-0.5">Confirm Password Key</label>
+            <label className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500 px-0.5">
+              Confirm Password Key
+            </label>
             <div className="relative flex items-center">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -392,11 +417,14 @@ export default function RegisterPage() {
                 value={confirmPassword}
                 onChange={(e) => {
                   setConfirmPassword(e.target.value);
-                  if(validationErrors.confirmPassword) setValidationErrors(prev => ({ ...prev, confirmPassword: undefined }));
+                  if (validationErrors.confirmPassword)
+                    setValidationErrors((prev) => ({ ...prev, confirmPassword: undefined }));
                 }}
                 disabled={loading}
                 className={`w-full p-2.5 sm:p-3.5 pr-10 bg-[#0A0A0B] border rounded-lg sm:rounded-xl text-white placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:bg-[#0E0E10] transition-all duration-200 disabled:opacity-40 font-sans shadow-inner ${
-                  validationErrors.confirmPassword ? "border-red-500/50 focus:border-red-500" : "border-white/5 focus:border-blue-500/60"
+                  validationErrors.confirmPassword
+                    ? "border-red-500/50 focus:border-red-500"
+                    : "border-white/5 focus:border-blue-500/60"
                 }`}
                 required
               />
@@ -418,7 +446,6 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Dynamic Runtime Exception Output Banner Container */}
           {error && (
             <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-red-500/5 border border-red-500/10 flex items-center gap-2.5 text-[10px] sm:text-xs font-mono text-red-400 animate-fadeIn">
               <AlertCircle size={13} className="shrink-0 text-red-500 sm:w-[15px] sm:h-[15px]" />
@@ -442,14 +469,14 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        {/* Separator Module */}
         <div className="relative flex py-4 sm:py-5 items-center select-none md:[transform:translateZ(15px)]">
           <div className="flex-grow border-t border-white/[0.04]"></div>
-          <span className="flex-shrink mx-3 text-[8px] sm:text-[9px] font-mono text-zinc-600 font-bold uppercase tracking-widest">OR</span>
+          <span className="flex-shrink mx-3 text-[8px] sm:text-[9px] font-mono text-zinc-600 font-bold uppercase tracking-widest">
+            OR
+          </span>
           <div className="flex-grow border-t border-white/[0.04]"></div>
         </div>
 
-        {/* Google Identity Integration Anchor */}
         <button
           onClick={handleGoogleRegister}
           disabled={googleLoading || loading}
@@ -458,12 +485,14 @@ export default function RegisterPage() {
           {googleLoading ? (
             <Loader2 className="animate-spin shrink-0" size={12} />
           ) : (
-            <FcGoogle size={14} className="shrink-0 group-hover/google:scale-110 transition-transform duration-200" />
+            <FcGoogle
+              size={14}
+              className="shrink-0 group-hover/google:scale-110 transition-transform duration-200"
+            />
           )}
           <span>Continue with Google</span>
         </button>
 
-        {/* Global Structural Redirect Links Base Footer */}
         <div className="mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-white/[0.04] text-[11px] sm:text-xs text-center font-sans text-zinc-500 md:[transform:translateZ(10px)]">
           Already have an instance?{" "}
           <Link

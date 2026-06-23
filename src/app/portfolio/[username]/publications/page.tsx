@@ -8,15 +8,12 @@ interface Props {
 }
 
 export default async function PublicationsPage({ params }: Props) {
-  // 1. Fetch public collections out of the unified response wrapper envelope
   const result = await getPortfolioByUsername(params.username);
 
-  // 🛡️ Discriminated Union Guard: Enforces strict data availability and checks portfolio visibility
   if (!result || !result.success || !result.data || !result.data.isPublic) {
     return notFound();
   }
 
-  // ✅ Safe Context: Accessing relational child tracks is guaranteed type-narrowed out of the success lane
   const portfolio = result.data;
   const publications = (portfolio as any).publications ?? [];
 
@@ -40,19 +37,11 @@ export default async function PublicationsPage({ params }: Props) {
                 )}
               </div>
 
-              {p.journal && (
-                <p className="text-sm text-gray-600">{p.journal}</p>
-              )}
+              {p.journal && <p className="text-sm text-gray-600">{p.journal}</p>}
 
-              {p.publisher && (
-                <p className="text-xs text-gray-500">{p.publisher}</p>
-              )}
+              {p.publisher && <p className="text-xs text-gray-500">{p.publisher}</p>}
 
-              {p.abstract && (
-                <p className="text-xs text-gray-500 line-clamp-3">
-                  {p.abstract}
-                </p>
-              )}
+              {p.abstract && <p className="text-xs text-gray-500 line-clamp-3">{p.abstract}</p>}
 
               <div className="flex gap-3 text-xs pt-2">
                 {p.publicationUrl && (
@@ -79,9 +68,7 @@ export default async function PublicationsPage({ params }: Props) {
               </div>
 
               {p.authors?.length > 0 && (
-                <p className="text-[11px] text-gray-400 pt-1">
-                  Authors: {p.authors.join(", ")}
-                </p>
+                <p className="text-[11px] text-gray-400 pt-1">Authors: {p.authors.join(", ")}</p>
               )}
             </div>
           ))}

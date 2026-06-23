@@ -10,60 +10,73 @@ import {
 import { ThemeType } from "@prisma/client";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
-/**
- * Transforms interface theme mutations, structural skin overrides, or core database
- * tracking failures into standardized, user-friendly responses tailored for UI toasts.
- */
+// Error
 function handleThemeConfigServerError(error: any, fallbackMessage: string) {
   console.error("Theme Controller Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("portfolioId required") || errorMessage.includes("portfolioId not found")) {
+  if (
+    errorMessage.includes("portfolioId required") ||
+    errorMessage.includes("portfolioId not found")
+  ) {
     return {
       success: false,
-      error: "Authentication mapping missing. Could not link visual profile skins to an active portfolio account.",
+      error:
+        "Authentication mapping missing. Could not link visual profile skins to an active portfolio account.",
     };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
-      error: "The layout personalization engine is currently running data sync updates. Please switch styles again.",
+      error:
+        "The layout personalization engine is currently running data sync updates. Please switch styles again.",
     };
   }
 
   return { success: false, error: fallbackMessage };
 }
 
-export async function activateTheme(
-  portfolioId: string,
-  themeName: ThemeType
-) {
+export async function activateTheme(portfolioId: string, themeName: ThemeType) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
-    
+
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Portfolio specification profile identification target not found." };
+      return {
+        success: false,
+        error: "Portfolio specification profile identification target not found.",
+      };
     }
 
     if (!themeName) {
-      return { success: false, error: "A valid theme variant classifier string parameter must be specified." };
+      return {
+        success: false,
+        error: "A valid theme variant classifier string parameter must be specified.",
+      };
     }
 
     const result = await activateThemeService(resolvedPortfolioId, themeName);
     return { success: true, data: result };
   } catch (error) {
-    return handleThemeConfigServerError(error, "Failed to apply and deploy requested layout skin configurations.");
+    return handleThemeConfigServerError(
+      error,
+      "Failed to apply and deploy requested layout skin configurations."
+    );
   }
 }
 
 export async function getActiveTheme(portfolioId: string) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
-    
+
     if (!resolvedPortfolioId) {
       return {
         success: false,
-        error: "Unable to identify active style attributes. Target tracking identifier context is unverified.",
+        error:
+          "Unable to identify active style attributes. Target tracking identifier context is unverified.",
         data: null,
       };
     }
@@ -94,32 +107,39 @@ export async function getThemes() {
   }
 }
 
-export async function updateThemeConfig(
-  portfolioId: string,
-  config: any
-) {
+export async function updateThemeConfig(portfolioId: string, config: any) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
-    
+
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Missing operational metadata tracking parameters to write configuration blocks." };
+      return {
+        success: false,
+        error: "Missing operational metadata tracking parameters to write configuration blocks.",
+      };
     }
 
     if (!config) {
-      return { success: false, error: "Aesthetic properties configuration data modifications payload maps cannot be empty." };
+      return {
+        success: false,
+        error:
+          "Aesthetic properties configuration data modifications payload maps cannot be empty.",
+      };
     }
 
     const result = await updateThemeConfigService(resolvedPortfolioId, config);
     return { success: true, data: result };
   } catch (error) {
-    return handleThemeConfigServerError(error, "Failed to write updated token properties changes back into layout settings.");
+    return handleThemeConfigServerError(
+      error,
+      "Failed to write updated token properties changes back into layout settings."
+    );
   }
 }
 
 export async function getThemeHistory(portfolioId: string) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
-    
+
     if (!resolvedPortfolioId) {
       return {
         success: false,

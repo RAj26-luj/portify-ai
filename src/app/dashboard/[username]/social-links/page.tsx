@@ -2,20 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { 
-  Plus, 
-  Share2, 
-  Loader2, 
-  AlertTriangle, 
-  HelpCircle,
-  AlertCircle,
-  Check
-} from "lucide-react";
+import { Plus, Share2, Loader2, AlertTriangle, HelpCircle, AlertCircle, Check } from "lucide-react";
 
-import {
-  getSocialLinks,
-  deleteSocialLink,
-} from "@/actions/social-link";
+import { getSocialLinks, deleteSocialLink } from "@/actions/social-link";
 
 import { getMyPortfolioId } from "@/actions/portfolio";
 
@@ -44,27 +33,26 @@ export default function SocialLinksPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<SocialLink | null>(null);
 
-  // Advanced SaaS safeguarding interface interaction states
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // Tracks which entry is actively presenting its inline verification/confirmation UI
   const [activeConfirmDeleteId, setActiveConfirmDeleteId] = useState<string | null>(null);
 
   async function loadLinks(id: string) {
     try {
       setLoading(true);
       setError(null);
-      
-      // 1. Query structural social link data nodes
+
       const result = await getSocialLinks(id);
 
-      // 🛡️ Safe Condition Narrowing: Guard checking layout structure fields envelope
       if (!result || !result.success || !("data" in result) || !Array.isArray(result.data)) {
-        throw new Error("error" in result && typeof result.error === "string" ? result.error : "Failed to load social links");
+        throw new Error(
+          "error" in result && typeof result.error === "string"
+            ? result.error
+            : "Failed to load social links"
+        );
       }
 
-      // ✅ Safe State Mutation: Normalizes null -> undefined directly during API response compilation
       setLinks(
         result.data.map((link: any) => ({
           id: link.id,
@@ -83,14 +71,17 @@ export default function SocialLinksPage() {
     }
   }
 
-  // 2. Mount chronological identity initialization lifecycle hooks
   useEffect(() => {
     (async () => {
       try {
         const portfolioResult = await getMyPortfolioId();
 
         if (!portfolioResult || !portfolioResult.success || !portfolioResult.data) {
-          throw new Error("error" in portfolioResult && typeof portfolioResult.error === "string" ? portfolioResult.error : "Portfolio not found");
+          throw new Error(
+            "error" in portfolioResult && typeof portfolioResult.error === "string"
+              ? portfolioResult.error
+              : "Portfolio not found"
+          );
         }
 
         const id = portfolioResult.data;
@@ -107,17 +98,23 @@ export default function SocialLinksPage() {
     try {
       setProcessingId(id);
       setActionError(null);
-      
+
       const result = await deleteSocialLink(id);
 
       if (!result || !result.success) {
-        throw new Error("error" in result && typeof result.error === "string" ? result.error : "Delete failed");
+        throw new Error(
+          "error" in result && typeof result.error === "string" ? result.error : "Delete failed"
+        );
       }
 
       setLinks((prev) => prev.filter((item) => item.id !== id));
       setActiveConfirmDeleteId(null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Failed to safely sever integration context endpoint connection.");
+      setActionError(
+        err instanceof Error
+          ? err.message
+          : "Failed to safely sever integration context endpoint connection."
+      );
     } finally {
       setProcessingId(null);
     }
@@ -166,7 +163,6 @@ export default function SocialLinksPage() {
 
   return (
     <div className="space-y-6 text-white px-4 sm:px-0 py-4 sm:py-0">
-      {/* HEADER CONTROLS ACTIONS */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -190,16 +186,19 @@ export default function SocialLinksPage() {
         </button>
       </div>
 
-      {/* COMPACT INLINE ACTION ERROR PANEL */}
       {actionError && (
         <div className="flex items-start gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-3 text-xs text-red-400 animate-fadeIn">
           <AlertTriangle size={14} className="shrink-0 mt-0.5" />
           <span className="font-medium flex-1 leading-normal">{actionError}</span>
-          <button onClick={() => setActionError(null)} className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2">✕</button>
+          <button
+            onClick={() => setActionError(null)}
+            className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* RENDER SYSTEM */}
       {links.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 p-6 sm:p-12 text-center max-w-xl mx-auto">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-900 text-zinc-500 mb-4">
@@ -218,10 +217,9 @@ export default function SocialLinksPage() {
         </div>
       ) : (
         <>
-          {/* MOBILE COMPACT LIST LAYOUT */}
           <div className="block sm:hidden space-y-2">
             {links.map((link) => (
-              <div 
+              <div
                 key={link.id}
                 className="flex flex-col p-3 rounded-lg border border-zinc-900 bg-[#070709] hover:bg-zinc-900/20 transition-all gap-2"
               >
@@ -239,7 +237,7 @@ export default function SocialLinksPage() {
                       </p>
                     </div>
                   </div>
-                  
+
                   {activeConfirmDeleteId !== link.id && (
                     <div className="flex items-center gap-2 shrink-0">
                       <button
@@ -260,7 +258,6 @@ export default function SocialLinksPage() {
                   )}
                 </div>
 
-                {/* MOBILE INLINE RECONCILIATION Safety overlay banner */}
                 {activeConfirmDeleteId === link.id && (
                   <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-2 flex items-center justify-between gap-3 animate-fadeIn w-full">
                     <div className="flex items-center gap-1 text-red-400 font-mono text-[9px] uppercase tracking-wider font-bold">
@@ -281,7 +278,11 @@ export default function SocialLinksPage() {
                         onClick={() => handleDelete(link.id)}
                         className="h-6 rounded bg-red-600 text-white font-mono text-[9px] font-bold uppercase tracking-wider px-2.5 inline-flex items-center gap-1"
                       >
-                        {processingId === link.id ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
+                        {processingId === link.id ? (
+                          <Loader2 size={10} className="animate-spin" />
+                        ) : (
+                          <Check size={10} />
+                        )}
                         <span>Drop</span>
                       </button>
                     </div>
@@ -291,7 +292,6 @@ export default function SocialLinksPage() {
             ))}
           </div>
 
-          {/* DESKTOP RESPONSIVE GRID LAYOUT */}
           <div className="hidden sm:grid gap-5 sm:grid-cols-2 lg:grid-cols-3 max-w-[1200px]">
             {links.map((link) => (
               <div key={link.id} className="relative group">
@@ -302,20 +302,21 @@ export default function SocialLinksPage() {
                   username={link.username}
                   iconName={link.iconName}
                   iconUrl={link.iconUrl}
-                  
                   onEdit={() => handleEdit(link)}
                   onDelete={() => setActiveConfirmDeleteId(link.id)}
                 />
 
-                {/* ABSOLUTE OVERLAY SYSTEM ON INDIVIDUAL CARD ELEMENT NODES */}
                 {activeConfirmDeleteId === link.id && (
                   <div className="absolute inset-0 bg-black/95 border border-red-900/40 rounded-xl p-4 sm:p-5 flex flex-col justify-between z-30 animate-fadeIn">
                     <div className="flex items-start gap-3 text-red-400">
                       <AlertCircle size={16} className="shrink-0 mt-0.5 animate-pulse" />
                       <div className="space-y-1">
-                        <h4 className="text-xs font-mono font-bold uppercase tracking-wider">Sever Edge Gateway?</h4>
+                        <h4 className="text-xs font-mono font-bold uppercase tracking-wider">
+                          Sever Edge Gateway?
+                        </h4>
                         <p className="text-[11px] text-zinc-500 leading-normal">
-                          This action drops the hyperlink reference node configuration from your visible public ecosystem routing index.
+                          This action drops the hyperlink reference node configuration from your
+                          visible public ecosystem routing index.
                         </p>
                       </div>
                     </div>
@@ -333,7 +334,11 @@ export default function SocialLinksPage() {
                         onClick={() => handleDelete(link.id)}
                         className="h-7 px-3 text-[10px] font-mono font-bold uppercase tracking-wider bg-red-600 hover:bg-red-500 text-white rounded-md transition-all inline-flex items-center gap-1 shadow-sm"
                       >
-                        {processingId === link.id ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
+                        {processingId === link.id ? (
+                          <Loader2 size={10} className="animate-spin" />
+                        ) : (
+                          <Check size={10} />
+                        )}
                         <span>Confirm Delete</span>
                       </button>
                     </div>
@@ -345,7 +350,6 @@ export default function SocialLinksPage() {
         </>
       )}
 
-      {/* FORM CONTROLLER MODAL DIALOGUE */}
       {showForm && portfolioId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
           <div className="w-full max-w-xl rounded-xl border border-zinc-800 bg-[#0C0C0E] p-4 sm:p-6 text-white shadow-2xl max-h-[90vh] overflow-y-auto">

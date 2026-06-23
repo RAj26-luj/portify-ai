@@ -1,23 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-  BookOpen, 
-  Sparkles, 
-  Calendar, 
-  Quote, 
-  Fingerprint, 
-  Award, 
-  ExternalLink, 
-  FileText, 
-  Edit3, 
-  Trash2, 
-  Loader2, 
+import {
+  BookOpen,
+  Sparkles,
+  Calendar,
+  Quote,
+  Fingerprint,
+  Award,
+  ExternalLink,
+  FileText,
+  Edit3,
+  Trash2,
+  Loader2,
   AlertTriangle,
   Image as ImageIcon,
   ChevronLeft,
   ChevronRight,
-  Users
+  Users,
 } from "lucide-react";
 
 interface Props {
@@ -41,7 +41,8 @@ interface Props {
   onDelete?: (id: string) => Promise<void> | void;
 }
 
-const DEFAULT_COVER_IMAGE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
+const DEFAULT_COVER_IMAGE =
+  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
 
 export default function PublicationCard({
   id,
@@ -66,10 +67,7 @@ export default function PublicationCard({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<string | null>(null);
 
-  // Combine active images into an integrated image viewer carousel
-  const slideImages = [
-    ...(publicationCover?.trim() ? [publicationCover.trim()] : [])
-  ];
+  const slideImages = [...(publicationCover?.trim() ? [publicationCover.trim()] : [])];
 
   if (slideImages.length === 0) {
     slideImages.push(DEFAULT_COVER_IMAGE);
@@ -111,11 +109,9 @@ export default function PublicationCard({
 
   return (
     <div className="group/pub-card relative flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-800 bg-[#0C0C0E] shadow-sm transition-all duration-500 hover:border-zinc-700 hover:shadow-[0_20px_50px_rgba(0,0,0,0.7)] w-full max-w-xl mx-auto">
-      
       <div>
-        {/* Dynamic Image / Landscape Banner Viewport */}
         <div className="relative h-44 w-full overflow-hidden bg-zinc-950 border-b border-zinc-900/60">
-          <div 
+          <div
             className="flex h-full w-full transition-transform duration-500 ease-out"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
@@ -130,8 +126,7 @@ export default function PublicationCard({
             ))}
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#0C0C0E] via-[#0C0C0E]/40 to-transparent pointer-events-none" />
-          
-          {/* Absolute High-Context Badge Grid Layout */}
+
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
             <div className="flex gap-1.5 items-center">
               {featured && (
@@ -147,21 +142,21 @@ export default function PublicationCard({
                 </span>
               )}
             </div>
-            
+
             <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-700/40 bg-zinc-900/80 text-zinc-300 backdrop-blur-sm shadow-md">
               <BookOpen size={13} />
             </div>
           </div>
 
-          {/* Asset Recommendation Prompt Hook */}
           {!publicationCover?.trim() && (
             <div className="absolute bottom-3 left-3 right-3 flex items-center gap-1.5 rounded-lg border border-blue-500/10 bg-blue-500/5 px-2.5 py-1.5 text-[11px] text-blue-400/90 backdrop-blur-md pointer-events-none">
               <ImageIcon size={12} className="shrink-0 text-blue-400" />
-              <span className="truncate">We recommend matching a graphic summary cover for optimization</span>
+              <span className="truncate">
+                We recommend matching a graphic summary cover for optimization
+              </span>
             </div>
           )}
 
-          {/* Conditional Navigation Triggers */}
           {slideImages.length > 1 && (
             <>
               <button
@@ -182,7 +177,6 @@ export default function PublicationCard({
           )}
         </div>
 
-        {/* Structured Text Content Ecosystem Area */}
         <div className="p-5 sm:p-6 space-y-4">
           <div className="space-y-1">
             <h3 className="font-bold text-zinc-100 text-base sm:text-lg tracking-tight leading-snug break-words group-hover/pub-card:text-blue-400 transition-colors duration-300">
@@ -195,7 +189,6 @@ export default function PublicationCard({
             )}
           </div>
 
-          {/* Integrated Multi-Parameter Metadata Context Grid */}
           <div className="grid gap-2.5 rounded-xl border border-zinc-900/60 bg-gradient-to-b from-zinc-900/20 to-zinc-900/5 p-4 text-xs">
             {publicationDate && (
               <div className="flex items-center gap-2.5 text-zinc-400 min-w-0">
@@ -203,9 +196,9 @@ export default function PublicationCard({
                 <span className="text-zinc-500 font-medium w-16 shrink-0">Release Date</span>
                 <div className="truncate text-zinc-300 font-medium font-mono">
                   {new Date(publicationDate).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </div>
               </div>
@@ -215,7 +208,9 @@ export default function PublicationCard({
               <div className="flex items-center gap-2.5 text-zinc-400 min-w-0 border-t border-zinc-900/60 pt-2.5">
                 <Fingerprint size={13} className="text-zinc-600 shrink-0" />
                 <span className="text-zinc-500 font-medium w-16 shrink-0">Digital Object ID</span>
-                <div className="truncate text-zinc-400 font-mono text-[11px] hover:text-zinc-300 transition-colors select-all break-all">{doi}</div>
+                <div className="truncate text-zinc-400 font-mono text-[11px] hover:text-zinc-300 transition-colors select-all break-all">
+                  {doi}
+                </div>
               </div>
             )}
 
@@ -228,17 +223,17 @@ export default function PublicationCard({
             )}
           </div>
 
-          {/* Abstract Narrative Text Node Module */}
           {abstract && (
             <div className="space-y-1.5">
-              <span className="text-[10px] font-bold tracking-wider text-zinc-600 uppercase block font-mono pl-0.5">Abstract Synopsis</span>
+              <span className="text-[10px] font-bold tracking-wider text-zinc-600 uppercase block font-mono pl-0.5">
+                Abstract Synopsis
+              </span>
               <p className="text-xs sm:text-sm leading-relaxed text-zinc-400 font-sans line-clamp-4 pl-0.5">
                 {abstract}
               </p>
             </div>
           )}
 
-          {/* Authors List Vector Row Token Stack */}
           {authors && authors.length > 0 && (
             <div className="space-y-2 border-t border-zinc-900/80 pt-3.5">
               <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider text-zinc-600 uppercase font-mono pl-0.5">
@@ -258,17 +253,26 @@ export default function PublicationCard({
             </div>
           )}
 
-          {/* External Verification Links Dock Matrix */}
           {(publicationUrl || pdfUrl) && (
             <div className="flex flex-wrap gap-x-4 gap-y-2 border-t border-zinc-900 pt-3.5 text-xs font-semibold">
               {publicationUrl && (
-                <a href={publicationUrl} target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-zinc-200 inline-flex items-center gap-1.5 transition-colors">
+                <a
+                  href={publicationUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-zinc-500 hover:text-zinc-200 inline-flex items-center gap-1.5 transition-colors"
+                >
                   <ExternalLink size={12} className="text-zinc-600" />
                   <span>View Publication Node</span>
                 </a>
               )}
               {pdfUrl && (
-                <a href={pdfUrl} target="_blank" rel="noreferrer" className="text-red-400 hover:text-red-300 inline-flex items-center gap-1.5 transition-colors">
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-red-400 hover:text-red-300 inline-flex items-center gap-1.5 transition-colors"
+                >
                   <FileText size={12} className="text-red-900/80" />
                   <span>Download Manuscript PDF</span>
                 </a>
@@ -278,7 +282,6 @@ export default function PublicationCard({
         </div>
       </div>
 
-      {/* Primary Infrastructure Administration Control Anchors Footer Dock */}
       <div className="p-5 sm:p-6 pt-0">
         {errorFeedback && (
           <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-2.5 text-xs text-red-400 animate-fadeIn">
@@ -289,7 +292,9 @@ export default function PublicationCard({
 
         {showDeleteConfirm ? (
           <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 animate-fadeIn">
-            <p className="text-xs font-medium text-zinc-400 px-1 text-center">Confirm irreversible record purge sequence?</p>
+            <p className="text-xs font-medium text-zinc-400 px-1 text-center">
+              Confirm irreversible record purge sequence?
+            </p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -350,7 +355,6 @@ export default function PublicationCard({
           </div>
         )}
       </div>
-
     </div>
   );
 }

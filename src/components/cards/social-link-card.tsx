@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  ExternalLink, 
-  Edit3, 
-  Trash2, 
-  Loader2, 
+import {
+  ExternalLink,
+  Edit3,
+  Trash2,
+  Loader2,
   AlertTriangle,
-  Image as ImageIcon
+  Image as ImageIcon,
 } from "lucide-react";
 
 interface Props {
@@ -23,8 +23,8 @@ interface Props {
   onDelete?: () => Promise<void> | void;
 }
 
-// Universal premium fallback brand network placeholder image asset
-const DEFAULT_SOCIAL_LOGO = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQcCsMhg-kB5Lcs7m_nDBYp4ltBjDF12AqXq1CCuR2TA&s=10";
+const DEFAULT_SOCIAL_LOGO =
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQcCsMhg-kB5Lcs7m_nDBYp4ltBjDF12AqXq1CCuR2TA&s=10";
 
 export default function SocialLinkCard({
   platform,
@@ -57,22 +57,12 @@ export default function SocialLinkCard({
     }
   };
 
-  const getBrandAccentStyles = () => {
-    const checkString = platform.toLowerCase();
-    if (checkString.includes("github")) return "group-hover/social-card:text-white group-hover/social-card:border-zinc-700";
-    if (checkString.includes("linkedin")) return "group-hover/social-card:text-blue-400 group-hover/social-card:border-blue-500/30";
-    if (checkString.includes("twitter") || checkString.includes("x")) return "group-hover/social-card:text-zinc-200 group-hover/social-card:border-zinc-800";
-    if (checkString.includes("youtube")) return "group-hover/social-card:text-red-500 group-hover/social-card:border-red-500/20";
-    return "group-hover/social-card:text-blue-400 group-hover/social-card:border-zinc-700";
-  };
-
   return (
     <>
-      {/* MOBILE COMPACT LIST ROW VIEW */}
       <div className="block sm:hidden p-3.5 rounded-xl border border-zinc-950 bg-[#070709] hover:bg-zinc-900/10 transition-all duration-200 w-full">
         <div className="flex items-start gap-3 justify-between">
           <div className="flex items-start gap-2.5 min-w-0 flex-1">
-            <div className="h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 p-1 flex items-center justify-center mt-0.5">
+            <div className="h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-955 p-1 flex items-center justify-center mt-0.5">
               <img
                 src={activeLogo}
                 alt={`${platform} connection graphic`}
@@ -82,13 +72,9 @@ export default function SocialLinkCard({
             </div>
 
             <div className="min-w-0 flex-1">
-              <h3 className="text-xs font-bold text-zinc-200 truncate">
-                {platform}
-              </h3>
+              <h3 className="text-xs font-bold text-zinc-200 truncate">{platform}</h3>
               {username ? (
-                <p className="text-[10px] font-mono text-zinc-500 truncate">
-                  @{username}
-                </p>
+                <p className="text-[10px] font-mono text-zinc-500 truncate">@{username}</p>
               ) : (
                 <p className="text-[10px] font-mono text-zinc-600 truncate">
                   {url.replace(/https?:\/\/(www\.)?/, "")}
@@ -97,7 +83,6 @@ export default function SocialLinkCard({
             </div>
           </div>
 
-          {/* Mobile HUD Controls Action Suite */}
           <div className="flex items-center gap-1 shrink-0">
             <a
               href={url}
@@ -130,7 +115,6 @@ export default function SocialLinkCard({
           </div>
         </div>
 
-        {/* Action Error Banner Layer for Mobile */}
         {errorFeedback && (
           <div className="mt-2 flex items-center gap-1.5 rounded-md border border-red-500/10 bg-red-500/5 p-1.5 text-[10px] text-red-400">
             <AlertTriangle size={11} className="shrink-0" />
@@ -138,10 +122,11 @@ export default function SocialLinkCard({
           </div>
         )}
 
-        {/* Mobile Deletion Shield Confirmation Dialog Drawer */}
         {showDeleteConfirm && (
-          <div className="mt-3 p-2 rounded-lg border border-zinc-800 bg-zinc-950 flex items-center justify-between gap-3 animate-fadeIn">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-tight">Sever Connection?</span>
+          <div className="mt-3 p-2 rounded-lg border border-zinc-800 bg-zinc-955 flex items-center justify-between gap-3 animate-fadeIn">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-tight">
+              Sever Connection?
+            </span>
             <div className="flex gap-1.5 shrink-0">
               <button
                 type="button"
@@ -164,16 +149,11 @@ export default function SocialLinkCard({
         )}
       </div>
 
-      {/* LAPTOP & DESKTOP FULL PRESENTATION CARD RUNTIME */}
-      {/* Note: Added h-full class definition to allow absolute height alignment configuration along the container grid tracks */}
       <div className="hidden sm:flex group/social-card relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-zinc-700 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.6)] w-full max-w-sm mx-auto h-full">
-        
-        {/* Isolated flex stack layout layer splits content sections uniformly away from button footers */}
         <div className="space-y-4 flex-1 flex flex-col justify-start">
-          {/* Core Header Architecture Focusing fully on immediate Recognition */}
           <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-zinc-900 shrink-0">
             <div className="flex items-center gap-3.5 min-w-0">
-              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 p-2 flex items-center justify-center shadow-inner transition-colors group-hover/social-card:border-zinc-700">
+              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-955 p-2 flex items-center justify-center shadow-inner transition-colors group-hover/social-card:border-zinc-700">
                 <img
                   src={activeLogo}
                   alt={`${platform} connection graphic`}
@@ -181,15 +161,13 @@ export default function SocialLinkCard({
                   loading="lazy"
                 />
               </div>
-              
+
               <div className="min-w-0">
                 <h3 className="font-bold text-zinc-100 text-sm sm:text-base tracking-tight truncate group-hover/social-card:text-white transition-colors">
                   {platform}
                 </h3>
                 {username && (
-                  <p className="text-xs font-mono text-zinc-500 truncate mt-0.5">
-                    @{username}
-                  </p>
+                  <p className="text-xs font-mono text-zinc-500 truncate mt-0.5">@{username}</p>
                 )}
               </div>
             </div>
@@ -205,15 +183,15 @@ export default function SocialLinkCard({
             </a>
           </div>
 
-          {/* Dynamic Visual Optimization Recommendation Prompt */}
           {!hasLogo && (
             <div className="flex items-center gap-1.5 rounded-lg border border-blue-500/10 bg-blue-500/5 px-2.5 py-1.5 text-[11px] text-blue-400/90 shrink-0 select-none">
               <ImageIcon size={12} className="shrink-0 text-blue-400" />
-              <span className="truncate">We recommend assigning a brand asset vector icon for better visibility</span>
+              <span className="truncate">
+                We recommend assigning a brand asset vector icon for better visibility
+              </span>
             </div>
           )}
 
-          {/* Structured Data Details Panel Grid Layout - Absorbs empty baseline tracking space smoothly */}
           <div className="rounded-xl border border-zinc-900/60 bg-gradient-to-b from-zinc-900/20 to-zinc-900/5 p-3.5 space-y-2.5 text-xs shadow-inner mt-auto">
             <div className="space-y-0.5">
               <span className="inline-flex items-center gap-1 text-[9px] font-bold tracking-wider text-zinc-600 uppercase font-mono">
@@ -228,13 +206,17 @@ export default function SocialLinkCard({
               <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-zinc-900/60 text-[10px] font-mono text-zinc-500">
                 {iconName && (
                   <div className="truncate pl-0.5">
-                    <span className="text-zinc-600 block text-[9px] uppercase tracking-tight font-sans">Glyph Asset</span>
+                    <span className="text-zinc-600 block text-[9px] uppercase tracking-tight font-sans">
+                      Glyph Asset
+                    </span>
                     <span className="text-zinc-400 font-medium truncate block">{iconName}</span>
                   </div>
                 )}
                 {iconSource && (
                   <div className="truncate pl-0.5">
-                    <span className="text-zinc-600 block text-[9px] uppercase tracking-tight font-sans">System Pipeline</span>
+                    <span className="text-zinc-600 block text-[9px] uppercase tracking-tight font-sans">
+                      System Pipeline
+                    </span>
                     <span className="text-zinc-400 font-medium truncate block">{iconSource}</span>
                   </div>
                 )}
@@ -243,7 +225,6 @@ export default function SocialLinkCard({
           </div>
         </div>
 
-        {/* Control Actions & Operational Error Dock Infrastructure base layer */}
         <div className="mt-4 shrink-0">
           {errorFeedback && (
             <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-2 text-xs text-red-400 animate-fadeIn">
@@ -253,8 +234,10 @@ export default function SocialLinkCard({
           )}
 
           {showDeleteConfirm ? (
-            <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2 animate-fadeIn">
-              <p className="text-[11px] font-medium text-zinc-400 px-1 text-center">Sever link graph integration?</p>
+            <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-955 p-2 animate-fadeIn">
+              <p className="text-[11px] font-medium text-zinc-400 px-1 text-center">
+                Sever link graph integration?
+              </p>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -303,7 +286,6 @@ export default function SocialLinkCard({
             )
           )}
         </div>
-
       </div>
     </>
   );

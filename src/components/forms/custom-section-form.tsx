@@ -9,27 +9,24 @@ interface Props {
   initialTitle: string;
 }
 
-export default function CustomSectionForm({
-  sectionId,
-  initialTitle,
-}: Props) {
+export default function CustomSectionForm({ sectionId, initialTitle }: Props) {
   const [title, setTitle] = useState(initialTitle);
   const [loading, setLoading] = useState(false);
-  
-  // High-Grade SaaS Validation & Operational Feedback states
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  // Evaluates state delta directly against initial parameter properties
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ message: string; type: "success" | "error" } | null>(
+    null
+  );
+
   const hasChanges = title !== initialTitle;
 
   async function handleSave() {
-    if (loading || !hasChanges) return; // Strict Multi-click defense matrix protection
+    if (loading || !hasChanges) return;
 
     setValidationError(null);
     setFeedback(null);
 
-    // Form validation block
+    // Validate
     if (!title.trim()) {
       setValidationError("Section title is highly critical and cannot be empty.");
       return;
@@ -46,7 +43,8 @@ export default function CustomSectionForm({
       });
     } catch (err) {
       setFeedback({
-        message: err instanceof Error ? err.message : "Operational backend database serialization error.",
+        message:
+          err instanceof Error ? err.message : "Operational backend database serialization error.",
         type: "error",
       });
     } finally {
@@ -56,14 +54,14 @@ export default function CustomSectionForm({
 
   return (
     <div className="space-y-4 max-w-xl mx-auto text-zinc-200 antialiased font-sans">
-      
-      {/* EXPLICIT INTERACTION FEEDBACK DOCK */}
       {feedback && (
-        <div className={`p-3 rounded-lg border flex items-start gap-2.5 text-xs animate-fadeIn ${
-          feedback.type === "error" 
-            ? "border-red-500/10 bg-red-500/5 text-red-400" 
-            : "border-emerald-500/10 bg-emerald-500/5 text-emerald-400"
-        }`}>
+        <div
+          className={`p-3 rounded-lg border flex items-start gap-2.5 text-xs animate-fadeIn ${
+            feedback.type === "error"
+              ? "border-red-500/10 bg-red-500/5 text-red-400"
+              : "border-emerald-500/10 bg-emerald-500/5 text-emerald-400"
+          }`}
+        >
           {feedback.type === "error" ? (
             <AlertTriangle size={14} className="shrink-0 mt-0.5" />
           ) : (
@@ -73,7 +71,6 @@ export default function CustomSectionForm({
         </div>
       )}
 
-      {/* INPUT CONTAINER CLUSTER */}
       <div className="space-y-1.5">
         <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5 select-none">
           <Type className="w-3.5 h-3.5 text-zinc-500" />
@@ -86,7 +83,7 @@ export default function CustomSectionForm({
             )}
           </span>
         </label>
-        
+
         <input
           type="text"
           value={title}
@@ -97,12 +94,15 @@ export default function CustomSectionForm({
           disabled={loading}
           placeholder="e.g. Research Publications, Side Hustles, Open Source"
           className={`w-full text-xs px-3 py-2 bg-zinc-900 border ${
-            validationError ? "border-red-500/50 focus:border-red-500" : "border-zinc-800 focus:border-zinc-700"
+            validationError
+              ? "border-red-500/50 focus:border-red-500"
+              : "border-zinc-800 focus:border-zinc-700"
           } rounded-lg text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-700 transition disabled:opacity-50`}
         />
-        
+
         <p className="text-[10px] text-zinc-500 leading-relaxed font-sans mt-1">
-          This title represents the visual header tag deployed onto your public template canvas structure.
+          This title represents the visual header tag deployed onto your public template canvas
+          structure.
         </p>
 
         {validationError && (
@@ -112,7 +112,6 @@ export default function CustomSectionForm({
         )}
       </div>
 
-      {/* ACTION BLOCK DOCK LAYER */}
       <div className="flex items-center justify-end pt-2 border-t border-zinc-900/60">
         <button
           type="button"
@@ -122,11 +121,14 @@ export default function CustomSectionForm({
         >
           {loading ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
           <span>
-            {loading ? "Committing Updates..." : !hasChanges ? "No Changes Detected" : "Save Modifications"}
+            {loading
+              ? "Committing Updates..."
+              : !hasChanges
+                ? "No Changes Detected"
+                : "Save Modifications"}
           </span>
         </button>
       </div>
-
     </div>
   );
 }

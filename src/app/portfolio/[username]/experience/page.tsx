@@ -8,15 +8,12 @@ interface Props {
 }
 
 export default async function ExperiencePage({ params }: Props) {
-  // 1. Fetch public portfolio profiles out of the unified response wrapper envelope
   const result = await getPortfolioByUsername(params.username);
 
-  // 🛡️ Discriminated Union Guard: Directs type narrowing parameters and handles hidden portfolios safely
   if (!result || !result.success || !result.data || !result.data.isPublic) {
     return notFound();
   }
 
-  // ✅ Safe Context: Accessing relational tracks is guaranteed type-narrowed out of the success lane
   const portfolio = result.data;
   const experiences = (portfolio as any).experiences ?? [];
 
@@ -45,9 +42,7 @@ export default async function ExperiencePage({ params }: Props) {
 
               {(exp.startDate || exp.endDate || exp.currentlyWorking) && (
                 <p className="text-xs text-gray-500">
-                  {exp.startDate
-                    ? new Date(exp.startDate).getFullYear()
-                    : ""}
+                  {exp.startDate ? new Date(exp.startDate).getFullYear() : ""}
                   {" - "}
                   {exp.currentlyWorking
                     ? "Present"
@@ -57,21 +52,14 @@ export default async function ExperiencePage({ params }: Props) {
                 </p>
               )}
 
-              {exp.location && (
-                <p className="text-xs text-gray-500">{exp.location}</p>
-              )}
+              {exp.location && <p className="text-xs text-gray-500">{exp.location}</p>}
 
-              {exp.description && (
-                <p className="text-xs text-gray-500">{exp.description}</p>
-              )}
+              {exp.description && <p className="text-xs text-gray-500">{exp.description}</p>}
 
               {exp.technologies?.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
                   {exp.technologies.map((t: string, i: number) => (
-                    <span
-                      key={i}
-                      className="text-[10px] px-2 py-1 bg-gray-100 rounded"
-                    >
+                    <span key={i} className="text-[10px] px-2 py-1 bg-gray-100 rounded">
                       {t}
                     </span>
                   ))}

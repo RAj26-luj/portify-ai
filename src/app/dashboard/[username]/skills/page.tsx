@@ -2,22 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { 
-  Award, 
-  Plus, 
-  Loader2, 
-  AlertTriangle, 
-  LayoutGrid, 
-  List, 
-  Search, 
-  X, 
-  ArrowUpDown, 
+import {
+  Award,
+  Plus,
+  Loader2,
+  AlertTriangle,
+  LayoutGrid,
+  List,
+  Search,
+  X,
+  ArrowUpDown,
   HelpCircle,
   Sparkles,
   Info,
   FolderOpen,
   FolderPlus,
-  Layers
+  Layers,
 } from "lucide-react";
 
 import { getSkills } from "@/actions/skill";
@@ -74,38 +74,56 @@ export default function SkillsPage() {
       setError(null);
 
       let activeId = pId || portfolioId;
-      
-      // 1. Resolve master portfolio identifier from action return envelope safely
+
       if (!activeId) {
         const portfolioResult = await getMyPortfolioId();
 
         if (!portfolioResult || !portfolioResult.success || !portfolioResult.data) {
-          throw new Error("error" in portfolioResult && typeof portfolioResult.error === "string" ? portfolioResult.error : "Portfolio context tracing target missing.");
+          throw new Error(
+            "error" in portfolioResult && typeof portfolioResult.error === "string"
+              ? portfolioResult.error
+              : "Portfolio context tracing target missing."
+          );
         }
 
         activeId = portfolioResult.data;
         setPortfolioId(activeId);
       }
 
-      // 2. Query capabilities grids concurrently 
       const [skillsResult, categoriesResult] = await Promise.all([
         getSkills(activeId),
         getSkillCategories(activeId),
       ]);
 
-      // 🛡️ Safe Condition Narrowing: Ensures actions execution succeeded completely before reading records
-      if (!skillsResult || !skillsResult.success || !("data" in skillsResult) || !Array.isArray(skillsResult.data)) {
-        throw new Error("error" in skillsResult && typeof skillsResult.error === "string" ? skillsResult.error : "Failed to compile background skills matrix markers.");
+      if (
+        !skillsResult ||
+        !skillsResult.success ||
+        !("data" in skillsResult) ||
+        !Array.isArray(skillsResult.data)
+      ) {
+        throw new Error(
+          "error" in skillsResult && typeof skillsResult.error === "string"
+            ? skillsResult.error
+            : "Failed to compile background skills matrix markers."
+        );
       }
 
-      if (!categoriesResult || !categoriesResult.success || !("data" in categoriesResult) || !Array.isArray(categoriesResult.data)) {
-        throw new Error("error" in categoriesResult && typeof categoriesResult.error === "string" ? categoriesResult.error : "Failed to compile custom sorting categories.");
+      if (
+        !categoriesResult ||
+        !categoriesResult.success ||
+        !("data" in categoriesResult) ||
+        !Array.isArray(categoriesResult.data)
+      ) {
+        throw new Error(
+          "error" in categoriesResult && typeof categoriesResult.error === "string"
+            ? categoriesResult.error
+            : "Failed to compile custom sorting categories."
+        );
       }
 
       const skillsData = skillsResult.data;
       const categoriesData = categoriesResult.data;
 
-      // ✅ Safe Map: Accessing categoriesData is clean because type narrowing confirmed it is an array
       setCategories(
         categoriesData.map((c: any) => ({
           id: c.id,
@@ -116,7 +134,6 @@ export default function SkillsPage() {
 
       const map = new Map<string, Skill>();
 
-      // ✅ Safe Iterator: Accessing skillsData is safe because type narrowing confirmed it is an array
       for (const item of skillsData) {
         map.set(item.id, {
           id: item.id,
@@ -135,41 +152,54 @@ export default function SkillsPage() {
       }
       setSkills(Array.from(map.values()));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load skills matrix profile elements.");
+      setError(
+        err instanceof Error ? err.message : "Failed to load skills matrix profile elements."
+      );
     } finally {
       setLoading(false);
       setIsSyncing(false);
     }
   }
 
-  // 3. Coordinate component mount lifecycles unwrapping response keys safely
   useEffect(() => {
     (async () => {
       try {
         const portfolioResult = await getMyPortfolioId();
 
         if (!portfolioResult || !portfolioResult.success || !portfolioResult.data) {
-          throw new Error("error" in portfolioResult && typeof portfolioResult.error === "string" ? portfolioResult.error : "Portfolio identifier trace failure.");
+          throw new Error(
+            "error" in portfolioResult && typeof portfolioResult.error === "string"
+              ? portfolioResult.error
+              : "Portfolio identifier trace failure."
+          );
         }
 
         const id = portfolioResult.data;
         setPortfolioId(id);
         await loadSkills(id);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to resolve active full-stack portfolio credentials token mapping.");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to resolve active full-stack portfolio credentials token mapping."
+        );
         setLoading(false);
       }
     })();
   }, [username]);
 
   const filteredSkills = skills.filter((skill) => {
-    const matchCriteria = `${skill.name} ${skill.tag || ""} ${skill.description || ""} ${skill.category?.name || ""}`.toLowerCase();
+    const matchCriteria =
+      `${skill.name} ${skill.tag || ""} ${skill.description || ""} ${skill.category?.name || ""}`.toLowerCase();
     return matchCriteria.includes(searchQuery.toLowerCase());
   });
 
-  const orderedCategories = [...categories].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
-  
-  const isShowcaseIncomplete = skills.length > 0 && skills.some(s => !s.proficiency || !s.description || !s.category);
+  const orderedCategories = [...categories].sort(
+    (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)
+  );
+
+  const isShowcaseIncomplete =
+    skills.length > 0 && skills.some((s) => !s.proficiency || !s.description || !s.category);
 
   if (loading) {
     return (
@@ -178,7 +208,9 @@ export default function SkillsPage() {
           <Loader2 className="h-7 w-7 sm:h-8 sm:w-8 animate-spin text-blue-500 z-10" />
           <div className="absolute h-7 w-7 sm:h-8 sm:w-8 border border-zinc-800 rounded-full animate-ping opacity-20" />
         </div>
-        <p className="text-xs uppercase tracking-widest">// Synchronizing skill capabilities matrices...</p>
+        <p className="text-xs uppercase tracking-widest">
+          // Synchronizing skill capabilities matrices...
+        </p>
       </div>
     );
   }
@@ -188,9 +220,11 @@ export default function SkillsPage() {
       <div className="mx-auto max-w-xl my-6 rounded-none sm:rounded-xl border-y sm:border border-red-500/10 bg-gradient-to-b from-red-500/5 to-transparent p-4 sm:p-5 shadow-2xl flex gap-3.5 items-start text-white font-sans w-full">
         <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
         <div className="space-y-2 flex-1 min-w-0">
-          <h4 className="text-sm font-bold text-zinc-200 tracking-tight">Showcase Data Extraction Failure</h4>
+          <h4 className="text-sm font-bold text-zinc-200 tracking-tight">
+            Showcase Data Extraction Failure
+          </h4>
           <p className="text-xs text-red-400/90 leading-relaxed">{error}</p>
-          <button 
+          <button
             onClick={() => loadSkills(portfolioId)}
             className="w-full inline-flex h-8 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 px-3 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white"
           >
@@ -203,19 +237,20 @@ export default function SkillsPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 text-white w-full max-w-[1440px] mx-auto font-sans antialiased px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-x-hidden">
-      
-      {/* ACTIONS HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-4 sm:pb-5 px-4 sm:px-0">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 shadow-sm shrink-0">
               <Award size={15} />
             </div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-zinc-100">Skills Matrix</h1>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-zinc-100">
+              Skills Matrix
+            </h1>
             {isSyncing && <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-500 mt-1" />}
           </div>
           <p className="text-[11px] sm:text-xs text-zinc-500 font-medium leading-relaxed max-w-2xl">
-            Configure technical stacks, proficiency clusters, and classification groups visible on your target home presentation canvas.
+            Configure technical stacks, proficiency clusters, and classification groups visible on
+            your target home presentation canvas.
           </p>
         </div>
 
@@ -261,7 +296,6 @@ export default function SkillsPage() {
         </div>
       </div>
 
-      {/* SYSTEM WARNING WELL */}
       {isShowcaseIncomplete && (
         <div className="rounded-xl border border-blue-500/10 bg-gradient-to-r from-blue-500/[0.03] to-transparent p-4 flex gap-2.5 items-start animate-fadeIn w-full mx-4 sm:mx-0">
           <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
@@ -270,18 +304,23 @@ export default function SkillsPage() {
               Missing Portfolio Resource Parameters Detected
             </p>
             <p className="text-[11px] sm:text-xs text-zinc-500 leading-relaxed">
-              We highly recommend formatting all capability vectors neatly. Associating clean clusters (<span className="text-zinc-400 font-mono text-[10px]">Skill Categories</span>), target values (<span className="text-zinc-400 font-mono text-[10px]">Proficiency Levels</span>), and descriptive logs ensures full high-fidelity validation blocks appear correctly on your public theme layer.
+              We highly recommend formatting all capability vectors neatly. Associating clean
+              clusters (
+              <span className="text-zinc-400 font-mono text-[10px]">Skill Categories</span>), target
+              values (
+              <span className="text-zinc-400 font-mono text-[10px]">Proficiency Levels</span>), and
+              descriptive logs ensures full high-fidelity validation blocks appear correctly on your
+              public theme layer.
             </p>
           </div>
         </div>
       )}
 
-      {/* FILTER CONTROL MATRIX TOOLBAR */}
       {skills.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-900/50 pb-4 px-4 sm:px-0">
           <div className="relative w-full sm:max-w-xs md:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 h-3.5 w-3.5" />
-            <input 
+            <input
               type="text"
               placeholder="Search framework name, tags, description copy..."
               value={searchQuery}
@@ -289,7 +328,10 @@ export default function SkillsPage() {
               className="w-full pl-9 pr-8 h-8.5 bg-[#09090b] border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors font-sans"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400"
+              >
                 <X size={12} />
               </button>
             )}
@@ -318,20 +360,36 @@ export default function SkillsPage() {
         </div>
       )}
 
-      {/* SKILLS CARDS GRID BLOCKS */}
       <div className="space-y-8 sm:space-y-10">
         {skills.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/10 p-8 sm:p-12 text-center max-w-xl mx-auto my-4 animate-fadeIn w-full">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-900 text-zinc-500 mb-3 shadow-inner">
               <HelpCircle size={18} />
             </div>
-            <h3 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">Capabilities Dashboard Matrix Empty</h3>
-            
+            <h3 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
+              Capabilities Dashboard Matrix Empty
+            </h3>
+
             <div className="text-[11px] sm:text-xs text-zinc-500 max-w-xs sm:max-w-sm mt-1.5 leading-relaxed font-sans space-y-3 text-left bg-zinc-950 border border-zinc-900 p-4 rounded-xl">
-              <span className="font-bold text-blue-400 block uppercase font-mono tracking-wider text-[9px]">💡 Setup Instructions Protocol:</span>
-              <p>1. Mount categorization containers first via the <strong className="text-zinc-300 font-semibold">Category</strong> action trigger located above.</p>
-              <p>2. Insert technology logs using <strong className="text-zinc-300 font-semibold">Add Skill</strong>, choosing framework titles (e.g. <span className="text-zinc-400 font-mono text-[10px]">TypeScript, PostgreSQL</span>).</p>
-              <p>3. Bind experience chronology values alongside proficiency indicators to format highly contextual showcase vectors.</p>
+              <span className="font-bold text-blue-400 block uppercase font-mono tracking-wider text-[9px]">
+                💡 Setup Instructions Protocol:
+              </span>
+              <p>
+                1. Mount categorization containers first via the{" "}
+                <strong className="text-zinc-300 font-semibold">Category</strong> action trigger
+                located above.
+              </p>
+              <p>
+                2. Insert technology logs using{" "}
+                <strong className="text-zinc-300 font-semibold">Add Skill</strong>, choosing
+                framework titles (e.g.{" "}
+                <span className="text-zinc-400 font-mono text-[10px]">TypeScript, PostgreSQL</span>
+                ).
+              </p>
+              <p>
+                3. Bind experience chronology values alongside proficiency indicators to format
+                highly contextual showcase vectors.
+              </p>
             </div>
 
             <button
@@ -350,7 +408,10 @@ export default function SkillsPage() {
                 .sort((a, b) => {
                   if (sortBy === "proficiency") {
                     const weight = { EXPERT: 4, ADVANCED: 3, INTERMEDIATE: 2, BEGINNER: 1 };
-                    return (weight[b.proficiency || "BEGINNER"] || 0) - (weight[a.proficiency || "BEGINNER"] || 0);
+                    return (
+                      (weight[b.proficiency || "BEGINNER"] || 0) -
+                      (weight[a.proficiency || "BEGINNER"] || 0)
+                    );
                   }
                   return a.name.localeCompare(b.name);
                 });
@@ -362,31 +423,47 @@ export default function SkillsPage() {
                   <div className="flex items-center justify-between border-b border-zinc-900 pb-2 px-4 sm:px-0">
                     <div className="flex items-center gap-2">
                       <FolderOpen className="w-4 h-4 text-zinc-500" />
-                      <h2 className="text-sm font-bold tracking-tight text-zinc-200 uppercase font-mono">{category.name}</h2>
+                      <h2 className="text-sm font-bold tracking-tight text-zinc-200 uppercase font-mono">
+                        {category.name}
+                      </h2>
                     </div>
                     <span className="text-[11px] font-mono font-medium text-zinc-500 bg-zinc-950 border border-zinc-900 px-2 py-0.5 rounded">
-                      {categorySkills.length} <span className="hidden sm:inline">Framework entries</span><span className="inline sm:hidden">Items</span>
+                      {categorySkills.length}{" "}
+                      <span className="hidden sm:inline">Framework entries</span>
+                      <span className="inline sm:hidden">Items</span>
                     </span>
                   </div>
 
-                  {/* MOBILE LIST DISPLAY */}
                   <div className="block sm:hidden space-y-2.5">
                     {categorySkills.map((skill) => (
-                      <div 
-                        key={skill.id} 
+                      <div
+                        key={skill.id}
                         className="flex flex-col p-4 rounded-xl border border-zinc-800 bg-[#0C0C0E] space-y-3 shadow-sm relative overflow-hidden"
                       >
                         <div className="flex items-center justify-between gap-2.5 min-w-0 w-full pr-14">
                           <div className="flex items-center gap-2.5 min-w-0">
-                            {skill.iconUrl && <img src={skill.iconUrl} alt="" className="w-4 h-4 object-contain shrink-0" />}
-                            <p className="font-bold text-xs text-zinc-200 truncate font-sans">{skill.name}</p>
+                            {skill.iconUrl && (
+                              <img
+                                src={skill.iconUrl}
+                                alt=""
+                                className="w-4 h-4 object-contain shrink-0"
+                              />
+                            )}
+                            <p className="font-bold text-xs text-zinc-200 truncate font-sans">
+                              {skill.name}
+                            </p>
                           </div>
-                          <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-mono font-bold border shrink-0 ${
-                            skill.proficiency === "EXPERT" ? "bg-purple-500/5 border-purple-500/10 text-purple-400" :
-                            skill.proficiency === "ADVANCED" ? "bg-blue-500/5 border-blue-500/10 text-blue-400" :
-                            skill.proficiency === "INTERMEDIATE" ? "bg-amber-500/5 border-amber-500/10 text-amber-400" :
-                            "bg-zinc-900 border-zinc-800 text-zinc-500"
-                          }`}>
+                          <span
+                            className={`inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-mono font-bold border shrink-0 ${
+                              skill.proficiency === "EXPERT"
+                                ? "bg-purple-500/5 border-purple-500/10 text-purple-400"
+                                : skill.proficiency === "ADVANCED"
+                                  ? "bg-blue-500/5 border-blue-500/10 text-blue-400"
+                                  : skill.proficiency === "INTERMEDIATE"
+                                    ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
+                                    : "bg-zinc-900 border-zinc-800 text-zinc-500"
+                            }`}
+                          >
                             {skill.proficiency || "BEGINNER"}
                           </span>
                         </div>
@@ -399,7 +476,9 @@ export default function SkillsPage() {
 
                         <div className="flex items-center justify-between border-t border-zinc-900 pt-2.5">
                           <span className="text-[9px] font-mono text-zinc-600">
-                            {skill.yearsOfExperience ? `${skill.yearsOfExperience} Yrs Exp` : "Experience Unset"}
+                            {skill.yearsOfExperience
+                              ? `${skill.yearsOfExperience} Yrs Exp`
+                              : "Experience Unset"}
                           </span>
                           <button
                             type="button"
@@ -413,7 +492,6 @@ export default function SkillsPage() {
                     ))}
                   </div>
 
-                  {/* DESKTOP VIEWS */}
                   <div className="hidden sm:block">
                     {viewMode === "grid" ? (
                       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -438,25 +516,43 @@ export default function SkillsPage() {
                         <table className="w-full text-left border-collapse">
                           <tbody className="divide-y divide-zinc-900 text-xs font-sans">
                             {categorySkills.map((skill) => (
-                              <tr key={skill.id} className="hover:bg-zinc-900/30 transition-colors group/row">
+                              <tr
+                                key={skill.id}
+                                className="hover:bg-zinc-900/30 transition-colors group/row"
+                              >
                                 <td className="py-3 px-4 font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors min-w-[180px]">
                                   <div className="flex items-center gap-2.5">
-                                    {skill.iconUrl && <img src={skill.iconUrl} alt="" className="w-4 h-4 object-contain shrink-0" />}
+                                    {skill.iconUrl && (
+                                      <img
+                                        src={skill.iconUrl}
+                                        alt=""
+                                        className="w-4 h-4 object-contain shrink-0"
+                                      />
+                                    )}
                                     <span>{skill.name}</span>
                                   </div>
                                 </td>
                                 <td className="py-3 px-4">
-                                  <span className={`inline-flex items-center rounded px-2 py-0.5 text-[9px] font-mono font-bold border uppercase ${
-                                    skill.proficiency === "EXPERT" ? "bg-purple-500/5 border-purple-500/10 text-purple-400" :
-                                    skill.proficiency === "ADVANCED" ? "bg-blue-500/5 border-blue-500/10 text-blue-400" :
-                                    skill.proficiency === "INTERMEDIATE" ? "bg-amber-500/5 border-amber-500/10 text-amber-400" :
-                                    "bg-zinc-900 border-zinc-800 text-zinc-500"
-                                  }`}>
+                                  <span
+                                    className={`inline-flex items-center rounded px-2 py-0.5 text-[9px] font-mono font-bold border uppercase ${
+                                      skill.proficiency === "EXPERT"
+                                        ? "bg-purple-500/5 border-purple-500/10 text-purple-400"
+                                        : skill.proficiency === "ADVANCED"
+                                          ? "bg-blue-500/5 border-blue-500/10 text-blue-400"
+                                          : skill.proficiency === "INTERMEDIATE"
+                                            ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
+                                            : "bg-zinc-900 border-zinc-800 text-zinc-500"
+                                    }`}
+                                  >
                                     {skill.proficiency || "BEGINNER"}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-zinc-500 font-mono text-[11px]">
-                                  {skill.yearsOfExperience ? `${skill.yearsOfExperience} Yrs Experience` : <span className="text-zinc-700 italic">Unspecified</span>}
+                                  {skill.yearsOfExperience ? (
+                                    `${skill.yearsOfExperience} Yrs Experience`
+                                  ) : (
+                                    <span className="text-zinc-700 italic">Unspecified</span>
+                                  )}
                                 </td>
                                 <td className="py-3 px-4 text-zinc-400 max-w-xs truncate italic">
                                   {skill.description || <span className="text-zinc-800">—</span>}
@@ -481,40 +577,53 @@ export default function SkillsPage() {
               );
             })}
 
-            {/* Uncategorized Element Clusters */}
             {filteredSkills.some((s) => !s.category?.id) && (
               <div className="space-y-3 sm:space-y-4 animate-fadeIn">
                 <div className="flex items-center justify-between border-b border-zinc-900 pb-2 px-4 sm:px-0">
                   <div className="flex items-center gap-2">
                     <Layers className="w-4 h-4 text-zinc-500" />
-                    <h2 className="text-sm font-bold tracking-tight text-zinc-400 uppercase font-mono">Uncategorized Capabilities</h2>
+                    <h2 className="text-sm font-bold tracking-tight text-zinc-400 uppercase font-mono">
+                      Uncategorized Capabilities
+                    </h2>
                   </div>
                   <span className="text-[11px] font-mono font-medium text-zinc-500 bg-zinc-950 border border-zinc-900 px-2 py-0.5 rounded">
                     {filteredSkills.filter((s) => !s.category?.id).length} Standalone items
                   </span>
                 </div>
 
-                {/* MOBILE LIST DISPLAY (UNCATEGORIZED) */}
                 <div className="block sm:hidden space-y-2.5">
                   {filteredSkills
                     .filter((s) => !s.category?.id)
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map((skill) => (
-                      <div 
-                        key={skill.id} 
+                      <div
+                        key={skill.id}
                         className="flex flex-col p-4 rounded-xl border border-zinc-800 bg-[#0C0C0E] space-y-3 shadow-sm relative overflow-hidden"
                       >
                         <div className="flex items-center justify-between gap-2.5 min-w-0 w-full pr-14">
                           <div className="flex items-center gap-2.5 min-w-0">
-                            {skill.iconUrl && <img src={skill.iconUrl} alt="" className="w-4 h-4 object-contain shrink-0" />}
-                            <p className="font-bold text-xs text-zinc-200 truncate font-sans">{skill.name}</p>
+                            {skill.iconUrl && (
+                              <img
+                                src={skill.iconUrl}
+                                alt=""
+                                className="w-4 h-4 object-contain shrink-0"
+                              />
+                            )}
+                            <p className="font-bold text-xs text-zinc-200 truncate font-sans">
+                              {skill.name}
+                            </p>
                           </div>
-                          <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-mono font-bold border shrink-0 ${
-                            skill.proficiency === "EXPERT" ? "bg-purple-500/5 border-purple-500/10 text-purple-400" :
-                            skill.proficiency === "ADVANCED" ? "bg-blue-500/5 border-blue-500/10 text-blue-400" :
-                            skill.proficiency === "INTERMEDIATE" ? "bg-amber-500/5 border-amber-500/10 text-amber-400" :
-                            "bg-zinc-900 border-zinc-800 text-zinc-500"
-                          }`}>
+                          <span
+                            className={`inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-mono font-bold border shrink-0 ${
+                              skill.proficiency === "EXPERT"
+                                ? "bg-purple-500/5 border-purple-500/10 text-purple-400"
+                                : skill.proficiency === "ADVANCED"
+                                  ? "bg-blue-500/5 border-blue-500/10 text-blue-400"
+                                  : skill.proficiency === "INTERMEDIATE"
+                                    ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
+                                    : "bg-zinc-900 border-zinc-800 text-zinc-500"
+                            }`}
+                          >
                             {skill.proficiency || "BEGINNER"}
                           </span>
                         </div>
@@ -527,7 +636,9 @@ export default function SkillsPage() {
 
                         <div className="flex items-center justify-between border-t border-zinc-900 pt-2.5">
                           <span className="text-[9px] font-mono text-zinc-600">
-                            {skill.yearsOfExperience ? `${skill.yearsOfExperience} Yrs Exp` : "Experience Unset"}
+                            {skill.yearsOfExperience
+                              ? `${skill.yearsOfExperience} Yrs Exp`
+                              : "Experience Unset"}
                           </span>
                           <button
                             type="button"
@@ -541,7 +652,6 @@ export default function SkillsPage() {
                     ))}
                 </div>
 
-                {/* DESKTOP RESPONSIVE CONTAINER (UNCATEGORIZED) */}
                 <div className="hidden sm:block">
                   {viewMode === "grid" ? (
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -572,25 +682,43 @@ export default function SkillsPage() {
                             .filter((s) => !s.category?.id)
                             .sort((a, b) => a.name.localeCompare(b.name))
                             .map((skill) => (
-                              <tr key={skill.id} className="hover:bg-zinc-900/30 transition-colors group/row">
+                              <tr
+                                key={skill.id}
+                                className="hover:bg-zinc-900/30 transition-colors group/row"
+                              >
                                 <td className="py-3 px-4 font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors min-w-[180px]">
                                   <div className="flex items-center gap-2.5">
-                                    {skill.iconUrl && <img src={skill.iconUrl} alt="" className="w-4 h-4 object-contain shrink-0" />}
+                                    {skill.iconUrl && (
+                                      <img
+                                        src={skill.iconUrl}
+                                        alt=""
+                                        className="w-4 h-4 object-contain shrink-0"
+                                      />
+                                    )}
                                     <span>{skill.name}</span>
                                   </div>
                                 </td>
                                 <td className="py-3 px-4">
-                                  <span className={`inline-flex items-center rounded px-2 py-0.5 text-[9px] font-mono font-bold border uppercase ${
-                                    skill.proficiency === "EXPERT" ? "bg-purple-500/5 border-purple-500/10 text-purple-400" :
-                                    skill.proficiency === "ADVANCED" ? "bg-blue-500/5 border-blue-500/10 text-blue-400" :
-                                    skill.proficiency === "INTERMEDIATE" ? "bg-amber-500/5 border-amber-500/10 text-amber-400" :
-                                    "bg-zinc-900 border-zinc-800 text-zinc-500"
-                                  }`}>
+                                  <span
+                                    className={`inline-flex items-center rounded px-2 py-0.5 text-[9px] font-mono font-bold border uppercase ${
+                                      skill.proficiency === "EXPERT"
+                                        ? "bg-purple-500/5 border-purple-500/10 text-purple-400"
+                                        : skill.proficiency === "ADVANCED"
+                                          ? "bg-blue-500/5 border-blue-500/10 text-blue-400"
+                                          : skill.proficiency === "INTERMEDIATE"
+                                            ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
+                                            : "bg-zinc-900 border-zinc-800 text-zinc-500"
+                                    }`}
+                                  >
                                     {skill.proficiency || "BEGINNER"}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-zinc-500 font-mono text-[11px]">
-                                  {skill.yearsOfExperience ? `${skill.yearsOfExperience} Yrs Experience` : <span className="text-zinc-700 italic">Unspecified</span>}
+                                  {skill.yearsOfExperience ? (
+                                    `${skill.yearsOfExperience} Yrs Experience`
+                                  ) : (
+                                    <span className="text-zinc-700 italic">Unspecified</span>
+                                  )}
                                 </td>
                                 <td className="py-3 px-4 text-zinc-400 max-w-xs truncate italic">
                                   {skill.description || <span className="text-zinc-800">—</span>}
@@ -617,7 +745,6 @@ export default function SkillsPage() {
         )}
       </div>
 
-      {/* ADD SKILL MODAL */}
       {openAddModal && (
         <div className="fixed inset-0 bg-black/85 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-fadeIn">
           <div className="max-h-[100vh] sm:max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-none sm:rounded-xl border-t sm:border border-zinc-800 bg-[#0C0C0E] p-0 text-white shadow-2xl relative">
@@ -628,8 +755,8 @@ export default function SkillsPage() {
                   Initialize New Capability Showcase Entry
                 </h2>
               </div>
-              <button 
-                onClick={() => setOpenAddModal(false)} 
+              <button
+                onClick={() => setOpenAddModal(false)}
                 className="text-zinc-500 hover:text-zinc-300 font-mono text-xs bg-zinc-950 border border-zinc-900 px-2.5 py-1 rounded focus:outline-none"
               >
                 ✕
@@ -648,7 +775,6 @@ export default function SkillsPage() {
         </div>
       )}
 
-      {/* ADD CATEGORY MODAL */}
       {openCategoryModal && (
         <div className="fixed inset-0 bg-black/85 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-fadeIn">
           <div className="max-h-[100vh] sm:max-h-[90vh] w-full max-w-md overflow-y-auto rounded-none sm:rounded-xl border-t sm:border border-zinc-800 bg-[#0C0C0E] p-0 text-white shadow-2xl relative">
@@ -659,8 +785,8 @@ export default function SkillsPage() {
                   Create Stack Categorization Group
                 </h2>
               </div>
-              <button 
-                onClick={() => setOpenCategoryModal(false)} 
+              <button
+                onClick={() => setOpenCategoryModal(false)}
                 className="text-zinc-500 hover:text-zinc-300 font-mono text-xs bg-zinc-950 border border-zinc-900 px-2.5 py-1 rounded focus:outline-none"
               >
                 ✕
@@ -680,7 +806,6 @@ export default function SkillsPage() {
         </div>
       )}
 
-      {/* EDIT SKILL MODAL */}
       {selectedSkillToEdit && (
         <div className="fixed inset-0 bg-black/85 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-fadeIn">
           <div className="max-h-[100vh] sm:max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-none sm:rounded-xl border-t sm:border border-zinc-800 bg-[#0C0C0E] p-0 text-white shadow-2xl relative">
@@ -691,8 +816,8 @@ export default function SkillsPage() {
                   Modify Capability Parameters: {selectedSkillToEdit.name}
                 </h2>
               </div>
-              <button 
-                onClick={() => setSelectedSkillToEdit(null)} 
+              <button
+                onClick={() => setSelectedSkillToEdit(null)}
                 className="text-zinc-500 hover:text-zinc-300 font-mono text-xs bg-zinc-950 border border-zinc-900 px-2.5 py-1 rounded focus:outline-none shrink-0"
               >
                 ✕

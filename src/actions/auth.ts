@@ -9,25 +9,20 @@ import { loginSchema } from "@/validators/auth/login";
 import { forgotPasswordSchema } from "@/validators/auth/forgot-password";
 import { resetPasswordSchema } from "@/validators/auth/reset-password";
 
-import {
-  sendVerificationEmail,
-  sendForgotPasswordEmail,
-} from "@/services/email";
+import { sendVerificationEmail, sendForgotPasswordEmail } from "@/services/email";
 
-import {
-  logRegistration,
-  logPasswordReset,
-} from "@/lib/audit-log";
+import { logRegistration, logPasswordReset } from "@/lib/audit-log";
 
-/**
- * Transforms standard platform infrastructure exceptions into production-ready,
- * actionable, human-readable statements for instant UI flash styling.
- */
+// Error
 function handleAuthServerError(error: any, fallbackMessage: string) {
   console.error("Authentication Service Server Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
       error: "Authentication service lookup timed out. Please try logging in again shortly.",
@@ -36,13 +31,19 @@ function handleAuthServerError(error: any, fallbackMessage: string) {
   if (errorMessage.includes("bcrypt") || errorMessage.includes("hash")) {
     return {
       success: false,
-      error: "Security cryptography service encountered an issue. Please try resubmitting your form.",
+      error:
+        "Security cryptography service encountered an issue. Please try resubmitting your form.",
     };
   }
-  if (errorMessage.includes("mail") || errorMessage.includes("smtp") || errorMessage.includes("Verification")) {
+  if (
+    errorMessage.includes("mail") ||
+    errorMessage.includes("smtp") ||
+    errorMessage.includes("Verification")
+  ) {
     return {
       success: false,
-      error: "Account created but delivery of verification code failed. Please go to forgot password to request a new code.",
+      error:
+        "Account created but delivery of verification code failed. Please go to forgot password to request a new code.",
     };
   }
 
@@ -56,7 +57,8 @@ export async function registerUser(data: unknown) {
     if (!parsed.success) {
       return {
         success: false,
-        error: "Registration metrics invalid. Please ensure all required fields are correctly formatted.",
+        error:
+          "Registration metrics invalid. Please ensure all required fields are correctly formatted.",
       };
     }
 
@@ -82,7 +84,6 @@ export async function registerUser(data: unknown) {
       .toLowerCase()
       .replace(/[^a-z0-9]/g, "");
 
-    // Generate a strictly unique username for the User model schema
     const username = `${baseUsername}_${Date.now()}`;
 
     const user = await prisma.user.create({
@@ -95,7 +96,6 @@ export async function registerUser(data: unknown) {
       },
     });
 
-    // Check if a portfolio with this base username configuration already exists
     const existingPortfolio = await prisma.portfolio.findFirst({
       where: {
         username,
@@ -104,9 +104,7 @@ export async function registerUser(data: unknown) {
 
     const portfolioUsername = existingPortfolio ? `${username}-${Date.now()}` : username;
 
-    const slug = `${portfolioUsername}-${Date.now()}`
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, "");
+    const slug = `${portfolioUsername}-${Date.now()}`.toLowerCase().replace(/[^a-z0-9-]/g, "");
 
     await prisma.portfolio.create({
       data: {
@@ -121,20 +119,53 @@ export async function registerUser(data: unknown) {
 
         sectionSettings: {
           create: [
-            { sectionKey: "hero", title: "Hero", mandatory: true, isEnabled: true, displayOrder: 0 },
-            { sectionKey: "about", title: "About", mandatory: true, isEnabled: true, displayOrder: 1 },
+            {
+              sectionKey: "hero",
+              title: "Hero",
+              mandatory: true,
+              isEnabled: true,
+              displayOrder: 0,
+            },
+            {
+              sectionKey: "about",
+              title: "About",
+              mandatory: true,
+              isEnabled: true,
+              displayOrder: 1,
+            },
             { sectionKey: "experience", title: "Experience", isEnabled: true, displayOrder: 2 },
             { sectionKey: "education", title: "Education", isEnabled: true, displayOrder: 3 },
             { sectionKey: "skills", title: "Skills", isEnabled: true, displayOrder: 4 },
             { sectionKey: "projects", title: "Projects", isEnabled: true, displayOrder: 5 },
             { sectionKey: "opensource", title: "Open Source", isEnabled: true, displayOrder: 6 },
             { sectionKey: "achievements", title: "Achievements", isEnabled: true, displayOrder: 7 },
-            { sectionKey: "certifications", title: "Certifications", isEnabled: true, displayOrder: 8 },
+            {
+              sectionKey: "certifications",
+              title: "Certifications",
+              isEnabled: true,
+              displayOrder: 8,
+            },
             { sectionKey: "publications", title: "Publications", isEnabled: true, displayOrder: 9 },
-            { sectionKey: "testimonials", title: "Testimonials", isEnabled: true, displayOrder: 10 },
-            { sectionKey: "codingprofiles", title: "Coding Profiles", isEnabled: true, displayOrder: 11 },
+            {
+              sectionKey: "testimonials",
+              title: "Testimonials",
+              isEnabled: true,
+              displayOrder: 10,
+            },
+            {
+              sectionKey: "codingprofiles",
+              title: "Coding Profiles",
+              isEnabled: true,
+              displayOrder: 11,
+            },
             { sectionKey: "sociallinks", title: "Social Links", isEnabled: true, displayOrder: 12 },
-            { sectionKey: "contact", title: "Contact", mandatory: true, isEnabled: true, displayOrder: 999 },
+            {
+              sectionKey: "contact",
+              title: "Contact",
+              mandatory: true,
+              isEnabled: true,
+              displayOrder: 999,
+            },
           ],
         },
 
@@ -148,9 +179,6 @@ export async function registerUser(data: unknown) {
       },
     });
 
- 
-
-    // Token generation converted to a 6-digit numeric OTP string
     const token = Math.floor(100000 + Math.random() * 900000).toString();
 
     await prisma.verificationToken.create({
@@ -161,7 +189,6 @@ export async function registerUser(data: unknown) {
       },
     });
 
-    // Keep verification email triggers localized here, catching exceptions gracefully
     try {
       await sendVerificationEmail(email, token);
     } catch (mailError) {
@@ -181,7 +208,10 @@ export async function registerUser(data: unknown) {
       userId: user.id,
     };
   } catch (error) {
-    return handleAuthServerError(error, "Unable to complete account registration lifecycle profile.");
+    return handleAuthServerError(
+      error,
+      "Unable to complete account registration lifecycle profile."
+    );
   }
 }
 
@@ -221,14 +251,16 @@ export async function loginUser(data: unknown) {
     if (user.isBlocked) {
       return {
         success: false,
-        error: "Your user account status has been blocked. Please reach out to administrative support.",
+        error:
+          "Your user account status has been blocked. Please reach out to administrative support.",
       };
     }
 
     if (user.status !== "APPROVED") {
       return {
         success: false,
-        error: "Your user access application profile is still pending security verification approval.",
+        error:
+          "Your user access application profile is still pending security verification approval.",
       };
     }
 
@@ -246,7 +278,10 @@ export async function loginUser(data: unknown) {
       userId: user.id,
     };
   } catch (error) {
-    return handleAuthServerError(error, "Security system validation processing error encountered during sign in.");
+    return handleAuthServerError(
+      error,
+      "Security system validation processing error encountered during sign in."
+    );
   }
 }
 
@@ -256,7 +291,7 @@ export async function forgotPassword(data: unknown) {
 
     if (!parsed.success) {
       return {
-        success: true, // Fail-silent structure preservation for security layout patterns
+        success: true,
       };
     }
 
@@ -268,11 +303,10 @@ export async function forgotPassword(data: unknown) {
 
     if (!user) {
       return {
-        success: true, // Fail-silent security layout pattern to avoid user registration enumeration leaks
+        success: true,
       };
     }
 
-    // Changed: Converted from randomUUID over to a 6-digit numeric OTP string configuration
     const token = Math.floor(100000 + Math.random() * 900000).toString();
 
     await prisma.passwordResetToken.create({
@@ -295,7 +329,7 @@ export async function forgotPassword(data: unknown) {
   } catch (error) {
     console.error("Failed handling forgot password system loop generation:", error);
     return {
-      success: true, // Keep resilient interface outcome active
+      success: true,
     };
   }
 }
@@ -327,7 +361,8 @@ export async function resetPassword(data: unknown) {
     if (resetToken.expiresAt < new Date()) {
       return {
         success: false,
-        error: "The authentication code has expired. Please initiate a new password reset sequence.",
+        error:
+          "The authentication code has expired. Please initiate a new password reset sequence.",
       };
     }
 

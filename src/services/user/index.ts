@@ -2,27 +2,19 @@ import { prisma } from "@/lib/prisma";
 import type { ProfileUpdateDTO } from "@/validators/profile";
 import bcrypt from "bcryptjs";
 
-/**
- * GET PROFILE
- */
 export async function getProfile(identifier: string) {
   if (!identifier) return null;
 
   const isObjectId = /^[a-f\d]{24}$/i.test(identifier);
 
   return prisma.user.findUnique({
-    where: isObjectId
-      ? { id: identifier }
-      : { username: identifier },
+    where: isObjectId ? { id: identifier } : { username: identifier },
     include: {
       portfolio: true,
     },
   });
 }
 
-/**
- * GET DASHBOARD USER
- */
 export async function getDashboardUser(username: string) {
   if (!username) return null;
 
@@ -39,9 +31,6 @@ export async function getDashboardUser(username: string) {
   });
 }
 
-/**
- * GET USER BY ID
- */
 export async function getUserById(userId: string) {
   if (!userId) return null;
 
@@ -53,45 +42,30 @@ export async function getUserById(userId: string) {
   });
 }
 
-/**
- * UPDATE PROFILE
- */
-export async function updateProfile(
-  userId: string,
-  data: ProfileUpdateDTO
-) {
+export async function updateProfile(userId: string, data: ProfileUpdateDTO) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
 
   if (!user) return null;
 
-  const portfolio =
-    await prisma.portfolio.findUnique({
-      where: { userId },
-    });
+  const portfolio = await prisma.portfolio.findUnique({
+    where: { userId },
+  });
 
   if (!portfolio) return null;
 
-  const userImage = data.image?.trim()
-    ? data.image
-    : user.image;
+  const userImage = data.image?.trim() ? data.image : user.image;
 
-  const coverImage = data.coverImage?.trim()
-    ? data.coverImage
-    : user.coverImage;
+  const coverImage = data.coverImage?.trim() ? data.coverImage : user.coverImage;
 
-  const profileImage =
-    data.profileImage?.trim()
-      ? data.profileImage
-      : portfolio.profileImage;
+  const profileImage = data.profileImage?.trim() ? data.profileImage : portfolio.profileImage;
 
- const portfolioCover =
-  data.coverPortfolioImage?.trim()
+  const portfolioCover = data.coverPortfolioImage?.trim()
     ? data.coverPortfolioImage
     : data.coverImage?.trim()
-    ? data.coverImage
-    : portfolio.coverImage;
+      ? data.coverImage
+      : portfolio.coverImage;
 
   await prisma.user.update({
     where: { id: user.id },
@@ -117,91 +91,53 @@ export async function updateProfile(
       profileImage: profileImage ?? undefined,
       coverImage: portfolioCover ?? undefined,
 
-      resumeHeadline:
-        data.resumeHeadline ?? undefined,
-      currentRole:
-        data.currentRole ?? undefined,
+      resumeHeadline: data.resumeHeadline ?? undefined,
+      currentRole: data.currentRole ?? undefined,
 
-      email:
-        data.emailPortfolio ?? undefined,
-      phone:
-        data.phonePortfolio ?? undefined,
-      website:
-        data.websitePortfolio ?? undefined,
-      country:
-        data.countryPortfolio ?? undefined,
-      state:
-        data.statePortfolio ?? undefined,
-      city:
-        data.cityPortfolio ?? undefined,
+      email: data.emailPortfolio ?? undefined,
+      phone: data.phonePortfolio ?? undefined,
+      website: data.websitePortfolio ?? undefined,
+      country: data.countryPortfolio ?? undefined,
+      state: data.statePortfolio ?? undefined,
+      city: data.cityPortfolio ?? undefined,
 
       timezone: data.timezone ?? undefined,
 
-      allowContactForm:
-        data.allowContactForm ??
-        portfolio.allowContactForm,
+      allowContactForm: data.allowContactForm ?? portfolio.allowContactForm,
 
-      allowResumeDownload:
-        data.allowResumeDownload ??
-        portfolio.allowResumeDownload,
+      allowResumeDownload: data.allowResumeDownload ?? portfolio.allowResumeDownload,
 
-      seoTitle:
-        data.seoTitle ?? undefined,
-      seoDescription:
-        data.seoDescription ?? undefined,
-      seoKeywords:
-        data.seoKeywords ?? undefined,
-      seoImage:
-        data.seoImage ?? undefined,
+      seoTitle: data.seoTitle ?? undefined,
+      seoDescription: data.seoDescription ?? undefined,
+      seoKeywords: data.seoKeywords ?? undefined,
+      seoImage: data.seoImage ?? undefined,
 
-      ogTitle:
-        data.ogTitle ?? undefined,
-      ogSubtitle:
-        data.ogSubtitle ?? undefined,
-      ogDescription:
-        data.ogDescription ?? undefined,
-      ogImage:
-        data.ogImage ?? undefined,
+      ogTitle: data.ogTitle ?? undefined,
+      ogSubtitle: data.ogSubtitle ?? undefined,
+      ogDescription: data.ogDescription ?? undefined,
+      ogImage: data.ogImage ?? undefined,
 
-      primaryButtonText:
-        data.primaryButtonText ??
-        undefined,
+      primaryButtonText: data.primaryButtonText ?? undefined,
 
-      primaryButtonUrl:
-        data.primaryButtonUrl ??
-        undefined,
+      primaryButtonUrl: data.primaryButtonUrl ?? undefined,
 
-      secondaryButtonText:
-        data.secondaryButtonText ??
-        undefined,
+      secondaryButtonText: data.secondaryButtonText ?? undefined,
 
-      secondaryButtonUrl:
-        data.secondaryButtonUrl ??
-        undefined,
+      secondaryButtonUrl: data.secondaryButtonUrl ?? undefined,
 
-      currentFocus:
-        data.currentFocus ?? undefined,
+      currentFocus: data.currentFocus ?? undefined,
 
-      availabilityStatus:
-        data.availabilityStatus ??
-        undefined,
+      availabilityStatus: data.availabilityStatus ?? undefined,
 
-      aboutImage:
-        data.aboutImage ?? undefined,
+      aboutImage: data.aboutImage ?? undefined,
 
-      contactAvailability:
-        data.contactAvailability ??
-        undefined,
+      contactAvailability: data.contactAvailability ?? undefined,
 
-      twitterImage:
-        data.twitterImage ?? undefined,
+      twitterImage: data.twitterImage ?? undefined,
 
-      description:
-        data.description ?? undefined,
+      description: data.description ?? undefined,
 
-      heroIntroduction:
-        data.heroIntroduction ??
-        undefined,
+      heroIntroduction: data.heroIntroduction ?? undefined,
     },
   });
 
@@ -213,9 +149,6 @@ export async function updateProfile(
   });
 }
 
-/**
- * CHANGE PASSWORD
- */
 export async function changePassword(
   username: string,
   currentPassword: string,
@@ -223,34 +156,24 @@ export async function changePassword(
 ) {
   if (!username) return null;
 
-  const user =
-    await prisma.user.findUnique({
-      where: { username },
-    });
+  const user = await prisma.user.findUnique({
+    where: { username },
+  });
 
   if (!user?.password) return null;
 
-  const valid =
-    await bcrypt.compare(
-      currentPassword,
-      user.password
-    );
+  const valid = await bcrypt.compare(currentPassword, user.password);
 
   if (!valid) return null;
 
-  const hashedPassword =
-    await bcrypt.hash(
-      newPassword,
-      12
-    );
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
 
   await prisma.user.update({
     where: {
       id: user.id,
     },
     data: {
-      password:
-        hashedPassword,
+      password: hashedPassword,
     },
   });
 
@@ -259,23 +182,17 @@ export async function changePassword(
   };
 }
 
-/**
- * DELETE ACCOUNT
- */
-export async function deleteAccount(
-  username: string
-) {
+export async function deleteAccount(username: string) {
   if (!username) return null;
 
-  const user =
-    await prisma.user.findUnique({
-      where: {
-        username,
-      },
-      include: {
-        portfolio: true,
-      },
-    });
+  const user = await prisma.user.findUnique({
+    where: {
+      username,
+    },
+    include: {
+      portfolio: true,
+    },
+  });
 
   if (!user) return null;
 

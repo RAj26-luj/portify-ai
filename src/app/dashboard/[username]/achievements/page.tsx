@@ -3,28 +3,25 @@
 import { useEffect, useState } from "react";
 import AchievementCard from "@/components/cards/achievement-card";
 import AchievementForm from "@/components/forms/achievement-form";
-import { 
-  Loader2, 
-  Trophy, 
-  Award, 
-  Sparkles, 
-  Plus, 
-  X, 
-  Terminal, 
-  Grid, 
-  List, 
-  Search, 
+import {
+  Loader2,
+  Trophy,
+  Award,
+  Sparkles,
+  Plus,
+  X,
+  Terminal,
+  Grid,
+  List,
+  Search,
   ArrowUpDown,
   AlertTriangle,
   Edit3,
   Trash2,
   Check,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
-import {
-  getAchievements,
-  deleteAchievement,
-} from "@/actions/achievement";
+import { getAchievements, deleteAchievement } from "@/actions/achievement";
 
 type Achievement = {
   id: string;
@@ -54,7 +51,6 @@ export default function AchievementsPage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // Mobile Confirmation Workflow Safeguard State
   const [mobileConfirmDeleteId, setMobileConfirmDeleteId] = useState<string | null>(null);
 
   async function loadAchievements() {
@@ -64,17 +60,17 @@ export default function AchievementsPage() {
       setPortfolioId(id);
 
       type GetAchievementsSuccess = {
-  success: true;
-  data: Achievement[];
-};
+        success: true;
+        data: Achievement[];
+      };
 
-const result = await getAchievements(id);
+      const result = await getAchievements(id);
 
-if (result.success) {
-  setAchievements((result as GetAchievementsSuccess).data);
-} else {
-  setAchievements([]);
-}
+      if (result.success) {
+        setAchievements((result as GetAchievementsSuccess).data);
+      } else {
+        setAchievements([]);
+      }
     } catch (error) {
       setActionError("Failed to pull achievement matrices from client scope.");
     } finally {
@@ -84,7 +80,7 @@ if (result.success) {
 
   async function handleDelete(id: string, bypassPrompt = false) {
     if (processingId) return;
-    
+
     const isMobile = window.innerWidth < 640;
     if (isMobile && !bypassPrompt) {
       setMobileConfirmDeleteId(id);
@@ -92,7 +88,9 @@ if (result.success) {
     }
 
     if (!isMobile) {
-      const confirmDelete = window.confirm("Are you sure you want to delete this achievement record permanently?");
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this achievement record permanently?"
+      );
       if (!confirmDelete) return;
     }
 
@@ -115,7 +113,8 @@ if (result.success) {
 
   const filteredAchievements = achievements
     .filter((item) => {
-      const targetQuery = `${item.title} ${item.issuer || ""} ${item.description || ""}`.toLowerCase();
+      const targetQuery =
+        `${item.title} ${item.issuer || ""} ${item.description || ""}`.toLowerCase();
       return targetQuery.includes(searchQuery.toLowerCase());
     })
     .sort((a, b) => {
@@ -134,15 +133,15 @@ if (result.success) {
           <Loader2 className="h-7 w-7 sm:h-8 sm:w-8 animate-spin text-blue-500 z-10" />
           <div className="absolute h-7 w-7 sm:h-8 sm:w-8 border border-zinc-800 rounded-full animate-ping opacity-20" />
         </div>
-        <p className="text-[10px] sm:text-xs uppercase tracking-widest">// Compiling achievement collections...</p>
+        <p className="text-[10px] sm:text-xs uppercase tracking-widest">
+          // Compiling achievement collections...
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 py-4 sm:py-6 text-zinc-300 antialiased font-sans w-full overflow-x-hidden">
-      
-      {/* HEADER SECTION CHASSIS */}
       <div className="border-b border-zinc-900 pb-4 sm:pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-0">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-full bg-blue-500/5 border border-blue-500/10 text-blue-400 font-mono text-[9px] uppercase tracking-widest mb-0.5">
@@ -153,7 +152,8 @@ if (result.success) {
             Achievements
           </h1>
           <p className="text-[11px] sm:text-xs text-zinc-500 font-medium max-w-2xl leading-relaxed">
-            Manage your verified competitive metrics, hackathon wins, honors, awards, and structural system recognitions.
+            Manage your verified competitive metrics, hackathon wins, honors, awards, and structural
+            system recognitions.
           </p>
         </div>
 
@@ -167,21 +167,24 @@ if (result.success) {
         </button>
       </div>
 
-      {/* ERROR HANDLER CONTEXT ACTION HUB BANNER */}
       {actionError && (
         <div className="flex items-start gap-2 rounded-none sm:rounded-lg border-y sm:border border-red-500/10 bg-red-500/5 p-4 sm:p-3 text-xs text-red-400 animate-fadeIn w-full">
           <AlertTriangle size={14} className="shrink-0 mt-0.5" />
           <span className="font-medium flex-1 leading-normal">{actionError}</span>
-          <button onClick={() => setActionError(null)} className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2">✕</button>
+          <button
+            onClick={() => setActionError(null)}
+            className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* SEARCH AND VIEW GRID TOOLBAR CONTROLS FILTER HUB */}
       {achievements.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-900/50 pb-4 px-4 sm:px-0">
           <div className="relative w-full sm:max-w-xs md:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 h-3.5 w-3.5" />
-            <input 
+            <input
               type="text"
               placeholder="Search awards, issuers, or notes..."
               value={searchQuery}
@@ -189,7 +192,10 @@ if (result.success) {
               className="w-full pl-9 pr-8 h-8.5 bg-[#09090b] border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400"
+              >
                 <X size={12} />
               </button>
             )}
@@ -239,22 +245,22 @@ if (result.success) {
         </div>
       )}
 
-      {/* RENDER STACK ROUTING HOOKS INTERFACES */}
       {filteredAchievements.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-none sm:rounded-xl border-y sm:border border-dashed border-zinc-800 bg-zinc-950/10 p-8 sm:p-12 text-center max-w-xl mx-auto my-4 animate-fadeIn w-full">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-900 text-zinc-500 mb-3 shadow-inner">
             <Award size={18} />
           </div>
           <h3 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
-            {achievements.length === 0 ? "Achievements Section Empty" : "No tracking indices resolved"}
+            {achievements.length === 0
+              ? "Achievements Section Empty"
+              : "No tracking indices resolved"}
           </h3>
-          
+
           <div className="text-[11px] sm:text-xs text-zinc-500 max-w-xs sm:max-w-sm mt-1.5 leading-relaxed font-sans space-y-2">
             <p>
-              {achievements.length === 0 
+              {achievements.length === 0
                 ? "Your layout profile has no registered competitive honors, validation badges, or certification markers. Displaying your historical performance vectors builds immense authority context for recruiters."
-                : "No matching registered award paths discovered. Clear your active search queries to reset grid matrices."
-              }
+                : "No matching registered award paths discovered. Clear your active search queries to reset grid matrices."}
             </p>
           </div>
 
@@ -274,11 +280,10 @@ if (result.success) {
         </div>
       ) : (
         <>
-          {/* MOBILE SPECIFIC CONDENSED ITERATOR */}
           <div className="block sm:hidden space-y-2.5 animate-fadeIn">
             {filteredAchievements.map((item) => (
-              <div 
-                key={item.id} 
+              <div
+                key={item.id}
                 className="rounded-none border-y border-zinc-800 bg-[#0C0C0E] p-4 space-y-3 shadow-sm relative overflow-hidden"
               >
                 {item.featured && (
@@ -286,9 +291,11 @@ if (result.success) {
                     FEATURED
                   </div>
                 )}
-                
+
                 <div className="space-y-1 pr-12">
-                  <h4 className="text-xs font-bold text-zinc-100 leading-snug tracking-tight break-words">{item.title}</h4>
+                  <h4 className="text-xs font-bold text-zinc-100 leading-snug tracking-tight break-words">
+                    {item.title}
+                  </h4>
                   {item.issuer && (
                     <p className="text-[10px] font-medium text-zinc-500 truncate">{item.issuer}</p>
                   )}
@@ -320,7 +327,11 @@ if (result.success) {
                           onClick={() => handleDelete(item.id, true)}
                           className="h-6 rounded bg-red-600 text-white font-mono text-[9px] font-bold uppercase tracking-wider px-2.5 inline-flex items-center gap-1"
                         >
-                          {processingId === item.id ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
+                          {processingId === item.id ? (
+                            <Loader2 size={10} className="animate-spin" />
+                          ) : (
+                            <Check size={10} />
+                          )}
                           <span>Execute</span>
                         </button>
                       </div>
@@ -328,9 +339,14 @@ if (result.success) {
                   ) : (
                     <div className="flex items-center justify-between gap-3 w-full">
                       <span className="text-[9px] font-mono text-zinc-600">
-                        {item.achievementDate ? new Date(item.achievementDate).toLocaleDateString("en-US", { year: "numeric", month: "short" }) : "—"}
+                        {item.achievementDate
+                          ? new Date(item.achievementDate).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                            })
+                          : "—"}
                       </span>
-                      
+
                       <div className="flex items-center gap-1.5 shrink-0">
                         <button
                           type="button"
@@ -356,7 +372,6 @@ if (result.success) {
             ))}
           </div>
 
-          {/* DESKTOP MATRIX DISPATCH VIEWER */}
           <div className="hidden sm:block">
             {viewMode === "grid" ? (
               <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 animate-fadeIn">
@@ -391,31 +406,47 @@ if (result.success) {
                   </thead>
                   <tbody className="divide-y divide-zinc-900 text-xs font-sans">
                     {filteredAchievements.map((item) => (
-                      <tr key={item.id} className="hover:bg-zinc-900/30 transition-colors group/row">
+                      <tr
+                        key={item.id}
+                        className="hover:bg-zinc-900/30 transition-colors group/row"
+                      >
                         <td className="py-3.5 px-4 min-w-[200px]">
-                          <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-xs">{item.title}</div>
+                          <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-xs">
+                            {item.title}
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 text-zinc-400 truncate max-w-xs font-medium">
-                          {item.issuer || <span className="text-zinc-700 font-normal italic">Unset</span>}
+                          {item.issuer || (
+                            <span className="text-zinc-700 font-normal italic">Unset</span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4 text-zinc-300 font-mono text-[11px] font-semibold">
                           {item.rank || item.position ? (
-                            <span className="truncate block max-w-[150px]">{[item.rank, item.position].filter(Boolean).join(" • ")}</span>
+                            <span className="truncate block max-w-[150px]">
+                              {[item.rank, item.position].filter(Boolean).join(" • ")}
+                            </span>
                           ) : (
                             <span className="text-zinc-700 font-normal">—</span>
                           )}
                         </td>
                         <td className="py-3.5 px-4 text-zinc-400 font-mono text-[11px]">
                           {item.achievementDate ? (
-                            new Date(item.achievementDate).toLocaleDateString("en-US", { year: "numeric", month: "short" })
+                            new Date(item.achievementDate).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                            })
                           ) : (
                             <span className="text-zinc-700">—</span>
                           )}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-mono font-bold border ${
-                            item.featured ? "bg-amber-500/5 border-amber-500/10 text-amber-400" : "bg-zinc-900 border-zinc-800 text-zinc-500"
-                          }`}>
+                          <span
+                            className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-mono font-bold border ${
+                              item.featured
+                                ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
+                                : "bg-zinc-900 border-zinc-800 text-zinc-500"
+                            }`}
+                          >
                             {item.featured ? "FEATURED" : "STANDARD"}
                           </span>
                         </td>
@@ -434,7 +465,11 @@ if (result.success) {
                               onClick={() => handleDelete(item.id)}
                               className="text-[11px] font-semibold text-red-500/90 hover:text-red-400 transition-colors bg-red-950/10 hover:bg-red-950/20 px-2 py-1 rounded border border-red-900/10 disabled:opacity-35 inline-flex items-center justify-center min-w-[50px]"
                             >
-                              {processingId === item.id ? <Loader2 size={10} className="animate-spin" /> : "Purge"}
+                              {processingId === item.id ? (
+                                <Loader2 size={10} className="animate-spin" />
+                              ) : (
+                                "Purge"
+                              )}
                             </button>
                           </div>
                         </td>
@@ -448,11 +483,9 @@ if (result.success) {
         </>
       )}
 
-      {/* CREATE MODAL INTERACTIVE SURFACE CONTROLLER */}
       {openCreateModal && (
         <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/85 p-0 sm:p-4 backdrop-blur-sm animate-fadeIn">
           <div className="w-full sm:max-w-3xl rounded-none sm:rounded-xl bg-[#0C0C0E] border-t sm:border border-zinc-800 p-0 text-white shadow-2xl max-h-[100vh] sm:max-h-[90vh] overflow-y-auto relative">
-            
             <div className="w-full sticky top-0 bg-[#0C0C0E] z-20 flex items-center justify-between border-b border-zinc-900/80 px-4 py-3.5 sm:px-6">
               <div className="flex items-center gap-2">
                 <Sparkles size={14} className="text-blue-400" />
@@ -482,11 +515,9 @@ if (result.success) {
         </div>
       )}
 
-      {/* EDIT MODAL INTERACTIVE SURFACE CONTROLLER */}
       {selectedAchievement && (
         <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/85 p-0 sm:p-4 backdrop-blur-sm animate-fadeIn">
           <div className="w-full sm:max-w-3xl rounded-none sm:rounded-xl bg-[#0C0C0E] border-t sm:border border-zinc-800 p-0 text-white shadow-2xl max-h-[100vh] sm:max-h-[90vh] overflow-y-auto relative">
-            
             <div className="w-full sticky top-0 bg-[#0C0C0E] z-20 flex items-center justify-between border-b border-zinc-900/80 px-4 py-3.5 sm:px-6">
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <Terminal size={13} className="text-blue-400 shrink-0" />

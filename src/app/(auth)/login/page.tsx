@@ -17,15 +17,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Real-time visibility tracking layer
   const [showPassword, setShowPassword] = useState(false);
-
-  // Custom UI Form Validation Feedback State
-  const [validationErrors, setValidationErrors] = useState<{
-    email?: string;
-    password?: string;
-  }>({});
 
   const {
     register,
@@ -41,23 +33,8 @@ export default function LoginPage() {
 
   const onSubmitCredentials: SubmitHandler<LoginInput> = async (data) => {
     if (isSubmitting || isGoogleLoading) return;
-    
+
     setError(null);
-    setValidationErrors({});
-
-    // Custom Validation Protocol Engine Processing
-    const clientErrors: typeof validationErrors = {};
-    if (!data.email?.trim()) {
-      clientErrors.email = "Account login email endpoint is required.";
-    }
-    if (!data.password) {
-      clientErrors.password = "Authentication password system key is required.";
-    }
-
-    if (Object.keys(clientErrors).length > 0) {
-      setValidationErrors(clientErrors);
-      return;
-    }
 
     try {
       setIsSubmitting(true);
@@ -140,28 +117,24 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen w-full flex flex-col items-center justify-center bg-[#050505] text-zinc-300 px-4 py-6 sm:p-8 antialiased selection:bg-blue-500/30 selection:text-white relative overflow-hidden md:[perspective:1200px] select-none">
-      
-      {/* 1. CINEMATIC BACKGROUND ENGINE LIGHTING ARRAYS */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:2rem_2rem] sm:bg-[size:4rem_4rem] pointer-events-none z-0" />
-      
-      {/* Deep Cyber Nebula Core */}
+
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[700px] h-[280px] sm:h-[700px] bg-gradient-to-tr from-blue-600/10 via-purple-500/5 to-transparent blur-[80px] sm:blur-[140px] rounded-full pointer-events-none z-0 animate-pulse duration-[8000ms]" />
 
-      {/* 2. TACTILE DETACHED FLOATING BACK CAPSULE BUTTON */}
       <div className="absolute top-4 sm:top-6 left-4 sm:left-8 z-50 w-[calc(100%-2rem)] sm:w-auto">
         <Link
           href="/"
           className="group/back inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl bg-[#0F0F0F]/80 backdrop-blur-md border border-white/5 hover:border-blue-500/20 text-zinc-400 hover:text-white text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.6)] active:scale-95 md:[transform-style:preserve-3d] md:hover:[transform:translateZ(15px)]"
         >
-          <ArrowLeft size={12} className="transform group-hover/back:-translate-x-0.5 transition-transform text-zinc-500 group-hover/back:text-blue-400 sm:w-[13px] sm:h-[13px]" />
+          <ArrowLeft
+            size={12}
+            className="transform group-hover/back:-translate-x-0.5 transition-transform text-zinc-500 group-hover/back:text-blue-400 sm:w-[13px] sm:h-[13px]"
+          />
           <span>Return Home Base</span>
         </Link>
       </div>
 
-      {/* 3. CORE HYPER-FUSED GLASSMOPRHIC SURFACE CONTAINER */}
       <div className="w-full max-w-sm sm:max-w-lg p-5 sm:p-11 bg-gradient-to-b from-[#121214]/90 to-[#0C0C0E]/95 border border-white/5 sm:border-white/10 sm:border-t-white/[0.15] rounded-xl sm:rounded-2xl shadow-[0_35px_60px_-15px_rgba(0,0,0,0.9)] relative z-10 mt-16 mb-6 transition-all duration-500 md:[transform-style:preserve-3d] md:hover:[transform:rotateX(6deg)_rotateY(-4deg)_translateZ(10px)] hover:border-white/10 sm:hover:border-white/20 group/card">
-        
-        {/* Floating Top Sci-Fi Cluster Badge */}
         <div className="flex items-center justify-between mb-5 sm:mb-8 md:[transform:translateZ(30px)] gap-2">
           <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-gradient-to-b from-blue-500/10 to-transparent border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
             <ShieldCheck size={16} className="sm:hidden" />
@@ -173,7 +146,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Header Typography Group */}
         <div className="mb-6 sm:mb-8 md:[transform:translateZ(25px)]">
           <h2 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-500 mb-1.5">
             Welcome Back
@@ -183,10 +155,10 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Main Operational Credentials Form Module */}
-        <form onSubmit={handleSubmit(onSubmitCredentials)} className="space-y-4 sm:space-y-6 md:[transform:translateZ(20px)]">
-          
-          {/* Input Block: Email Address */}
+        <form
+          onSubmit={handleSubmit(onSubmitCredentials)}
+          className="space-y-4 sm:space-y-6 md:[transform:translateZ(20px)]"
+        >
           <div className="space-y-1.5 group/input">
             <div className="flex justify-between items-center px-0.5">
               <label className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500">
@@ -200,17 +172,18 @@ export default function LoginPage() {
               placeholder="name@domain.com"
               disabled={isSubmitting || isGoogleLoading}
               className={`w-full p-2.5 sm:p-4 bg-[#0A0A0B] border rounded-lg sm:rounded-xl text-white placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:bg-[#0E0E10] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed font-sans shadow-inner ${
-                errors.email || validationErrors.email ? "border-red-500/50 focus:border-red-500" : "border-white/5 focus:border-blue-500/60"
+                errors.email
+                  ? "border-red-500/50 focus:border-red-500"
+                  : "border-white/5 focus:border-blue-500/60"
               }`}
             />
-            {(errors.email || validationErrors.email) && (
+            {errors.email && (
               <p className="text-red-400 font-mono text-[10px] mt-1 flex items-center gap-1 pl-0.5 animate-fadeIn">
-                <span>// {errors.email?.message || validationErrors.email}</span>
+                <span>// {errors.email.message}</span>
               </p>
             )}
           </div>
 
-          {/* Input Block: Password Engine with Interactive Mask Reveal */}
           <div className="space-y-1.5 group/input">
             <div className="flex justify-between items-center px-0.5">
               <label className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500">
@@ -223,7 +196,7 @@ export default function LoginPage() {
                 Forgot?
               </Link>
             </div>
-            
+
             <div className="relative flex items-center">
               <input
                 {...register("password")}
@@ -231,11 +204,12 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 disabled={isSubmitting || isGoogleLoading}
                 className={`w-full p-2.5 sm:p-4 pr-10 bg-[#0A0A0B] border rounded-lg sm:rounded-xl text-white placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:bg-[#0E0E10] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed font-sans shadow-inner ${
-                  errors.password || validationErrors.password ? "border-red-500/50 focus:border-red-500" : "border-white/5 focus:border-blue-500/60"
+                  errors.password
+                    ? "border-red-500/50 focus:border-red-500"
+                    : "border-white/5 focus:border-blue-500/60"
                 }`}
               />
-              
-              {/* Reactive Mask Visibility Toggle Anchor */}
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -247,14 +221,13 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {(errors.password || validationErrors.password) && (
+            {errors.password && (
               <p className="text-red-400 font-mono text-[10px] mt-1 flex items-center gap-1 pl-0.5 animate-fadeIn">
-                <span>// {errors.password?.message || validationErrors.password}</span>
+                <span>// {errors.password.message}</span>
               </p>
             )}
           </div>
 
-          {/* Dynamic Core Runtime Error Alert Banner */}
           {error && (
             <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-red-500/5 border border-red-500/10 flex items-center gap-2.5 text-[10px] sm:text-xs font-mono text-red-400 animate-fadeIn">
               <AlertCircle size={13} className="shrink-0 text-red-500 sm:w-[15px] sm:h-[15px]" />
@@ -262,7 +235,6 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Primary Core Submission Action Button */}
           <button
             type="submit"
             disabled={isSubmitting || isGoogleLoading}
@@ -279,14 +251,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Premium Structural Break Line Separator */}
         <div className="relative flex py-4 sm:py-6 items-center select-none md:[transform:translateZ(15px)]">
           <div className="flex-grow border-t border-white/[0.04]"></div>
-          <span className="flex-shrink mx-3 text-[8px] sm:text-[9px] font-mono text-zinc-600 font-bold uppercase tracking-widest">Federated Access</span>
+          <span className="flex-shrink mx-3 text-[8px] sm:text-[9px] font-mono text-zinc-600 font-bold uppercase tracking-widest">
+            Federated Access
+          </span>
           <div className="flex-grow border-t border-white/[0.04]"></div>
         </div>
 
-        {/* Federated Social Single-Sign-On Platform Anchor Channel Button */}
         <button
           onClick={onSubmitGoogleAuth}
           disabled={isGoogleLoading || isSubmitting}
@@ -295,12 +267,14 @@ export default function LoginPage() {
           {isGoogleLoading ? (
             <Loader2 className="animate-spin shrink-0" size={12} />
           ) : (
-            <FcGoogle size={14} className="shrink-0 group-hover/google:scale-110 transition-transform duration-200" />
+            <FcGoogle
+              size={14}
+              className="shrink-0 group-hover/google:scale-110 transition-transform duration-200"
+            />
           )}
           <span>Continue with Google</span>
         </button>
 
-        {/* Global Structural Platform Outlinks Redirect Layout Area */}
         <div className="mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-white/[0.04] text-[11px] sm:text-xs text-center font-sans text-zinc-500 md:[transform:translateZ(10px)]">
           New system developer?{" "}
           <Link

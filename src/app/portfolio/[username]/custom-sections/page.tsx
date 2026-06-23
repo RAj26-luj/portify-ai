@@ -8,15 +8,12 @@ interface Props {
 }
 
 export default async function CustomSectionsPage({ params }: Props) {
-  // 1. Fetch public portfolio specification models from server response envelope
   const result = await getPortfolioByUsername(params.username);
 
-  // 🛡️ Discriminated Union Guard: Prevents runtime crashes and enforces public profile canvas boundaries
   if (!result || !result.success || !result.data || !result.data.isPublic) {
     return notFound();
   }
 
-  // ✅ Safe Context: Accessing relational tracks is guaranteed type-narrowed out of the success lane
   const portfolio = result.data;
   const sections = (portfolio as any).customSections ?? [];
 
@@ -34,41 +31,25 @@ export default async function CustomSectionsPage({ params }: Props) {
                 <p className="font-semibold">{s.title}</p>
 
                 {s.sectionType && (
-                  <span className="text-[10px] px-2 py-1 bg-gray-100 rounded">
-                    {s.sectionType}
-                  </span>
+                  <span className="text-[10px] px-2 py-1 bg-gray-100 rounded">{s.sectionType}</span>
                 )}
               </div>
 
-              {s.subtitle && (
-                <p className="text-sm text-gray-600">{s.subtitle}</p>
-              )}
+              {s.subtitle && <p className="text-sm text-gray-600">{s.subtitle}</p>}
 
-              {s.description && (
-                <p className="text-xs text-gray-500">{s.description}</p>
-              )}
+              {s.description && <p className="text-xs text-gray-500">{s.description}</p>}
 
               {s.richTextContent && (
-                <p className="text-xs text-gray-500 line-clamp-4">
-                  {s.richTextContent}
-                </p>
+                <p className="text-xs text-gray-500 line-clamp-4">{s.richTextContent}</p>
               )}
 
               {s.imageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={s.imageUrl}
-                  alt={s.title}
-                  className="w-full h-48 object-cover rounded"
-                />
+                <img src={s.imageUrl} alt={s.title} className="w-full h-48 object-cover rounded" />
               )}
 
               {s.buttonText && s.buttonUrl && (
-                <a
-                  href={s.buttonUrl}
-                  target="_blank"
-                  className="text-xs text-blue-600"
-                >
+                <a href={s.buttonUrl} target="_blank" className="text-xs text-blue-600">
                   {s.buttonText}
                 </a>
               )}

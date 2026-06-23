@@ -3,12 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
-export type EmploymentType =
-  | "FULL_TIME"
-  | "PART_TIME"
-  | "INTERNSHIP"
-  | "FREELANCE"
-  | "CONTRACT";
+export type EmploymentType = "FULL_TIME" | "PART_TIME" | "INTERNSHIP" | "FREELANCE" | "CONTRACT";
 
 export type ExperienceInput = {
   id?: string;
@@ -29,18 +24,19 @@ export type ExperienceInput = {
   displayOrder?: number;
 };
 
-/**
- * Transforms corporate experience validation anomalies or internal service failures
- * into structured client-friendly notifications optimized for instant toast/banner styling.
- */
+// Error
 function handleExperienceServerError(error: any, fallbackMessage: string) {
   console.error("Experience Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("portfolioId required") || errorMessage.includes("portfolioId not found")) {
+  if (
+    errorMessage.includes("portfolioId required") ||
+    errorMessage.includes("portfolioId not found")
+  ) {
     return {
       success: false,
-      error: "Authentication reference token is missing. Could not link experience timelines to an active portfolio.",
+      error:
+        "Authentication reference token is missing. Could not link experience timelines to an active portfolio.",
     };
   }
   if (errorMessage.includes("Experience ID is required")) {
@@ -49,19 +45,21 @@ function handleExperienceServerError(error: any, fallbackMessage: string) {
       error: "Target record tracking indicator reference is missing from your action context.",
     };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
-      error: "Corporate timeline storage engine is carrying out schema configurations. Please try again shortly.",
+      error:
+        "Corporate timeline storage engine is carrying out schema configurations. Please try again shortly.",
     };
   }
 
   return { success: false, error: fallbackMessage };
 }
 
-/**
- * CREATE
- */
 export async function createExperience(data: ExperienceInput) {
   try {
     const resolvedPortfolioId = data.portfolioId || (await getPortfolioId());
@@ -74,11 +72,17 @@ export async function createExperience(data: ExperienceInput) {
     }
 
     if (!data.company) {
-      return { success: false, error: "Company or enterprise organization field name is required." };
+      return {
+        success: false,
+        error: "Company or enterprise organization field name is required.",
+      };
     }
 
     if (!data.position) {
-      return { success: false, error: "Job title or operational staff designation description is required." };
+      return {
+        success: false,
+        error: "Job title or operational staff designation description is required.",
+      };
     }
 
     const result = await prisma.experience.create({
@@ -103,20 +107,20 @@ export async function createExperience(data: ExperienceInput) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleExperienceServerError(error, "Failed to instantiate new professional career experience context item.");
+    return handleExperienceServerError(
+      error,
+      "Failed to instantiate new professional career experience context item."
+    );
   }
 }
 
-/**
- * UPDATE (FIXED SIGNATURE)
- */
-export async function updateExperience(
-  id: string,
-  data: Partial<ExperienceInput>
-) {
+export async function updateExperience(id: string, data: Partial<ExperienceInput>) {
   try {
     if (!id) {
-      return { success: false, error: "Missing unique structural identification mapping reference string key." };
+      return {
+        success: false,
+        error: "Missing unique structural identification mapping reference string key.",
+      };
     }
 
     const result = await prisma.experience.update({
@@ -134,8 +138,6 @@ export async function updateExperience(
         responsibilities: data.responsibilities ?? [],
         technologies: data.technologies ?? [],
         displayOrder: data.displayOrder ?? 0,
-
-        // SAFE DATE HANDLING
         startDate: data.startDate ? new Date(data.startDate) : undefined,
         endDate: data.endDate ? new Date(data.endDate) : undefined,
       },
@@ -143,13 +145,13 @@ export async function updateExperience(
 
     return { success: true, data: result };
   } catch (error) {
-    return handleExperienceServerError(error, "Failed to apply corporate employment tracking modifications back into database store.");
+    return handleExperienceServerError(
+      error,
+      "Failed to apply corporate employment tracking modifications back into database store."
+    );
   }
 }
 
-/**
- * GET ALL
- */
 export async function getExperiences(portfolioId: string) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
@@ -157,7 +159,8 @@ export async function getExperiences(portfolioId: string) {
     if (!resolvedPortfolioId) {
       return {
         success: false,
-        error: "Unable to retrieve records. Target portfolio profile identity parameters cannot be mapped.",
+        error:
+          "Unable to retrieve records. Target portfolio profile identity parameters cannot be mapped.",
         data: [],
       };
     }
@@ -178,9 +181,6 @@ export async function getExperiences(portfolioId: string) {
   }
 }
 
-/**
- * GET BY ID
- */
 export async function getExperienceById(id: string) {
   try {
     if (!id) return { success: true, data: null };
@@ -191,17 +191,21 @@ export async function getExperienceById(id: string) {
 
     return { success: true, data };
   } catch (error) {
-    return handleExperienceServerError(error, "Failed to track specific profile career milestone relationship records lines.");
+    return handleExperienceServerError(
+      error,
+      "Failed to track specific profile career milestone relationship records lines."
+    );
   }
 }
 
-/**
- * DELETE
- */
 export async function deleteExperience(id: string) {
   try {
     if (!id) {
-      return { success: false, error: "Missing experience tracking trace tracking key pointer. Removal sequence cancelled." };
+      return {
+        success: false,
+        error:
+          "Missing experience tracking trace tracking key pointer. Removal sequence cancelled.",
+      };
     }
 
     const result = await prisma.experience.delete({
@@ -210,6 +214,9 @@ export async function deleteExperience(id: string) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleExperienceServerError(error, "The specified employment timeline history row could not be successfully cleared.");
+    return handleExperienceServerError(
+      error,
+      "The specified employment timeline history row could not be successfully cleared."
+    );
   }
 }

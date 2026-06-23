@@ -1,19 +1,18 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import {
-  NotificationType,
-} from "@prisma/client";
+import { NotificationType } from "@prisma/client";
 
-/**
- * Transforms push notification datastore anomalies or internal query exceptions
- * into standardized, client-friendly signatures optimized for quick UI alerts.
- */
+// Error
 function handleNotificationServerError(error: any, fallbackMessage: string) {
   console.error("Notification Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
       error: "The real-time alert engine is temporarily executing system syncs. Please try again.",
@@ -22,17 +21,18 @@ function handleNotificationServerError(error: any, fallbackMessage: string) {
   return { success: false, error: fallbackMessage };
 }
 
-export async function createNotification(
-  data: {
-    userId: string;
-    title: string;
-    message: string;
-    type?: NotificationType;
-  }
-) {
+export async function createNotification(data: {
+  userId: string;
+  title: string;
+  message: string;
+  type?: NotificationType;
+}) {
   try {
     if (!data.userId) {
-      return { success: false, error: "Recipient user identity token parameter string is required." };
+      return {
+        success: false,
+        error: "Recipient user identity token parameter string is required.",
+      };
     }
     if (!data.title) {
       return { success: false, error: "Alert notification summary title cannot be empty." };
@@ -40,26 +40,22 @@ export async function createNotification(
 
     const result = await prisma.notification.create({
       data: {
-        userId:
-          data.userId,
-        title:
-          data.title,
-        message:
-          data.message,
-        type:
-          data.type ??
-          NotificationType.INFO,
+        userId: data.userId,
+        title: data.title,
+        message: data.message,
+        type: data.type ?? NotificationType.INFO,
       },
     });
     return { success: true, data: result };
   } catch (error) {
-    return handleNotificationServerError(error, "Failed to broadcast notification dispatcher signal event.");
+    return handleNotificationServerError(
+      error,
+      "Failed to broadcast notification dispatcher signal event."
+    );
   }
 }
 
-export async function getNotifications(
-  userId: string
-) {
+export async function getNotifications(userId: string) {
   try {
     if (!userId) {
       return {
@@ -74,8 +70,7 @@ export async function getNotifications(
         userId,
       },
       orderBy: {
-        createdAt:
-          "desc",
+        createdAt: "desc",
       },
     });
     return { success: true, data };
@@ -89,9 +84,7 @@ export async function getNotifications(
   }
 }
 
-export async function getUnreadNotifications(
-  userId: string
-) {
+export async function getUnreadNotifications(userId: string) {
   try {
     if (!userId) {
       return {
@@ -107,8 +100,7 @@ export async function getUnreadNotifications(
         isRead: false,
       },
       orderBy: {
-        createdAt:
-          "desc",
+        createdAt: "desc",
       },
     });
     return { success: true, data };
@@ -122,9 +114,7 @@ export async function getUnreadNotifications(
   }
 }
 
-export async function getUnreadCount(
-  userId: string
-) {
+export async function getUnreadCount(userId: string) {
   try {
     if (!userId) {
       return { success: true, data: 0 };
@@ -147,12 +137,13 @@ export async function getUnreadCount(
   }
 }
 
-export async function markAsRead(
-  id: string
-) {
+export async function markAsRead(id: string) {
   try {
     if (!id) {
-      return { success: false, error: "Unique message item reference mapping tracker is required." };
+      return {
+        success: false,
+        error: "Unique message item reference mapping tracker is required.",
+      };
     }
 
     const result = await prisma.notification.update({
@@ -161,22 +152,25 @@ export async function markAsRead(
       },
       data: {
         isRead: true,
-        readAt:
-          new Date(),
+        readAt: new Date(),
       },
     });
     return { success: true, data: result };
   } catch (error) {
-    return handleNotificationServerError(error, "Failed to clear selected individual unread metric flags index.");
+    return handleNotificationServerError(
+      error,
+      "Failed to clear selected individual unread metric flags index."
+    );
   }
 }
 
-export async function markAllAsRead(
-  userId: string
-) {
+export async function markAllAsRead(userId: string) {
   try {
     if (!userId) {
-      return { success: false, error: "Target profile account identity reference token is missing." };
+      return {
+        success: false,
+        error: "Target profile account identity reference token is missing.",
+      };
     }
 
     const result = await prisma.notification.updateMany({
@@ -186,22 +180,25 @@ export async function markAllAsRead(
       },
       data: {
         isRead: true,
-        readAt:
-          new Date(),
+        readAt: new Date(),
       },
     });
     return { success: true, data: result };
   } catch (error) {
-    return handleNotificationServerError(error, "Failed to execute batch modifications on unread items feed.");
+    return handleNotificationServerError(
+      error,
+      "Failed to execute batch modifications on unread items feed."
+    );
   }
 }
 
-export async function deleteNotification(
-  id: string
-) {
+export async function deleteNotification(id: string) {
   try {
     if (!id) {
-      return { success: false, error: "Target alert notification item tracking signature is required." };
+      return {
+        success: false,
+        error: "Target alert notification item tracking signature is required.",
+      };
     }
 
     const result = await prisma.notification.delete({
@@ -211,6 +208,9 @@ export async function deleteNotification(
     });
     return { success: true, data: result };
   } catch (error) {
-    return handleNotificationServerError(error, "The specified alert row index ledger row could not be successfully cleared.");
+    return handleNotificationServerError(
+      error,
+      "The specified alert row index ledger row could not be successfully cleared."
+    );
   }
 }

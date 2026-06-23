@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  FileText, 
-  Calendar, 
-  ExternalLink, 
-  Trash2, 
-  Loader2, 
+import {
+  FileText,
+  Calendar,
+  ExternalLink,
+  Trash2,
+  Loader2,
   AlertTriangle,
-  History
+  History,
 } from "lucide-react";
 
 interface ResumeChangeLog {
@@ -56,7 +56,6 @@ export function ResumeVersionCard({
 
   return (
     <>
-      {/* MOBILE COMPACT LIST ROW VIEW */}
       <div className="block sm:hidden p-3.5 rounded-xl border border-zinc-950 bg-[#070709] hover:bg-zinc-900/10 transition-all duration-200 w-full relative overflow-hidden">
         <div className="flex items-start gap-3 justify-between">
           <div className="flex items-start gap-2.5 min-w-0 flex-1">
@@ -65,9 +64,7 @@ export function ResumeVersionCard({
             </div>
 
             <div className="min-w-0 flex-1 space-y-0.5">
-              <h3 className="text-xs font-bold text-zinc-200 truncate">
-                {fileName}
-              </h3>
+              <h3 className="text-xs font-bold text-zinc-200 truncate">{fileName}</h3>
               <p className="text-[10px] font-mono text-zinc-500 flex items-center gap-1">
                 <Calendar size={10} className="shrink-0" />
                 <span>
@@ -86,7 +83,6 @@ export function ResumeVersionCard({
             </div>
           </div>
 
-          {/* Mobile HUD Controls Action Suite */}
           <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
             <a
               href={fileUrl}
@@ -108,7 +104,6 @@ export function ResumeVersionCard({
           </div>
         </div>
 
-        {/* Server Action Feedback Architecture for Mobile Viewport */}
         {errorFeedback && (
           <div className="mt-2 flex items-center gap-1.5 rounded-md border border-red-500/10 bg-red-500/5 p-1.5 text-[10px] text-red-400">
             <AlertTriangle size={11} className="shrink-0" />
@@ -116,10 +111,11 @@ export function ResumeVersionCard({
           </div>
         )}
 
-        {/* Mobile Confirm Destruction State Panel */}
         {showDeleteConfirm && (
-          <div className="mt-3 p-2 rounded-lg border border-zinc-800 bg-zinc-950 flex items-center justify-between gap-3 animate-fadeIn">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-tight">Purge Version?</span>
+          <div className="mt-3 p-2 rounded-lg border border-zinc-800 bg-zinc-955 flex items-center justify-between gap-3 animate-fadeIn">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-tight">
+              Purge Version?
+            </span>
             <div className="flex gap-1.5 shrink-0">
               <button
                 type="button"
@@ -142,17 +138,14 @@ export function ResumeVersionCard({
         )}
       </div>
 
-      {/* LAPTOP & DESKTOP FULL PRESENTATION CARD RUNTIME */}
       <div className="hidden sm:flex group/resume-card relative flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-800 bg-[#0C0C0E] p-5 shadow-sm transition-all duration-500 hover:border-zinc-700 hover:shadow-[0_20px_50px_rgba(0,0,0,0.7)] w-full max-w-xl mx-auto">
-        
         <div className="space-y-4">
-          {/* Core Header Identity Layout */}
           <div className="flex items-start justify-between gap-4 border-b border-zinc-900 pb-4">
             <div className="flex items-center gap-3.5 min-w-0">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-gradient-to-b from-zinc-800 to-zinc-900 text-zinc-400 shadow-md group-hover/resume-card:text-blue-400 group-hover/resume-card:border-blue-500/30 transition-all duration-300">
+              <div className="flex h-11 h-11 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-gradient-to-b from-zinc-800 to-zinc-900 text-zinc-400 shadow-md group-hover/resume-card:text-blue-400 group-hover/resume-card:border-blue-500/30 transition-all duration-300">
                 <FileText size={20} />
               </div>
-              
+
               <div className="min-w-0 space-y-0.5">
                 <h3 className="font-bold text-zinc-100 text-sm sm:text-base tracking-tight truncate group-hover/resume-card:text-white transition-colors">
                   {fileName}
@@ -171,7 +164,6 @@ export function ResumeVersionCard({
             </div>
           </div>
 
-          {/* Beautiful Audit Version Control Tracking Module */}
           {changeLogs.length > 0 && (
             <div className="space-y-3 rounded-xl border border-zinc-900/60 bg-gradient-to-b from-zinc-900/20 to-zinc-900/5 p-4 shadow-inner">
               <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-zinc-500 uppercase font-mono pl-0.5">
@@ -182,7 +174,6 @@ export function ResumeVersionCard({
               <div className="relative pl-3 border-l border-zinc-800 space-y-3.5">
                 {changeLogs.map((log) => (
                   <div key={log.id} className="relative text-xs space-y-2 group/node">
-                    {/* Decorative timeline node element marker */}
                     <div className="absolute -left-[16.5px] top-1 flex h-2 w-2 items-center justify-center rounded-full bg-zinc-900 border border-zinc-700">
                       <div className="h-1 w-1 rounded-full bg-zinc-500 group-hover/resume-card:bg-blue-400 transition-colors" />
                     </div>
@@ -197,15 +188,19 @@ export function ResumeVersionCard({
                       <span className="text-zinc-400 font-medium">{log.fieldName}</span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono bg-zinc-950/40 p-2 rounded border border-zinc-900/40">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono bg-zinc-955 p-2 rounded border border-zinc-900/40">
                       <div className="space-y-0.5 min-w-0">
-                        <div className="text-[9px] text-zinc-600 uppercase tracking-wider font-sans">Previous Value</div>
+                        <div className="text-[9px] text-zinc-600 uppercase tracking-wider font-sans">
+                          Previous Value
+                        </div>
                         <div className="text-red-400/90 truncate bg-red-950/10 border border-red-900/20 px-1.5 py-0.5 rounded-md min-h-[1.5rem] flex items-center">
                           {log.oldValue ?? "—"}
                         </div>
                       </div>
                       <div className="space-y-0.5 min-w-0">
-                        <div className="text-[9px] text-zinc-600 uppercase tracking-wider font-sans">Updated Entry</div>
+                        <div className="text-[9px] text-zinc-600 uppercase tracking-wider font-sans">
+                          Updated Entry
+                        </div>
                         <div className="text-emerald-400/90 truncate bg-emerald-950/10 border border-emerald-900/20 px-1.5 py-0.5 rounded-md min-h-[1.5rem] flex items-center">
                           {log.newValue ?? "—"}
                         </div>
@@ -218,7 +213,6 @@ export function ResumeVersionCard({
           )}
         </div>
 
-        {/* Control Action & Errors Interface Footer Base Dock */}
         <div className="mt-5">
           {errorFeedback && (
             <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-2.5 text-xs text-red-400 animate-fadeIn">
@@ -228,8 +222,10 @@ export function ResumeVersionCard({
           )}
 
           {showDeleteConfirm ? (
-            <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 animate-fadeIn">
-              <p className="text-xs font-medium text-zinc-400 px-1 text-center">Confirm irreversible version purge code sequence?</p>
+            <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-955 p-2.5 animate-fadeIn">
+              <p className="text-xs font-medium text-zinc-400 px-1 text-center">
+                Confirm irreversible version purge code sequence?
+              </p>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -273,7 +269,6 @@ export function ResumeVersionCard({
             </div>
           )}
         </div>
-
       </div>
     </>
   );

@@ -2,23 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { 
-  Briefcase, 
-  Plus, 
-  Loader2, 
-  AlertTriangle, 
-  LayoutGrid, 
-  List, 
-  Search, 
-  X, 
-  ArrowUpDown, 
+import {
+  Briefcase,
+  Plus,
+  Loader2,
+  AlertTriangle,
+  LayoutGrid,
+  List,
+  Search,
+  X,
+  ArrowUpDown,
   Calendar,
   MapPin,
   Building2,
   Edit3,
   Trash2,
   AlertCircle,
-  Check
+  Check,
 } from "lucide-react";
 
 import { getExperiences, deleteExperience } from "@/actions/experience";
@@ -27,12 +27,7 @@ import { getMyPortfolioId } from "@/actions/portfolio";
 import ExperienceForm from "@/components/forms/experience-form";
 import ExperienceCard from "@/components/cards/experience-card";
 
-type EmploymentType =
-  | "FULL_TIME"
-  | "PART_TIME"
-  | "INTERNSHIP"
-  | "FREELANCE"
-  | "CONTRACT";
+type EmploymentType = "FULL_TIME" | "PART_TIME" | "INTERNSHIP" | "FREELANCE" | "CONTRACT";
 
 type Experience = {
   id: string;
@@ -63,14 +58,12 @@ export default function ExperiencePage() {
   const [openForm, setOpenForm] = useState(false);
   const [editData, setEditData] = useState<Experience | null>(null);
 
-  // Premium SaaS Interface Layout & Interaction States
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"chronological" | "alphabetical">("chronological");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // Tracks which component row/card/node is actively staging its confirmation wrapper
   const [activeConfirmDeleteId, setActiveConfirmDeleteId] = useState<string | null>(null);
 
   const load = async (pId?: string) => {
@@ -79,8 +72,7 @@ export default function ExperiencePage() {
       setError(null);
 
       let activeId = pId || portfolioId;
-      
-      // 1. Resolve active user workspace context using key-in type bounds
+
       if (!activeId) {
         const portfolioResult = await getMyPortfolioId();
 
@@ -92,14 +84,16 @@ export default function ExperiencePage() {
         setPortfolioId(activeId);
       }
 
-      // 2. Query relative work experience matrices with strict object resolution checks
       const result = await getExperiences(activeId);
 
       if (!result || !result.success || !("data" in result) || !Array.isArray(result.data)) {
-        throw new Error("error" in result && typeof result.error === "string" ? result.error : "Failed compiling target experience records from server.");
+        throw new Error(
+          "error" in result && typeof result.error === "string"
+            ? result.error
+            : "Failed compiling target experience records from server."
+        );
       }
 
-      // 3. Populate component state arrays mapping dynamic optional parameters fields safely
       setExperiences(
         result.data.map((exp: any) => ({
           id: exp.id,
@@ -125,7 +119,6 @@ export default function ExperiencePage() {
     }
   };
 
-  // 4. Mount chronological lifecycle bindings matching the active target namespace identifier
   useEffect(() => {
     (async () => {
       try {
@@ -147,17 +140,25 @@ export default function ExperiencePage() {
     try {
       setProcessingId(id);
       setActionError(null);
-      
+
       const result = await deleteExperience(id);
-      
+
       if (!result.success) {
-        throw new Error("error" in result && typeof result.error === "string" ? result.error : "Server action mutation failed.");
+        throw new Error(
+          "error" in result && typeof result.error === "string"
+            ? result.error
+            : "Server action mutation failed."
+        );
       }
 
       setExperiences((prev) => prev.filter((exp) => exp.id !== id));
       setActiveConfirmDeleteId(null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Execution failure: Unable to drop experience index node safely.");
+      setActionError(
+        err instanceof Error
+          ? err.message
+          : "Execution failure: Unable to drop experience index node safely."
+      );
     } finally {
       setProcessingId(null);
     }
@@ -178,10 +179,10 @@ export default function ExperiencePage() {
     setEditData(null);
   };
 
-  // Pure functional sorting & search criteria matching arrays 
   const filteredExperiences = experiences
     .filter((exp) => {
-      const matchCriteria = `${exp.company} ${exp.position} ${exp.location || ""} ${exp.technologies.join(" ")}`.toLowerCase();
+      const matchCriteria =
+        `${exp.company} ${exp.position} ${exp.location || ""} ${exp.technologies.join(" ")}`.toLowerCase();
       return matchCriteria.includes(searchQuery.toLowerCase());
     })
     .sort((a, b) => {
@@ -190,7 +191,7 @@ export default function ExperiencePage() {
       }
       const timeA = a.startDate ? new Date(a.startDate).getTime() : 0;
       const timeB = b.startDate ? new Date(b.startDate).getTime() : 0;
-      return timeB - timeA; // Newest occupational events surface first
+      return timeB - timeA;
     });
 
   if (loading) {
@@ -200,7 +201,9 @@ export default function ExperiencePage() {
           <Loader2 className="h-7 w-7 sm:h-8 sm:w-8 animate-spin text-blue-500 z-10" />
           <div className="absolute h-7 w-7 sm:h-8 sm:w-8 border border-zinc-800 rounded-full animate-ping opacity-20" />
         </div>
-        <p className="text-[10px] sm:text-xs uppercase tracking-widest">// Mapping professional experience matrices...</p>
+        <p className="text-[10px] sm:text-xs uppercase tracking-widest">
+          // Mapping professional experience matrices...
+        </p>
       </div>
     );
   }
@@ -210,9 +213,13 @@ export default function ExperiencePage() {
       <div className="mx-auto max-w-xl my-6 sm:my-12 rounded-xl border border-red-500/10 bg-gradient-to-b from-red-500/5 to-transparent p-4 sm:p-5 shadow-2xl flex gap-3 items-start text-white font-sans w-full">
         <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
         <div className="space-y-2 flex-1 min-w-0">
-          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">Timeline Mapping Sync Defect</h4>
-          <p className="text-[11px] sm:text-xs text-red-400/90 leading-relaxed break-words">{error}</p>
-          <button 
+          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
+            Timeline Mapping Sync Defect
+          </h4>
+          <p className="text-[11px] sm:text-xs text-red-400/90 leading-relaxed break-words">
+            {error}
+          </p>
+          <button
             onClick={() => load(portfolioId)}
             className="w-full inline-flex h-8 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 px-3 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white"
           >
@@ -225,23 +232,23 @@ export default function ExperiencePage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 text-white max-w-[1440px] mx-auto font-sans antialiased px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
-      
-      {/* CONTROL HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-4 sm:pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 shadow-sm">
               <Briefcase size={15} />
             </div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-zinc-100">Experience</h1>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-zinc-100">
+              Experience
+            </h1>
           </div>
           <p className="text-[11px] sm:text-xs text-zinc-500 font-medium leading-relaxed max-w-2xl">
-            Manage your corporate work history, full-time milestones, contracts, freelancing operations, and internship records.
+            Manage your corporate work history, full-time milestones, contracts, freelancing
+            operations, and internship records.
           </p>
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end shrink-0">
-          {/* Layout Configuration Switching Toggles */}
           {experiences.length > 0 && (
             <div className="flex items-center rounded-lg border border-zinc-900 bg-zinc-950 p-0.5 text-zinc-500 hidden sm:flex">
               <button
@@ -275,21 +282,24 @@ export default function ExperiencePage() {
         </div>
       </div>
 
-      {/* INLINE ACTION ERROR PANEL */}
       {actionError && (
         <div className="flex items-start gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-3 text-xs text-red-400 animate-fadeIn">
           <AlertTriangle size={14} className="shrink-0 mt-0.5" />
           <span className="font-medium flex-1 leading-normal">{actionError}</span>
-          <button onClick={() => setActionError(null)} className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2">✕</button>
+          <button
+            onClick={() => setActionError(null)}
+            className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* FILTER CONTROLS TOOLBAR */}
       {experiences.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-900/50 pb-4">
           <div className="relative w-full sm:max-w-xs md:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 h-3.5 w-3.5" />
-            <input 
+            <input
               type="text"
               placeholder="Search by company, position or stack tools..."
               value={searchQuery}
@@ -297,7 +307,10 @@ export default function ExperiencePage() {
               className="w-full pl-9 pr-8 h-8.5 bg-[#09090b] border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400"
+              >
                 <X size={12} />
               </button>
             )}
@@ -326,7 +339,6 @@ export default function ExperiencePage() {
         </div>
       )}
 
-      {/* EXPERIENCE RENDER BLOCKS */}
       {filteredExperiences.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/10 p-6 sm:p-12 text-center max-w-xl mx-auto my-4 animate-fadeIn w-full">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-900 text-zinc-500 mb-3 shadow-inner">
@@ -335,13 +347,12 @@ export default function ExperiencePage() {
           <h3 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
             {experiences.length === 0 ? "Experience Section Empty" : "No classifications resolved"}
           </h3>
-          
+
           <div className="text-[11px] sm:text-xs text-zinc-500 max-w-xs sm:max-w-sm mt-1.5 leading-relaxed font-sans space-y-2 w-full">
             <p>
-              {experiences.length === 0 
+              {experiences.length === 0
                 ? "Your layout profile has no corporate work history tracked. Populating full-time parameters or internship achievements forms a foundational segment."
-                : "No matching registered employment tracks found. Clear your text query search inputs to reset the indexing frame."
-              }
+                : "No matching registered employment tracks found. Clear your text query search inputs to reset the indexing frame."}
             </p>
           </div>
 
@@ -361,11 +372,10 @@ export default function ExperiencePage() {
         </div>
       ) : (
         <>
-          {/* MOBILE LIST DISPLAY */}
           <div className="block sm:hidden space-y-2.5 animate-fadeIn">
             {filteredExperiences.map((exp) => (
-              <div 
-                key={exp.id} 
+              <div
+                key={exp.id}
                 className="p-3.5 rounded-xl border border-zinc-800 bg-[#0C0C0E] space-y-3 shadow-sm relative overflow-hidden"
               >
                 {exp.currentlyWorking && (
@@ -373,11 +383,15 @@ export default function ExperiencePage() {
                     CURRENT
                   </div>
                 )}
-                
+
                 <div className="space-y-1 pr-12">
-                  <h4 className="text-xs font-bold text-zinc-100 leading-snug tracking-tight break-words">{exp.company}</h4>
-                  <p className="text-[10px] font-semibold text-zinc-400 break-words leading-tight">{exp.position}</p>
-                  
+                  <h4 className="text-xs font-bold text-zinc-100 leading-snug tracking-tight break-words">
+                    {exp.company}
+                  </h4>
+                  <p className="text-[10px] font-semibold text-zinc-400 break-words leading-tight">
+                    {exp.position}
+                  </p>
+
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 pt-1.5 text-[10px] font-mono text-zinc-500">
                     {exp.location && (
                       <span className="flex items-center gap-1 max-w-[140px] truncate">
@@ -391,15 +405,22 @@ export default function ExperiencePage() {
                       </span>
                     )}
                   </div>
-                  
+
                   {exp.technologies && exp.technologies.length > 0 && (
                     <div className="flex flex-wrap gap-1 pt-2">
                       {exp.technologies.slice(0, 3).map((tech, i) => (
-                        <span key={i} className="bg-zinc-900 border border-zinc-800 text-zinc-400 rounded text-[8px] font-mono px-1.5 py-0.5">
+                        <span
+                          key={i}
+                          className="bg-zinc-900 border border-zinc-800 text-zinc-400 rounded text-[8px] font-mono px-1.5 py-0.5"
+                        >
                           {tech}
                         </span>
                       ))}
-                      {exp.technologies.length > 3 && <span className="text-[8px] text-zinc-600 font-mono mt-0.5">+{exp.technologies.length - 3}</span>}
+                      {exp.technologies.length > 3 && (
+                        <span className="text-[8px] text-zinc-600 font-mono mt-0.5">
+                          +{exp.technologies.length - 3}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -425,7 +446,11 @@ export default function ExperiencePage() {
                           onClick={() => handleDelete(exp.id)}
                           className="h-6 rounded bg-red-600 text-white font-mono text-[9px] font-bold uppercase tracking-wider px-2.5 inline-flex items-center gap-1"
                         >
-                          {processingId === exp.id ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
+                          {processingId === exp.id ? (
+                            <Loader2 size={10} className="animate-spin" />
+                          ) : (
+                            <Check size={10} />
+                          )}
                           <span>Purge</span>
                         </button>
                       </div>
@@ -433,9 +458,14 @@ export default function ExperiencePage() {
                   ) : (
                     <div className="flex items-center justify-between gap-3 w-full">
                       <span className="text-[9px] font-mono text-zinc-600">
-                        {exp.startDate ? new Date(exp.startDate).getFullYear() : "Init"} — {exp.currentlyWorking ? "Present" : (exp.endDate ? new Date(exp.endDate).getFullYear() : "Term")}
+                        {exp.startDate ? new Date(exp.startDate).getFullYear() : "Init"} —{" "}
+                        {exp.currentlyWorking
+                          ? "Present"
+                          : exp.endDate
+                            ? new Date(exp.endDate).getFullYear()
+                            : "Term"}
                       </span>
-                      
+
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
@@ -461,7 +491,6 @@ export default function ExperiencePage() {
             ))}
           </div>
 
-          {/* DESKTOP MATRIX ADAPTER VIEWS */}
           <div className="hidden sm:block">
             {viewMode === "grid" ? (
               <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1xl xl:grid-cols-2 animate-fadeIn">
@@ -475,7 +504,9 @@ export default function ExperiencePage() {
                       location={exp.location}
                       companyWebsite={exp.companyWebsite}
                       companyLogo={exp.companyLogo}
-                      startDate={exp.startDate ? exp.startDate.toISOString().split("T")[0] : undefined}
+                      startDate={
+                        exp.startDate ? exp.startDate.toISOString().split("T")[0] : undefined
+                      }
                       endDate={exp.endDate ? exp.endDate.toISOString().split("T")[0] : undefined}
                       currentlyWorking={exp.currentlyWorking}
                       description={exp.description}
@@ -485,15 +516,17 @@ export default function ExperiencePage() {
                       onDelete={() => setActiveConfirmDeleteId(exp.id)}
                     />
 
-                    {/* GRID CONFIRMATION OVERLAY */}
                     {activeConfirmDeleteId === exp.id && (
                       <div className="absolute inset-0 bg-black/95 border border-red-900/40 rounded-xl p-5 flex flex-col justify-between z-30 animate-fadeIn">
                         <div className="flex items-start gap-3 text-red-400">
                           <AlertCircle size={16} className="shrink-0 mt-0.5 animate-pulse" />
                           <div className="space-y-1">
-                            <h4 className="text-xs font-mono font-bold uppercase tracking-wider">Purge Experience Record?</h4>
+                            <h4 className="text-xs font-mono font-bold uppercase tracking-wider">
+                              Purge Experience Record?
+                            </h4>
                             <p className="text-[11px] text-zinc-500 leading-normal">
-                              This structural change will immediately drop this professional placement profile segment trace from your profile layout.
+                              This structural change will immediately drop this professional
+                              placement profile segment trace from your profile layout.
                             </p>
                           </div>
                         </div>
@@ -511,7 +544,11 @@ export default function ExperiencePage() {
                             onClick={() => handleDelete(exp.id)}
                             className="h-7 px-3 text-[10px] font-mono font-bold uppercase tracking-wider bg-red-600 hover:bg-red-500 text-white rounded-md transition-all inline-flex items-center gap-1 shadow-sm"
                           >
-                            {processingId === exp.id ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
+                            {processingId === exp.id ? (
+                              <Loader2 size={10} className="animate-spin" />
+                            ) : (
+                              <Check size={10} />
+                            )}
                             <span>Confirm Delete</span>
                           </button>
                         </div>
@@ -537,7 +574,9 @@ export default function ExperiencePage() {
                     {filteredExperiences.map((exp) => (
                       <tr key={exp.id} className="hover:bg-zinc-900/30 transition-colors group/row">
                         <td className="py-3.5 px-4 min-w-[180px]">
-                          <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-xs">{exp.company}</div>
+                          <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-xs">
+                            {exp.company}
+                          </div>
                           {exp.employmentType && (
                             <span className="text-[9px] text-zinc-500 font-mono font-bold block mt-0.5 uppercase tracking-wide">
                               {exp.employmentType.replace("_", " ")}
@@ -561,12 +600,24 @@ export default function ExperiencePage() {
                           <div className="flex items-center gap-1.5">
                             <Calendar size={11} className="text-zinc-600 shrink-0" />
                             <span>
-                              {exp.startDate ? new Date(exp.startDate).toLocaleDateString("en-US", { year: "numeric", month: "short" }) : "Init"} 
-                              {" — "} 
+                              {exp.startDate
+                                ? new Date(exp.startDate).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "short",
+                                  })
+                                : "Init"}
+                              {" — "}
                               {exp.currentlyWorking ? (
-                                <span className="text-emerald-400 font-semibold text-[10px] uppercase bg-emerald-500/5 border border-emerald-500/10 px-1 rounded">Present</span>
+                                <span className="text-emerald-400 font-semibold text-[10px] uppercase bg-emerald-500/5 border border-emerald-500/10 px-1 rounded">
+                                  Present
+                                </span>
+                              ) : exp.endDate ? (
+                                new Date(exp.endDate).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "short",
+                                })
                               ) : (
-                                exp.endDate ? new Date(exp.endDate).toLocaleDateString("en-US", { year: "numeric", month: "short" }) : "Term"
+                                "Term"
                               )}
                             </span>
                           </div>
@@ -575,11 +626,18 @@ export default function ExperiencePage() {
                           {exp.technologies && exp.technologies.length > 0 ? (
                             <div className="flex flex-wrap gap-1 max-w-[180px]">
                               {exp.technologies.slice(0, 2).map((tech, i) => (
-                                <span key={i} className="bg-zinc-900 border border-zinc-800 text-zinc-400 rounded text-[9px] font-mono px-1 py-0.2">
+                                <span
+                                  key={i}
+                                  className="bg-zinc-900 border border-zinc-800 text-zinc-400 rounded text-[9px] font-mono px-1 py-0.2"
+                                >
                                   {tech}
                                 </span>
                               ))}
-                              {exp.technologies.length > 2 && <span className="text-[9px] text-zinc-600 font-mono">+{exp.technologies.length - 2}</span>}
+                              {exp.technologies.length > 2 && (
+                                <span className="text-[9px] text-zinc-600 font-mono">
+                                  +{exp.technologies.length - 2}
+                                </span>
+                              )}
                             </div>
                           ) : (
                             <span className="text-zinc-700 font-mono">—</span>
@@ -597,10 +655,11 @@ export default function ExperiencePage() {
                               </button>
                             )}
 
-                            {/* TABLE CONTEXT CONFIRMATION */}
                             {activeConfirmDeleteId === exp.id ? (
                               <div className="flex items-center gap-1.5 animate-fadeIn">
-                                <span className="text-[10px] text-red-400 font-mono mr-1 font-bold animate-pulse">Confirm Purge?</span>
+                                <span className="text-[10px] text-red-400 font-mono mr-1 font-bold animate-pulse">
+                                  Confirm Purge?
+                                </span>
                                 <button
                                   type="button"
                                   onClick={() => setActiveConfirmDeleteId(null)}
@@ -614,7 +673,11 @@ export default function ExperiencePage() {
                                   onClick={() => handleDelete(exp.id)}
                                   className="text-[11px] font-bold bg-red-600 hover:bg-red-500 text-white px-2.5 py-1 rounded transition-colors inline-flex items-center gap-1 shadow-sm"
                                 >
-                                  {processingId === exp.id ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
+                                  {processingId === exp.id ? (
+                                    <Loader2 size={10} className="animate-spin" />
+                                  ) : (
+                                    <Check size={10} />
+                                  )}
                                   <span>Purge</span>
                                 </button>
                               </div>
@@ -625,7 +688,11 @@ export default function ExperiencePage() {
                                 onClick={() => setActiveConfirmDeleteId(exp.id)}
                                 className="text-[11px] font-semibold text-red-500/90 hover:text-red-400 transition-colors bg-red-950/10 hover:bg-red-500/10 px-2 py-1 rounded border border-red-900/10 disabled:opacity-35 inline-flex items-center justify-center min-w-[50px]"
                               >
-                                {processingId === exp.id ? <Loader2 size={10} className="animate-spin" /> : "Purge"}
+                                {processingId === exp.id ? (
+                                  <Loader2 size={10} className="animate-spin" />
+                                ) : (
+                                  "Purge"
+                                )}
                               </button>
                             )}
                           </div>
@@ -640,7 +707,6 @@ export default function ExperiencePage() {
         </>
       )}
 
-      {/* FORM MANAGEMENT WORKFLOW OVERLAY SURFACE */}
       {openForm && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
           <div className="w-full sm:max-w-4xl rounded-t-2xl sm:rounded-xl border-t sm:border border-zinc-800 bg-[#0C0C0E] p-4 sm:p-6 text-white shadow-2xl max-h-[92vh] sm:max-h-[90vh] overflow-y-auto relative">

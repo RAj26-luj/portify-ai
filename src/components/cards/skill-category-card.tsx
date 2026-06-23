@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  FolderHeart, 
-  Edit3, 
-  Trash2, 
-  Loader2, 
-  AlertTriangle,
-  Layers,
-  Sparkles
-} from "lucide-react";
+import { FolderHeart, Edit3, Trash2, Loader2, AlertTriangle, Layers, Sparkles } from "lucide-react";
 
 interface SkillCategoryCardProps {
   category: {
@@ -25,11 +17,7 @@ interface SkillCategoryCardProps {
   onDelete?: (id: string) => Promise<void> | void;
 }
 
-export default function SkillCategoryCard({
-  category,
-  onView,
-  onDelete,
-}: SkillCategoryCardProps) {
+export default function SkillCategoryCard({ category, onView, onDelete }: SkillCategoryCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<string | null>(null);
@@ -49,11 +37,10 @@ export default function SkillCategoryCard({
   };
 
   return (
-    <div className="group/category-card relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-zinc-700 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.6)] w-full max-w-sm mx-auto">
-      
-      <div className="space-y-4">
+    <div className="group/category-card relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-zinc-700 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.6)] w-full max-w-sm mx-auto h-full">
+      <div className="space-y-4 flex-1 flex flex-col justify-start">
         {/* Header Branding Module */}
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-3 shrink-0">
           <div className="space-y-1 min-w-0 flex-1">
             <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase block font-mono">
               Taxonomy Classification
@@ -69,12 +56,12 @@ export default function SkillCategoryCard({
         </div>
 
         {/* Unified Meta Information Counters */}
-        <div className="flex flex-wrap gap-2 text-[10px] font-mono font-medium">
+        <div className="flex flex-wrap gap-2 text-[10px] font-mono font-medium shrink-0">
           <div className="flex items-center gap-1 rounded bg-zinc-900 px-2 py-0.5 border border-zinc-800 text-zinc-400">
             <Layers size={11} className="text-zinc-600" />
             <span>Display Sequence: {category.displayOrder}</span>
           </div>
-          
+
           <div className="flex items-center gap-1 rounded bg-zinc-900 px-2 py-0.5 border border-zinc-800 text-zinc-400">
             <Sparkles size={11} className="text-zinc-600" />
             <span>Total Entities: {category.skills?.length ?? 0}</span>
@@ -83,7 +70,7 @@ export default function SkillCategoryCard({
 
         {/* Embedded Children Token Badges Map Layer */}
         {category.skills && category.skills.length > 0 ? (
-          <div className="space-y-2 border-t border-zinc-900/80 pt-3">
+          <div className="space-y-2 border-t border-zinc-900/80 pt-3 mt-auto">
             <div className="flex flex-wrap gap-1.5 pl-0.5">
               {category.skills.map((skill) => (
                 <span
@@ -96,14 +83,14 @@ export default function SkillCategoryCard({
             </div>
           </div>
         ) : (
-          <p className="text-xs italic text-zinc-600 pl-0.5 pt-1">
+          <p className="text-xs italic text-zinc-600 pl-0.5 pt-1 mt-auto">
             No technical skills cataloged inside this branch context.
           </p>
         )}
       </div>
 
       {/* Control Actions & Operational Error Management Interface Base Dock */}
-      <div className="mt-5">
+      <div className="mt-5 shrink-0">
         {errorFeedback && (
           <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-2 text-xs text-red-400 animate-fadeIn">
             <AlertTriangle size={12} className="shrink-0" />
@@ -112,8 +99,10 @@ export default function SkillCategoryCard({
         )}
 
         {showDeleteConfirm ? (
-          <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2 animate-fadeIn">
-            <p className="text-[11px] font-medium text-zinc-400 px-1 text-center">Confirm dropping index architecture branch?</p>
+          <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-955 p-2 animate-fadeIn">
+            <p className="text-[11px] font-medium text-zinc-400 px-1 text-center">
+              Confirm dropping index architecture branch?
+            </p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -128,7 +117,7 @@ export default function SkillCategoryCard({
                 type="button"
                 disabled={isDeleting}
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 inline-flex items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 text-zinc-300 py-1 text-xs font-medium transition-colors focus:outline-none select-none"
+                className="flex-1 inline-flex items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 py-1 text-xs font-medium text-zinc-400 transition-colors select-none"
               >
                 Cancel
               </button>
@@ -156,7 +145,6 @@ export default function SkillCategoryCard({
           </div>
         )}
       </div>
-
     </div>
   );
 }

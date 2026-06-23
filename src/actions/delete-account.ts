@@ -3,21 +3,25 @@
 import { prisma } from "@/lib/prisma";
 import { createAuditLog } from "@/lib/audit-log";
 
-/**
- * Transforms heavy cascade record purging or constraint failure exceptions
- * into structured, friendly user payloads ideal for interface toast notifications.
- */
+// Error
 function handleDeleteAccountServerError(error: any, fallbackMessage: string) {
   console.error("Account Destructor Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
   if (errorMessage.includes("User not found")) {
-    return { success: false, error: "The account targeted for deletion could not be located in our records." };
+    return {
+      success: false,
+      error: "The account targeted for deletion could not be located in our records.",
+    };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
-    return { 
-      success: false, 
-      error: "The data wiping pipeline encountered a structural locking timeout. Please try again." 
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
+    return {
+      success: false,
+      error: "The data wiping pipeline encountered a structural locking timeout. Please try again.",
     };
   }
 
@@ -45,13 +49,15 @@ export async function deleteAccount(userId: string) {
 
     const portfolioId = user.portfolio?.id;
 
-    // Secure independent log record entries before cascading relational tables purge loops
     try {
       await createAuditLog("ACCOUNT_DELETED", userId, {
         email: user.email,
       });
     } catch (auditError) {
-      console.error("Non-blocking audit configuration sequence registration exception:", auditError);
+      console.error(
+        "Non-blocking audit configuration sequence registration exception:",
+        auditError
+      );
     }
 
     await prisma.passwordResetToken.deleteMany({
@@ -301,6 +307,9 @@ export async function deleteAccount(userId: string) {
       success: true,
     };
   } catch (error) {
-    return handleDeleteAccountServerError(error, "Failed to successfully close out user database registries during profile removal.");
+    return handleDeleteAccountServerError(
+      error,
+      "Failed to successfully close out user database registries during profile removal."
+    );
   }
 }

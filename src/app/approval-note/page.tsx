@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { MessageSquarePlus, Loader2, Info, Sparkles, Mail, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  MessageSquarePlus,
+  Loader2,
+  Info,
+  Sparkles,
+  Mail,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
 
 export default function ApprovalNotePage() {
   const router = useRouter();
@@ -11,7 +19,9 @@ export default function ApprovalNotePage() {
 
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(
+    null
+  );
 
   const handleSubmit = async () => {
     if (status !== "authenticated" || loading) {
@@ -38,14 +48,17 @@ export default function ApprovalNotePage() {
         throw new Error(data.error || "Failed to submit node stream.");
       }
 
-      setFeedback({ type: "success", message: "Security parameters transmitted successfully. Routing..." });
+      setFeedback({
+        type: "success",
+        message: "Security parameters transmitted successfully. Routing...",
+      });
       setTimeout(() => {
         router.push("/pending-approval");
       }, 1000);
     } catch (err: any) {
-      setFeedback({ 
-        type: "error", 
-        message: err?.message || "Transmission interrupted. Auto-routing to fallback sequence..." 
+      setFeedback({
+        type: "error",
+        message: err?.message || "Transmission interrupted. Auto-routing to fallback sequence...",
       });
       setTimeout(() => {
         router.push("/pending-approval");
@@ -71,8 +84,11 @@ export default function ApprovalNotePage() {
           note: "__SKIPPED__",
         }),
       });
-      
-      setFeedback({ type: "success", message: "Skipping optional message. Direct routing active..." });
+
+      setFeedback({
+        type: "success",
+        message: "Skipping optional message. Direct routing active...",
+      });
     } catch {}
 
     setTimeout(() => {
@@ -88,7 +104,6 @@ export default function ApprovalNotePage() {
 
       {/* Control Console Interface Card */}
       <div className="w-full max-w-[340px] xs:max-w-sm sm:max-w-xl rounded-xl sm:rounded-2xl border border-white/5 border-t-white/[0.08] bg-[#111111] p-4 xs:p-5 sm:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.8)] relative z-10 transition-all duration-300 hover:border-white/10 group">
-        
         {/* Dynamic Header Badge Layout */}
         <div className="flex items-center gap-2.5 sm:gap-3.5 mb-4">
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-500/5 border border-blue-500/10 flex items-center justify-center text-blue-400 shadow-inner group-hover:border-blue-500/20 transition-colors duration-200 shrink-0">
@@ -98,13 +113,16 @@ export default function ApprovalNotePage() {
           <div className="min-w-0">
             <h1 className="text-sm xs:text-base sm:text-xl font-bold tracking-tight text-white flex items-center gap-1.5 wrap">
               Verification Context Note
-              <span className="text-[9px] sm:text-xs font-mono font-medium text-zinc-500 tracking-normal lowercase shrink-0">(Optional)</span>
+              <span className="text-[9px] sm:text-xs font-mono font-medium text-zinc-500 tracking-normal lowercase shrink-0">
+                (Optional)
+              </span>
             </h1>
           </div>
         </div>
 
         <p className="text-[11px] sm:text-sm text-zinc-400 leading-relaxed mb-4 font-sans">
-          To accelerate workspace provisioning, consider providing a brief context breakdown to help our manual audit team verify your activation request securely.
+          To accelerate workspace provisioning, consider providing a brief context breakdown to help
+          our manual audit team verify your activation request securely.
         </p>
 
         {/* Informational Guidelines Stack */}
@@ -114,10 +132,13 @@ export default function ApprovalNotePage() {
               <Info size={14} className="text-blue-400 mt-0.5 shrink-0 sm:w-[16px] sm:h-[16px]" />
               <div className="space-y-0.5">
                 <p className="text-[10px] sm:text-xs font-medium text-zinc-200">
-                  What to include <span className="text-zinc-500 font-normal italic">(Recommended Fields)</span>
+                  What to include{" "}
+                  <span className="text-zinc-500 font-normal italic">(Recommended Fields)</span>
                 </p>
                 <p className="text-[10px] sm:text-[11px] text-zinc-400 leading-normal">
-                  Briefly explain your primary operational objective, engineering projects, institution, or find your public developer link url from Google/GitHub and copy/paste it below to ensure validation correctness.
+                  Briefly explain your primary operational objective, engineering projects,
+                  institution, or find your public developer link url from Google/GitHub and
+                  copy/paste it below to ensure validation correctness.
                 </p>
               </div>
             </div>
@@ -125,9 +146,14 @@ export default function ApprovalNotePage() {
 
           <div className="rounded-lg bg-blue-500/[0.01] border border-blue-500/10 p-2.5 sm:p-3.5">
             <div className="flex gap-2">
-              <Sparkles size={14} className="text-blue-400 mt-0.5 shrink-0 sm:w-[16px] sm:h-[16px]" />
+              <Sparkles
+                size={14}
+                className="text-blue-400 mt-0.5 shrink-0 sm:w-[16px] sm:h-[16px]"
+              />
               <p className="text-[10px] sm:text-[11px] text-zinc-400 leading-normal">
-                You are entirely <strong className="text-zinc-300 font-medium">free to skip</strong> this note. The administration queue evaluates skipped forms using standard automated processing parameters.
+                You are entirely <strong className="text-zinc-300 font-medium">free to skip</strong>{" "}
+                this note. The administration queue evaluates skipped forms using standard automated
+                processing parameters.
               </p>
             </div>
           </div>
@@ -140,7 +166,13 @@ export default function ApprovalNotePage() {
                   Crucial Notification Protocol
                 </p>
                 <p className="text-[10px] sm:text-[11px] text-zinc-400 leading-normal">
-                  Following verification decision events, status notifications deploy instantly via mail. Check your <strong className="text-zinc-300 font-medium">Spam</strong>, <strong className="text-zinc-300 font-medium">Junk</strong>, and <strong className="text-zinc-300 font-medium">Promotions</strong> filters. If a message lands there, ensure to mark it as <strong className="text-amber-400 font-medium">"Not Spam"</strong> for subsequent system dispatches.
+                  Following verification decision events, status notifications deploy instantly via
+                  mail. Check your <strong className="text-zinc-300 font-medium">Spam</strong>,{" "}
+                  <strong className="text-zinc-300 font-medium">Junk</strong>, and{" "}
+                  <strong className="text-zinc-300 font-medium">Promotions</strong> filters. If a
+                  message lands there, ensure to mark it as{" "}
+                  <strong className="text-amber-400 font-medium">"Not Spam"</strong> for subsequent
+                  system dispatches.
                 </p>
               </div>
             </div>
@@ -163,13 +195,14 @@ export default function ApprovalNotePage() {
           </div>
         </div>
 
-        {/* Real-Time Operational Feedback Banner */}
         {feedback && (
-          <div className={`mt-4 p-3 rounded-lg border text-left flex items-start gap-2 animate-fade-in ${
-            feedback.type === "success" 
-              ? "bg-emerald-500/[0.02] border-emerald-500/20 text-emerald-400" 
-              : "bg-red-500/[0.02] border-red-500/20 text-red-400"
-          }`}>
+          <div
+            className={`mt-4 p-3 rounded-lg border text-left flex items-start gap-2 animate-fade-in ${
+              feedback.type === "success"
+                ? "bg-emerald-500/[0.02] border-emerald-500/20 text-emerald-400"
+                : "bg-red-500/[0.02] border-red-500/20 text-red-400"
+            }`}
+          >
             {feedback.type === "success" ? (
               <CheckCircle2 size={14} className="mt-0.5 shrink-0" />
             ) : (
@@ -179,7 +212,6 @@ export default function ApprovalNotePage() {
           </div>
         )}
 
-        {/* Structural Action Submissions Desk */}
         <div className="flex flex-col sm:flex-row gap-2 mt-5 sm:mt-6 font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider">
           <button
             onClick={handleSubmit}

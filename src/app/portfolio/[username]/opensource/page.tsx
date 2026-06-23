@@ -8,15 +8,12 @@ interface Props {
 }
 
 export default async function OpenSourcePage({ params }: Props) {
-  // 1. Fetch public portfolio specification models from server response envelope
   const result = await getPortfolioByUsername(params.username);
 
-  // 🛡️ Discriminated Union Guard: Prevents top-level crashes and verifies profile visibility boundaries
   if (!result || !result.success || !result.data || !result.data.isPublic) {
     return notFound();
   }
 
-  // ✅ Safe Context: Unboxing properties directly from the isolated success branch data payload
   const portfolio = result.data;
   const openSource = (portfolio as any).openSourceProjects ?? [];
 
@@ -33,16 +30,10 @@ export default async function OpenSourcePage({ params }: Props) {
               <p className="font-semibold">{o.repositoryName}</p>
 
               {o.contributionTitle && (
-                <p className="text-sm text-gray-600">
-                  {o.contributionTitle}
-                </p>
+                <p className="text-sm text-gray-600">{o.contributionTitle}</p>
               )}
 
-              {o.description && (
-                <p className="text-xs text-gray-500">
-                  {o.description}
-                </p>
-              )}
+              {o.description && <p className="text-xs text-gray-500">{o.description}</p>}
 
               {o.contributionType && (
                 <span className="text-[10px] px-2 py-1 bg-gray-100 rounded">
@@ -51,28 +42,18 @@ export default async function OpenSourcePage({ params }: Props) {
               )}
 
               {o.linesChanged && (
-                <p className="text-xs text-gray-500">
-                  Lines changed: {o.linesChanged}
-                </p>
+                <p className="text-xs text-gray-500">Lines changed: {o.linesChanged}</p>
               )}
 
               <div className="flex gap-3 text-xs pt-2">
                 {o.repositoryUrl && (
-                  <a
-                    href={o.repositoryUrl}
-                    target="_blank"
-                    className="text-blue-600"
-                  >
+                  <a href={o.repositoryUrl} target="_blank" className="text-blue-600">
                     Repo
                   </a>
                 )}
 
                 {o.pullRequestUrl && (
-                  <a
-                    href={o.pullRequestUrl}
-                    target="_blank"
-                    className="text-blue-600"
-                  >
+                  <a href={o.pullRequestUrl} target="_blank" className="text-blue-600">
                     PR
                   </a>
                 )}
@@ -81,10 +62,7 @@ export default async function OpenSourcePage({ params }: Props) {
               {o.impactMetrics?.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
                   {o.impactMetrics.map((m: string, i: number) => (
-                    <span
-                      key={i}
-                      className="text-[10px] px-2 py-1 bg-gray-100 rounded"
-                    >
+                    <span key={i} className="text-[10px] px-2 py-1 bg-gray-100 rounded">
                       {m}
                     </span>
                   ))}

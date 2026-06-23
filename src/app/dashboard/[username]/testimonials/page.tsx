@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { 
-  Quote, 
-  Plus, 
-  Loader2, 
-  AlertTriangle, 
-  LayoutGrid, 
-  List, 
-  Search, 
-  X, 
-  ArrowUpDown, 
+import {
+  Quote,
+  Plus,
+  Loader2,
+  AlertTriangle,
+  LayoutGrid,
+  List,
+  Search,
+  X,
+  ArrowUpDown,
   HelpCircle,
   Sparkles,
   UserCheck,
@@ -19,16 +19,13 @@ import {
   AlertCircle,
   Trash2,
   Globe,
-  Info
+  Info,
 } from "lucide-react";
 
 import TestimonialCard from "@/components/cards/testimonial-card";
 import TestimonialForm from "@/components/forms/testimonial-form";
 
-import {
-  getTestimonials,
-  deleteTestimonial,
-} from "@/actions/testimonial";
+import { getTestimonials, deleteTestimonial } from "@/actions/testimonial";
 
 import { getMyPortfolioId } from "@/actions/portfolio";
 
@@ -65,7 +62,6 @@ export default function TestimonialsPage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // Mobile Confirmation Workflow Safeguard State
   const [mobileConfirmDeleteId, setMobileConfirmDeleteId] = useState<string | null>(null);
 
   async function loadTestimonials(pId?: string) {
@@ -74,27 +70,32 @@ export default function TestimonialsPage() {
       setError(null);
 
       let activeId = pId || portfolioId;
-      
-      // 1. Resolve master portfolio identifier from action return envelope safely
+
       if (!activeId) {
         const portfolioResult = await getMyPortfolioId();
 
         if (!portfolioResult || !portfolioResult.success || !portfolioResult.data) {
-          throw new Error("error" in portfolioResult && typeof portfolioResult.error === "string" ? portfolioResult.error : "Portfolio context tracing target missing.");
+          throw new Error(
+            "error" in portfolioResult && typeof portfolioResult.error === "string"
+              ? portfolioResult.error
+              : "Portfolio context tracing target missing."
+          );
         }
 
         activeId = portfolioResult.data;
         setPortfolioId(activeId);
       }
 
-      // 2. Query peer endorsement records safely using the contract wrapper parameters
       const result = await getTestimonials(activeId);
 
       if (!result || !result.success || !("data" in result) || !Array.isArray(result.data)) {
-        throw new Error("error" in result && typeof result.error === "string" ? result.error : "Failed to load testimonials database lines.");
+        throw new Error(
+          "error" in result && typeof result.error === "string"
+            ? result.error
+            : "Failed to load testimonials database lines."
+        );
       }
 
-      // ✅ Safe Narrowing: Maps incoming row primitives strictly matching type bounds definitions
       setTestimonials(
         result.data.map((t: any) => ({
           id: t.id,
@@ -118,21 +119,28 @@ export default function TestimonialsPage() {
     }
   }
 
-  // 3. Coordinate runtime assembly lifecycles checking core payload structures
   useEffect(() => {
     (async () => {
       try {
         const result = await getMyPortfolioId();
 
         if (!result || !result.success || !result.data) {
-          throw new Error("error" in result && typeof result.error === "string" ? result.error : "Portfolio credential alignment failure.");
+          throw new Error(
+            "error" in result && typeof result.error === "string"
+              ? result.error
+              : "Portfolio credential alignment failure."
+          );
         }
 
         const id = result.data;
         setPortfolioId(id);
         await loadTestimonials(id);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to resolve active full-stack portfolio credentials token mapping.");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to resolve active full-stack portfolio credentials token mapping."
+        );
         setLoading(false);
       }
     })();
@@ -148,27 +156,37 @@ export default function TestimonialsPage() {
     }
 
     if (!isMobile) {
-      const confirmDelete = window.confirm("Are you sure you want to remove this testimonial recommendation permanently?");
+      const confirmDelete = window.confirm(
+        "Are you sure you want to remove this testimonial recommendation permanently?"
+      );
       if (!confirmDelete) return;
     }
 
     try {
       setProcessingId(id);
       setActionError(null);
-      
+
       const result = await deleteTestimonial(id);
 
       if (!result || !result.success) {
-        throw new Error("error" in result && typeof result.error === "string" ? result.error : "Purge sequence frame was rejected by datastore rules.");
+        throw new Error(
+          "error" in result && typeof result.error === "string"
+            ? result.error
+            : "Purge sequence frame was rejected by datastore rules."
+        );
       }
-      
+
       setTestimonials((prev) => prev.filter((item) => item.id !== id));
       if (editing?.id === id) {
         setEditing(null);
       }
       setMobileConfirmDeleteId(null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Unable to safely purge selected testimonial index node. Please try again.");
+      setActionError(
+        err instanceof Error
+          ? err.message
+          : "Unable to safely purge selected testimonial index node. Please try again."
+      );
     } finally {
       setProcessingId(null);
     }
@@ -196,7 +214,8 @@ export default function TestimonialsPage() {
 
   const filteredTestimonials = testimonials
     .filter((t) => {
-      const matchCriteria = `${t.authorName} ${t.authorRole || ""} ${t.company || ""} ${t.testimonial}`.toLowerCase();
+      const matchCriteria =
+        `${t.authorName} ${t.authorRole || ""} ${t.company || ""} ${t.testimonial}`.toLowerCase();
       return matchCriteria.includes(searchQuery.toLowerCase());
     })
     .sort((a, b) => {
@@ -208,7 +227,9 @@ export default function TestimonialsPage() {
       return timeB - timeA;
     });
 
-  const isShowcaseIncomplete = testimonials.length > 0 && testimonials.some(t => !t.linkedinUrl || !t.profileImage || !t.authorRole);
+  const isShowcaseIncomplete =
+    testimonials.length > 0 &&
+    testimonials.some((t) => !t.linkedinUrl || !t.profileImage || !t.authorRole);
 
   if (loading) {
     return (
@@ -217,7 +238,9 @@ export default function TestimonialsPage() {
           <Loader2 className="h-7 w-7 sm:h-8 sm:w-8 animate-spin text-blue-500 z-10" />
           <div className="absolute h-7 w-7 sm:h-8 sm:w-8 border border-zinc-800 rounded-full animate-ping opacity-20" />
         </div>
-        <p className="text-[10px] sm:text-xs uppercase tracking-widest">// Synchronizing peer testimonials section...</p>
+        <p className="text-[10px] sm:text-xs uppercase tracking-widest">
+          // Synchronizing peer testimonials section...
+        </p>
       </div>
     );
   }
@@ -227,9 +250,13 @@ export default function TestimonialsPage() {
       <div className="mx-auto max-w-xl my-6 rounded-none sm:rounded-xl border-y sm:border border-red-500/10 bg-gradient-to-b from-red-500/5 to-transparent p-4 sm:p-5 shadow-2xl flex gap-3.5 items-start text-white font-sans w-full">
         <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
         <div className="space-y-2 flex-1 min-w-0">
-          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">Testimonial Data Extraction Failure</h4>
-          <p className="text-[11px] sm:text-xs text-red-400/90 leading-relaxed break-words">{error}</p>
-          <button 
+          <h4 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
+            Testimonial Data Extraction Failure
+          </h4>
+          <p className="text-[11px] sm:text-xs text-red-400/90 leading-relaxed break-words">
+            {error}
+          </p>
+          <button
             onClick={() => loadTestimonials(portfolioId)}
             className="w-full inline-flex h-8 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 px-3 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white"
           >
@@ -242,18 +269,19 @@ export default function TestimonialsPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 text-white w-full max-w-[1440px] mx-auto font-sans antialiased px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-x-hidden">
-      
-      {/* PREMIUM ACTIONS CONTROL HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-4 sm:pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 shadow-sm shrink-0">
               <Quote size={15} />
             </div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-zinc-100">Testimonials</h1>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-zinc-100">
+              Testimonials
+            </h1>
           </div>
           <p className="text-[11px] sm:text-xs text-zinc-500 font-medium leading-relaxed max-w-2xl">
-            Manage external recommendations, client reviews, and peer endorsements to build professional credibility across public themes.
+            Manage external recommendations, client reviews, and peer endorsements to build
+            professional credibility across public themes.
           </p>
         </div>
 
@@ -291,16 +319,19 @@ export default function TestimonialsPage() {
         </div>
       </div>
 
-      {/* COMPACT INLINE ACTION ERROR PANEL */}
       {actionError && (
         <div className="flex items-start gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-3 text-xs text-red-400 animate-fadeIn">
           <AlertTriangle size={14} className="shrink-0 mt-0.5" />
           <span className="font-medium flex-1 leading-normal">{actionError}</span>
-          <button onClick={() => setActionError(null)} className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2">✕</button>
+          <button
+            onClick={() => setActionError(null)}
+            className="text-zinc-500 hover:text-zinc-300 font-mono text-[10px] ml-2"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* RECOMMENDED FILL SYSTEM COMPLIANCE WELL */}
       {isShowcaseIncomplete && (
         <div className="rounded-xl border border-blue-500/10 bg-gradient-to-r from-blue-500/[0.03] to-transparent p-4 flex gap-2.5 items-start animate-fadeIn w-full">
           <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
@@ -309,26 +340,34 @@ export default function TestimonialsPage() {
               Missing Testimonial Verification Parameters Detected
             </p>
             <p className="text-[11px] sm:text-xs text-zinc-500 leading-relaxed">
-              We highly recommend filling all fields entirely. Adding valid reference targets (<span className="text-zinc-400 font-mono text-[10px]">LinkedIn Reference URLs</span>), avatars (<span className="text-zinc-400 font-mono text-[10px]">Profile Images</span>), and specific corporate descriptions ensures a higher authenticity layer that helps recruiters validate entries.
+              We highly recommend filling all fields entirely. Adding valid reference targets (
+              <span className="text-zinc-400 font-mono text-[10px]">LinkedIn Reference URLs</span>),
+              avatars (<span className="text-zinc-400 font-mono text-[10px]">Profile Images</span>),
+              and specific corporate descriptions ensures a higher authenticity layer that helps
+              recruiters validate entries.
             </p>
           </div>
         </div>
       )}
 
-      {/* FILTER CONTROL HUBS TOOLBAR */}
       {testimonials.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-900/50 pb-4">
           <div className="relative w-full sm:max-w-xs md:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 h-3.5 w-3.5" />
-            <input 
+            <input
               type="text"
               placeholder="Search by author name, corporate role, or commentary text..."
               value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.currentTarget.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchQuery(e.currentTarget.value)
+              }
               className="w-full pl-9 pr-8 h-8.5 bg-[#09090b] border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors font-sans"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400"
+              >
                 <X size={12} />
               </button>
             )}
@@ -357,7 +396,6 @@ export default function TestimonialsPage() {
         </div>
       )}
 
-      {/* MAIN LAYOUT DATA MATRIX CONTAINER */}
       <div className="space-y-8">
         {filteredTestimonials.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/10 p-8 sm:p-12 text-center max-w-xl mx-auto my-4 animate-fadeIn w-full">
@@ -365,15 +403,16 @@ export default function TestimonialsPage() {
               <HelpCircle size={18} />
             </div>
             <h3 className="text-xs sm:text-sm font-bold text-zinc-200 tracking-tight">
-              {testimonials.length === 0 ? "Testimonials Section Unpopulated" : "No classifications resolved"}
+              {testimonials.length === 0
+                ? "Testimonials Section Unpopulated"
+                : "No classifications resolved"}
             </h3>
-            
+
             <div className="text-[11px] sm:text-xs text-zinc-500 max-w-xs sm:max-w-sm mt-1.5 leading-relaxed font-sans space-y-2 w-full">
               <p>
-                {testimonials.length === 0 
+                {testimonials.length === 0
                   ? "Your portfolio currently has no external client recommendations or peer endorsements recorded. Populate this section manually to build trust and validate your technical background skill set."
-                  : "No matching testimonial logs found. Clear or adjust your text token criteria to reload default catalogs."
-                }
+                  : "No matching testimonial logs found. Clear or adjust your text token criteria to reload default catalogs."}
               </p>
             </div>
 
@@ -393,19 +432,18 @@ export default function TestimonialsPage() {
           </div>
         ) : (
           <>
-            {/* MOBILE COMPACT LIST LAYOUT */}
             <div className="block sm:hidden space-y-2.5 animate-fadeIn">
               {filteredTestimonials.map((testimonial) => (
-                <div 
-                  key={testimonial.id} 
+                <div
+                  key={testimonial.id}
                   className="rounded-xl border border-zinc-800 bg-[#0C0C0E] p-4 space-y-3 shadow-sm relative overflow-hidden"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
                       {testimonial.profileImage ? (
-                        <img 
-                          src={testimonial.profileImage} 
-                          alt={testimonial.authorName} 
+                        <img
+                          src={testimonial.profileImage}
+                          alt={testimonial.authorName}
                           className="w-6 h-6 rounded-full object-cover border border-zinc-800 shrink-0"
                         />
                       ) : (
@@ -414,16 +452,23 @@ export default function TestimonialsPage() {
                         </div>
                       )}
                       <div className="min-w-0">
-                        <p className="font-bold text-xs text-zinc-200 truncate font-sans">{testimonial.authorName}</p>
+                        <p className="font-bold text-xs text-zinc-200 truncate font-sans">
+                          {testimonial.authorName}
+                        </p>
                         <p className="text-[10px] text-zinc-500 truncate font-sans">
-                          {testimonial.authorRole}{testimonial.company ? ` @ ${testimonial.company}` : ""}
+                          {testimonial.authorRole}
+                          {testimonial.company ? ` @ ${testimonial.company}` : ""}
                         </p>
                       </div>
                     </div>
-                    
-                    <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-mono font-bold border shrink-0 ${
-                      testimonial.featured ? "bg-amber-500/5 border-amber-500/10 text-amber-400" : "bg-zinc-900 border-zinc-800 text-zinc-500"
-                    }`}>
+
+                    <span
+                      className={`inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-mono font-bold border shrink-0 ${
+                        testimonial.featured
+                          ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
+                          : "bg-zinc-900 border-zinc-800 text-zinc-500"
+                      }`}
+                    >
                       {testimonial.featured ? "FEATURED" : "STANDARD"}
                     </span>
                   </div>
@@ -453,7 +498,11 @@ export default function TestimonialsPage() {
                             onClick={() => handleDelete(testimonial.id, true)}
                             className="h-6 rounded bg-red-600 text-white font-mono text-[9px] font-bold uppercase tracking-wider px-2.5 inline-flex items-center gap-1"
                           >
-                            {processingId === testimonial.id ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
+                            {processingId === testimonial.id ? (
+                              <Loader2 size={10} className="animate-spin" />
+                            ) : (
+                              <Check size={10} />
+                            )}
                             <span>Execute</span>
                           </button>
                         </div>
@@ -462,12 +511,19 @@ export default function TestimonialsPage() {
                       <div className="flex items-center justify-between gap-3 w-full">
                         <div>
                           {testimonial.linkedinUrl ? (
-                            <a href={testimonial.linkedinUrl} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline flex items-center gap-1 font-mono text-[10px]">
+                            <a
+                              href={testimonial.linkedinUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-400 hover:underline flex items-center gap-1 font-mono text-[10px]"
+                            >
                               <Globe size={10} />
                               <span>Verified</span>
                             </a>
                           ) : (
-                            <span className="text-zinc-700 italic font-mono text-[10px]">Unlinked</span>
+                            <span className="text-zinc-700 italic font-mono text-[10px]">
+                              Unlinked
+                            </span>
                           )}
                         </div>
 
@@ -495,7 +551,6 @@ export default function TestimonialsPage() {
               ))}
             </div>
 
-            {/* DESKTOP ADVANCED MATRIX GRID DISPLAY LAYOUT */}
             <div className="hidden sm:block">
               {viewMode === "grid" ? (
                 <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 animate-fadeIn">
@@ -524,13 +579,16 @@ export default function TestimonialsPage() {
                     </thead>
                     <tbody className="divide-y divide-zinc-900 text-xs font-sans">
                       {filteredTestimonials.map((testimonial) => (
-                        <tr key={testimonial.id} className="hover:bg-zinc-900/30 transition-colors group/row">
+                        <tr
+                          key={testimonial.id}
+                          className="hover:bg-zinc-900/30 transition-colors group/row"
+                        >
                           <td className="py-3.5 px-4 min-w-[180px]">
                             <div className="flex items-center gap-3">
                               {testimonial.profileImage ? (
-                                <img 
-                                  src={testimonial.profileImage} 
-                                  alt={testimonial.authorName} 
+                                <img
+                                  src={testimonial.profileImage}
+                                  alt={testimonial.authorName}
                                   className="w-6 h-6 rounded-full object-cover border border-zinc-800"
                                 />
                               ) : (
@@ -538,19 +596,32 @@ export default function TestimonialsPage() {
                                   {testimonial.authorName.charAt(0).toUpperCase()}
                                 </div>
                               )}
-                              <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-[140px]">{testimonial.authorName}</div>
+                              <div className="font-bold text-zinc-200 group-hover/row:text-blue-400 transition-colors truncate max-w-[140px]">
+                                {testimonial.authorName}
+                              </div>
                             </div>
                           </td>
                           <td className="py-3.5 px-4 text-zinc-400 font-medium max-w-[150px] truncate">
-                            {testimonial.authorRole || <span className="text-zinc-700 italic">No Title</span>}
-                            {testimonial.company && <span className="text-zinc-500 block text-[11px] truncate">@ {testimonial.company}</span>}
+                            {testimonial.authorRole || (
+                              <span className="text-zinc-700 italic">No Title</span>
+                            )}
+                            {testimonial.company && (
+                              <span className="text-zinc-500 block text-[11px] truncate">
+                                @ {testimonial.company}
+                              </span>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 text-zinc-400 italic max-w-[220px] truncate">
                             “{testimonial.testimonial}”
                           </td>
                           <td className="py-3.5 px-4 text-zinc-400 font-mono text-[11px]">
                             {testimonial.linkedinUrl ? (
-                              <a href={testimonial.linkedinUrl} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline flex items-center gap-1">
+                              <a
+                                href={testimonial.linkedinUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-blue-400 hover:underline flex items-center gap-1"
+                              >
                                 <Globe size={11} />
                                 <span>Verified</span>
                               </a>
@@ -559,9 +630,13 @@ export default function TestimonialsPage() {
                             )}
                           </td>
                           <td className="py-3.5 px-4">
-                            <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-mono font-bold border ${
-                              testimonial.featured ? "bg-amber-500/5 border-amber-500/10 text-amber-400" : "bg-zinc-900 border-zinc-800 text-zinc-500"
-                            }`}>
+                            <span
+                              className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-mono font-bold border ${
+                                testimonial.featured
+                                  ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
+                                  : "bg-zinc-900 border-zinc-800 text-zinc-500"
+                              }`}
+                            >
                               {testimonial.featured ? "FEATURED" : "STANDARD"}
                             </span>
                           </td>
@@ -580,7 +655,11 @@ export default function TestimonialsPage() {
                                 onClick={() => handleDelete(testimonial.id)}
                                 className="text-[11px] font-semibold text-red-500/90 hover:text-red-400 transition-colors bg-red-950/10 hover:bg-red-500/20 px-2 py-1 rounded border border-red-900/10 disabled:opacity-35 inline-flex items-center justify-center min-w-[50px]"
                               >
-                                {processingId === testimonial.id ? <Loader2 size={10} className="animate-spin" /> : "Purge"}
+                                {processingId === testimonial.id ? (
+                                  <Loader2 size={10} className="animate-spin" />
+                                ) : (
+                                  "Purge"
+                                )}
                               </button>
                             </div>
                           </td>
@@ -595,16 +674,16 @@ export default function TestimonialsPage() {
         )}
       </div>
 
-      {/* FORM HANDLER POPUP MODAL ARCHITECTURE CONTROLLER */}
       {formOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
           <div className="max-h-[100vh] sm:max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-none sm:rounded-xl border-t sm:border border-zinc-800 bg-[#0C0C0E] p-0 text-white shadow-2xl relative">
-            
             <div className="w-full sticky top-0 bg-[#0C0C0E] z-20 flex items-center justify-between border-b border-zinc-900/80 px-4 py-3.5 sm:px-6">
               <div className="flex items-center gap-2">
                 <Sparkles size={14} className="text-blue-400 animate-pulse" />
                 <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-400 font-mono pr-4">
-                  {editing ? "Modify Testimonial Parameters" : "Initialize New Testimonial Node Parameter Block"}
+                  {editing
+                    ? "Modify Testimonial Parameters"
+                    : "Initialize New Testimonial Node Parameter Block"}
                 </h2>
               </div>
               <button
@@ -619,7 +698,9 @@ export default function TestimonialsPage() {
             <div className="mb-4 rounded-lg bg-zinc-950 border border-zinc-900 p-3 text-[10px] sm:text-[11px] text-zinc-400 flex gap-2 items-start hidden sm:flex mx-6 mt-4">
               <UserCheck size={13} className="text-blue-400 shrink-0 mt-0.5" />
               <p className="leading-normal">
-                We highly recommend completing all optional resource fields entirely. Providing code repository credentials, functional specifications, and cover captures maximizes your verification status score.
+                We highly recommend completing all optional resource fields entirely. Providing code
+                repository credentials, functional specifications, and cover captures maximizes your
+                verification status score.
               </p>
             </div>
 

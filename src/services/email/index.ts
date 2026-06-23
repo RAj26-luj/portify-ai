@@ -5,10 +5,8 @@ export { sendAdminNotification } from "./send-admin-notification";
 
 import { sendEmail } from "@/lib/nodemailer";
 
-// --- SIMPLE IN-MEMORY ANTI-SPAM RATE LIMITER ---
-// Tracks email volume per recipient address over a sliding timeline bucket window.
 const emailRateLimitTracker = new Map<string, { count: number; resetAt: number }>();
-const MAX_EMAILS_PER_WINDOW = 5; 
+const MAX_EMAILS_PER_WINDOW = 5;
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 Minutes
 
 function verifySpamGatePass(email: string): boolean {
@@ -32,7 +30,6 @@ function verifySpamGatePass(email: string): boolean {
   return true;
 }
 
-// --- PREMIUM RENDER ENGINE TEMPLATE FRAMEWORK ---
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 interface EmailWrapperOptions {
@@ -43,7 +40,13 @@ interface EmailWrapperOptions {
   ctaUrl?: string;
 }
 
-function buildBaseEmailTemplate({ preheader, title, bodyHtml, ctaText, ctaUrl }: EmailWrapperOptions): string {
+function buildBaseEmailTemplate({
+  preheader,
+  title,
+  bodyHtml,
+  ctaText,
+  ctaUrl,
+}: EmailWrapperOptions): string {
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -89,11 +92,15 @@ function buildBaseEmailTemplate({ preheader, title, bodyHtml, ctaText, ctaUrl }:
                 <div class="content">
                   <h1 class="title">${title}</h1>
                   ${bodyHtml}
-                  ${ctaText && ctaUrl ? `
+                  ${
+                    ctaText && ctaUrl
+                      ? `
                     <div class="btn-container">
                       <a href="${ctaUrl}" class="btn">${ctaText}</a>
                     </div>
-                  ` : ""}
+                  `
+                      : ""
+                  }
                 </div>
                 <div class="footer">
                   <p>© 2026 Portify AI. Secure platform notification.</p>
@@ -108,8 +115,6 @@ function buildBaseEmailTemplate({ preheader, title, bodyHtml, ctaText, ctaUrl }:
     </html>
   `;
 }
-
-// --- DYNAMIC EMAIL SERVICE DISPATCH EXPORTS ---
 
 export async function sendApprovalEmail(email: string, userId?: string) {
   if (!verifySpamGatePass(email)) return;

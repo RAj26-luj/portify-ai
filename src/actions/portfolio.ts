@@ -3,24 +3,30 @@
 import { prisma } from "@/lib/prisma";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
-/**
- * Transforms system fetch anomalies, nested relation lookup limits, or data layer 
- * configurations into uniform, user-friendly responses tailored for non-intrusive UI flashes.
- */
+// Error
 function handlePortfolioServerError(error: any, fallbackMessage: string) {
   console.error("Portfolio Core Service Server Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("portfolioId required") || errorMessage.includes("portfolioId not found")) {
+  if (
+    errorMessage.includes("portfolioId required") ||
+    errorMessage.includes("portfolioId not found")
+  ) {
     return {
       success: false,
-      error: "Authentication reference token is missing. Could not locate a valid portfolio account.",
+      error:
+        "Authentication reference token is missing. Could not locate a valid portfolio account.",
     };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
-      error: "The portfolio schema core database engine is temporarily busy syncing. Please pull to refresh.",
+      error:
+        "The portfolio schema core database engine is temporarily busy syncing. Please pull to refresh.",
     };
   }
 
@@ -62,8 +68,6 @@ export async function getPortfolioByUserId(userId: string) {
         testimonials: { orderBy: { displayOrder: "asc" } },
         socialLinks: { orderBy: { displayOrder: "asc" } },
         codingProfiles: { orderBy: { displayOrder: "asc" } },
-        
-        // Modified: Added nested inclusion and ordering for custom section items
         customSections: {
           include: {
             items: {
@@ -76,7 +80,6 @@ export async function getPortfolioByUserId(userId: string) {
             displayOrder: "asc",
           },
         },
-        
         openSourceProjects: {
           include: { timeline: true },
           orderBy: { displayOrder: "asc" },
@@ -145,8 +148,6 @@ export async function getPortfolioByUsername(username: string) {
         testimonials: { orderBy: { displayOrder: "asc" } },
         socialLinks: { orderBy: { displayOrder: "asc" } },
         codingProfiles: { orderBy: { displayOrder: "asc" } },
-        
-        // Modified: Added nested inclusion alongside visibility filtering
         customSections: {
           where: {
             isVisible: true,
@@ -162,7 +163,6 @@ export async function getPortfolioByUsername(username: string) {
             displayOrder: "asc",
           },
         },
-        
         openSourceProjects: {
           include: { timeline: true },
           orderBy: { displayOrder: "asc" },
@@ -202,7 +202,10 @@ export async function getPortfolio(portfolioId: string) {
 
     return { success: true, data: portfolio };
   } catch (error) {
-    return handlePortfolioServerError(error, "Failed to load core target parameters configuration indices.");
+    return handlePortfolioServerError(
+      error,
+      "Failed to load core target parameters configuration indices."
+    );
   }
 }
 
@@ -218,10 +221,16 @@ export async function createPortfolio(
 ) {
   try {
     if (!userId) {
-      return { success: false, error: "Account initialization failed: User target identifier missing." };
+      return {
+        success: false,
+        error: "Account initialization failed: User target identifier missing.",
+      };
     }
     if (!username) {
-      return { success: false, error: "Account initialization failed: Clean routing username is required." };
+      return {
+        success: false,
+        error: "Account initialization failed: Clean routing username is required.",
+      };
     }
 
     const result = await prisma.portfolio.create({
@@ -230,19 +239,22 @@ export async function createPortfolio(
 
     return { success: true, data: result };
   } catch (error) {
-    return handlePortfolioServerError(error, "Failed to instantiate new structural base portfolio configuration slot.");
+    return handlePortfolioServerError(
+      error,
+      "Failed to instantiate new structural base portfolio configuration slot."
+    );
   }
 }
 
-export async function updatePortfolio(
-  portfolioId: string,
-  data: Record<string, unknown>
-) {
+export async function updatePortfolio(portfolioId: string, data: Record<string, unknown>) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Missing operational reference verification ID code context." };
+      return {
+        success: false,
+        error: "Missing operational reference verification ID code context.",
+      };
     }
 
     const result = await prisma.portfolio.update({
@@ -252,7 +264,10 @@ export async function updatePortfolio(
 
     return { success: true, data: result };
   } catch (error) {
-    return handlePortfolioServerError(error, "Failed to save configuration layout updates back onto core metadata fields.");
+    return handlePortfolioServerError(
+      error,
+      "Failed to save configuration layout updates back onto core metadata fields."
+    );
   }
 }
 
@@ -261,7 +276,10 @@ export async function publishPortfolio(portfolioId: string) {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Missing operational verification token context link. Deployment aborted." };
+      return {
+        success: false,
+        error: "Missing operational verification token context link. Deployment aborted.",
+      };
     }
 
     const result = await prisma.portfolio.update({
@@ -275,7 +293,10 @@ export async function publishPortfolio(portfolioId: string) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handlePortfolioServerError(error, "The configuration deployment release sequence encountered a data layer failure.");
+    return handlePortfolioServerError(
+      error,
+      "The configuration deployment release sequence encountered a data layer failure."
+    );
   }
 }
 
@@ -305,8 +326,6 @@ export async function exportPortfolio(portfolioId: string) {
         testimonials: true,
         socialLinks: true,
         codingProfiles: true,
-        
-        // Modified: Changed true boolean flag to an inclusive operational query map
         customSections: {
           include: {
             items: {
@@ -316,7 +335,6 @@ export async function exportPortfolio(portfolioId: string) {
             },
           },
         },
-        
         openSourceProjects: { include: { timeline: true } },
         media: true,
         views: true,
@@ -330,7 +348,10 @@ export async function exportPortfolio(portfolioId: string) {
 
     return { success: true, data: portfolio };
   } catch (error) {
-    console.error("Failed to execute recursive relational backup snapshot stream aggregation:", error);
+    console.error(
+      "Failed to execute recursive relational backup snapshot stream aggregation:",
+      error
+    );
     return {
       success: false,
       error: "Could not safely pack configuration tables matrix data payload arrays for export.",
@@ -345,6 +366,10 @@ export async function getMyPortfolioId() {
     return { success: true, data };
   } catch (error) {
     console.error("Failed handling background target session parsing trace lookup:", error);
-    return { success: false, error: "Active session mapping parameters lookup failed or expired.", data: null };
+    return {
+      success: false,
+      error: "Active session mapping parameters lookup failed or expired.",
+      data: null,
+    };
   }
 }

@@ -1,24 +1,22 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import {
-  ProjectStatus,
-  ProjectType,
-} from "@prisma/client";
+import { ProjectStatus, ProjectType } from "@prisma/client";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
-/**
- * Transforms software project management datastore anomalies or internal query exceptions
- * into standardized, client-friendly signatures optimized for sleek UI flash alerts.
- */
+// Error
 function handleProjectServerError(error: any, fallbackMessage: string) {
   console.error("Project Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("portfolioId required") || errorMessage.includes("portfolioId not found")) {
+  if (
+    errorMessage.includes("portfolioId required") ||
+    errorMessage.includes("portfolioId not found")
+  ) {
     return {
       success: false,
-      error: "Authentication reference token is missing. Could not link project assets to a portfolio profile.",
+      error:
+        "Authentication reference token is missing. Could not link project assets to a portfolio profile.",
     };
   }
   if (errorMessage.includes("Project not found")) {
@@ -27,10 +25,15 @@ function handleProjectServerError(error: any, fallbackMessage: string) {
       error: "The requested engineering case study record could not be found.",
     };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
-      error: "Project showcase datastore is carrying out system operations. Please re-submit changes.",
+      error:
+        "Project showcase datastore is carrying out system operations. Please re-submit changes.",
     };
   }
 
@@ -76,11 +79,17 @@ export async function createProject(data: {
     const resolvedPortfolioId = data.portfolioId || (await getPortfolioId());
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Portfolio specification profile identification target not found." };
+      return {
+        success: false,
+        error: "Portfolio specification profile identification target not found.",
+      };
     }
 
     if (!data.title) {
-      return { success: false, error: "Project engineering title or application label name parameter is required." };
+      return {
+        success: false,
+        error: "Project engineering title or application label name parameter is required.",
+      };
     }
 
     const result = await prisma.project.create({
@@ -128,7 +137,10 @@ export async function createProject(data: {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleProjectServerError(error, "Failed to instantiate new project showcase registry details entry.");
+    return handleProjectServerError(
+      error,
+      "Failed to instantiate new project showcase registry details entry."
+    );
   }
 }
 
@@ -171,7 +183,10 @@ export async function updateProject(
 ) {
   try {
     if (!id) {
-      return { success: false, error: "Missing distinct architectural tracking index key parameter reference." };
+      return {
+        success: false,
+        error: "Missing distinct architectural tracking index key parameter reference.",
+      };
     }
 
     const result = await prisma.project.update({
@@ -182,7 +197,10 @@ export async function updateProject(
 
     return { success: true, data: result };
   } catch (error) {
-    return handleProjectServerError(error, "Failed to apply project specification changes onto data store layers.");
+    return handleProjectServerError(
+      error,
+      "Failed to apply project specification changes onto data store layers."
+    );
   }
 }
 
@@ -208,10 +226,7 @@ export async function getProjects(portfolioId: string) {
         },
         projectClicks: true,
       },
-      orderBy: [
-        { displayOrder: "asc" },
-        { createdAt: "desc" },
-      ],
+      orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
     });
 
     return { success: true, data };
@@ -243,14 +258,21 @@ export async function getProjectById(id: string) {
 
     return { success: true, data };
   } catch (error) {
-    return handleProjectServerError(error, "Failed to cross-reference system details parameters for this project case study.");
+    return handleProjectServerError(
+      error,
+      "Failed to cross-reference system details parameters for this project case study."
+    );
   }
 }
 
 export async function deleteProject(id: string) {
   try {
     if (!id) {
-      return { success: false, error: "Project tracking trace parameter identification string missing. Deletion sequence aborted." };
+      return {
+        success: false,
+        error:
+          "Project tracking trace parameter identification string missing. Deletion sequence aborted.",
+      };
     }
 
     const result = await prisma.project.delete({
@@ -259,7 +281,10 @@ export async function deleteProject(id: string) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleProjectServerError(error, "The specified work portfolio showcase project module could not be successfully cleared.");
+    return handleProjectServerError(
+      error,
+      "The specified work portfolio showcase project module could not be successfully cleared."
+    );
   }
 }
 
@@ -275,7 +300,10 @@ export async function toggleFeaturedProject(id: string) {
     });
 
     if (!project) {
-      return { success: false, error: "Highlight priority settings failed: Matching project profile entry not found." };
+      return {
+        success: false,
+        error: "Highlight priority settings failed: Matching project profile entry not found.",
+      };
     }
 
     const result = await prisma.project.update({
@@ -285,23 +313,29 @@ export async function toggleFeaturedProject(id: string) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleProjectServerError(error, "Unable to adjust highlight selection configuration criteria display rules.");
+    return handleProjectServerError(
+      error,
+      "Unable to adjust highlight selection configuration criteria display rules."
+    );
   }
 }
 
-export async function reorderProjects(
-  portfolioId: string,
-  projectIds: string[]
-) {
+export async function reorderProjects(portfolioId: string, projectIds: string[]) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Target portfolio reference identity validation marker code not resolved." };
+      return {
+        success: false,
+        error: "Target portfolio reference identity validation marker code not resolved.",
+      };
     }
 
     if (!projectIds || projectIds.length === 0) {
-      return { success: true, message: "Empty sequencing configuration layout rules provided. Sequence grid unchanged." };
+      return {
+        success: true,
+        message: "Empty sequencing configuration layout rules provided. Sequence grid unchanged.",
+      };
     }
 
     await prisma.$transaction(
@@ -320,7 +354,10 @@ export async function reorderProjects(
 
     return { success: true };
   } catch (error) {
-    return handleProjectServerError(error, "Failed to commit customized project timeline grid board sorting reorders.");
+    return handleProjectServerError(
+      error,
+      "Failed to commit customized project timeline grid board sorting reorders."
+    );
   }
 }
 
@@ -337,11 +374,17 @@ export async function createProjectMetric(data: {
     }
 
     if (!data.label) {
-      return { success: false, error: "Analytical summary parameter label parameter criteria is required." };
+      return {
+        success: false,
+        error: "Analytical summary parameter label parameter criteria is required.",
+      };
     }
 
     if (!data.value) {
-      return { success: false, error: "Analytical outcome metric value indicator text is required." };
+      return {
+        success: false,
+        error: "Analytical outcome metric value indicator text is required.",
+      };
     }
 
     const result = await prisma.projectMetric.create({
@@ -356,7 +399,10 @@ export async function createProjectMetric(data: {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleProjectServerError(error, "Failed to append inline project highlight analytics row indices.");
+    return handleProjectServerError(
+      error,
+      "Failed to append inline project highlight analytics row indices."
+    );
   }
 }
 
@@ -371,7 +417,10 @@ export async function updateProjectMetric(
 ) {
   try {
     if (!id) {
-      return { success: false, error: "Missing unique statistical highlight index mapping key tracer reference." };
+      return {
+        success: false,
+        error: "Missing unique statistical highlight index mapping key tracer reference.",
+      };
     }
 
     const result = await prisma.projectMetric.update({
@@ -381,14 +430,21 @@ export async function updateProjectMetric(
 
     return { success: true, data: result };
   } catch (error) {
-    return handleProjectServerError(error, "Failed to adjust properties fields inside this project metrics module.");
+    return handleProjectServerError(
+      error,
+      "Failed to adjust properties fields inside this project metrics module."
+    );
   }
 }
 
 export async function deleteProjectMetric(id: string) {
   try {
     if (!id) {
-      return { success: false, error: "Identification trace tracking token parameter string missing. Deletion sequence aborted." };
+      return {
+        success: false,
+        error:
+          "Identification trace tracking token parameter string missing. Deletion sequence aborted.",
+      };
     }
 
     const result = await prisma.projectMetric.delete({
@@ -397,7 +453,10 @@ export async function deleteProjectMetric(id: string) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleProjectServerError(error, "The specified standalone metric grid parameter metadata field row could not be cleared.");
+    return handleProjectServerError(
+      error,
+      "The specified standalone metric grid parameter metadata field row could not be cleared."
+    );
   }
 }
 
@@ -418,7 +477,10 @@ export async function getProjectMetrics(projectId: string) {
 
     return { success: true, data };
   } catch (error) {
-    console.error("Failed compiling individual data analytics indicators charts summary rows:", error);
+    console.error(
+      "Failed compiling individual data analytics indicators charts summary rows:",
+      error
+    );
     return {
       success: false,
       error: "Failed to assemble individual case study key quantitative data index records.",

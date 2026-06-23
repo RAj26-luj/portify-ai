@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Loader2, Terminal, BarChart4, AlertCircle, CheckCircle2 } from "lucide-react";
-import {
-  createProjectMetric,
-  updateProjectMetric,
-} from "@/actions/project-metric";
+import { createProjectMetric, updateProjectMetric } from "@/actions/project-metric";
 
 interface ProjectMetricFormProps {
   projectId: string;
@@ -30,11 +27,9 @@ export default function ProjectMetricForm({
   const [description, setDescription] = useState(metric?.description ?? "");
   const [loading, setLoading] = useState(false);
 
-  // Dynamic validation monitoring states
   const [isTouched, setIsTouched] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Evaluates internal parameter updates to update button execution state
   useEffect(() => {
     const isLabelChanged = label !== (metric?.label ?? "");
     const isValueChanged = value !== (metric?.value ?? "");
@@ -53,23 +48,17 @@ export default function ProjectMetricForm({
 
     try {
       if (metric?.id) {
-        await updateProjectMetric(
-          metric.id,
-          {
-            label: label.trim(),
-            value: value.trim(),
-            description: description.trim() || undefined,
-          }
-        );
+        await updateProjectMetric(metric.id, {
+          label: label.trim(),
+          value: value.trim(),
+          description: description.trim() || undefined,
+        });
       } else {
-        await createProjectMetric(
-          projectId,
-          {
-            label: label.trim(),
-            value: value.trim(),
-            description: description.trim() || undefined,
-          }
-        );
+        await createProjectMetric(projectId, {
+          label: label.trim(),
+          value: value.trim(),
+          description: description.trim() || undefined,
+        });
       }
 
       onSuccess?.();
@@ -83,10 +72,10 @@ export default function ProjectMetricForm({
   const inputStyle =
     "w-full rounded-lg border border-white/5 bg-[#0A0A0B] p-2.5 sm:p-3 text-zinc-200 placeholder-zinc-700 text-xs sm:text-sm focus:outline-none focus:border-blue-500/60 focus:bg-[#0E0E10] focus:shadow-[0_0_20px_rgba(59,130,246,0.04)] transition-all duration-200 disabled:opacity-40 shadow-inner font-sans";
 
-  const labelStyle = 
+  const labelStyle =
     "mb-1 flex items-center justify-between text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 group-hover/input:text-zinc-300 transition-colors";
 
-  const descriptionStyle = 
+  const descriptionStyle =
     "text-[10px] sm:text-xs text-zinc-500 font-sans leading-normal block mt-1";
 
   return (
@@ -94,29 +83,37 @@ export default function ProjectMetricForm({
       onSubmit={handleSubmit}
       className="space-y-4 sm:space-y-5 text-zinc-300 bg-[#0C0C0E] p-4 sm:p-6 rounded-xl border border-white/10 max-w-full overflow-x-hidden selection:bg-blue-500/30 selection:text-white font-sans select-none"
     >
-      {/* HEADER SECTION CONTEXT INFO */}
       <div className="bg-[#121214] border border-white/5 rounded-lg p-3 sm:p-4 mb-1">
         <h4 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
           <BarChart4 size={13} className="text-blue-400" />
           <span>Project Analytical Telemetry Metrics</span>
         </h4>
         <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-          Log precise impact validation statistics (e.g. &quot;40% latency reduction&quot; or &quot;300+ algorithmic problems solved&quot;) to back up your core engineering accomplishments.
+          Log precise impact validation statistics (e.g. &quot;40% latency reduction&quot; or
+          &quot;300+ algorithmic problems solved&quot;) to back up your core engineering
+          accomplishments.
         </p>
       </div>
 
-      {/* Input Group: Label */}
       <div className="space-y-1 group/input">
         <label className={labelStyle}>
-          <span className="flex items-center gap-1">Metric Key Label <span className="text-red-400 font-sans font-bold">*(Required)</span></span>
+          <span className="flex items-center gap-1">
+            Metric Key Label <span className="text-red-400 font-sans font-bold">*(Required)</span>
+          </span>
           <div className="flex items-center gap-1">
             {isTouched && !label.trim() ? (
-              <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5"><AlertCircle size={9} /> missing_label</span>
+              <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5">
+                <AlertCircle size={9} /> missing_label
+              </span>
             ) : label.trim() ? (
-              <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/5 px-1 rounded border border-emerald-500/10 lowercase flex items-center gap-0.5"><CheckCircle2 size={9} /> key_set</span>
+              <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/5 px-1 rounded border border-emerald-500/10 lowercase flex items-center gap-0.5">
+                <CheckCircle2 size={9} /> key_set
+              </span>
             ) : null}
             {hasChanges && (
-              <span className="text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1 py-0.5 rounded uppercase font-bold tracking-normal">edited</span>
+              <span className="text-[8px] font-mono text-blue-400 bg-blue-500/5 border border-blue-500/10 px-1 py-0.5 rounded uppercase font-bold tracking-normal">
+                edited
+              </span>
             )}
             <Terminal size={10} className="text-zinc-700 hidden sm:block" />
           </div>
@@ -131,20 +128,30 @@ export default function ProjectMetricForm({
           disabled={loading}
         />
         {isTouched && !label.trim() && (
-          <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Field missing: Telemetry tracker parameter key name required.</p>
+          <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">
+            ⚠️ Field missing: Telemetry tracker parameter key name required.
+          </p>
         )}
-        <span className={descriptionStyle}>The diagnostic structural keyword title for this tracking node.</span>
+        <span className={descriptionStyle}>
+          The diagnostic structural keyword title for this tracking node.
+        </span>
       </div>
 
-      {/* Input Group: Value */}
       <div className="space-y-1 group/input">
         <label className={labelStyle}>
-          <span className="flex items-center gap-1">Telemetry Value Token <span className="text-red-400 font-sans font-bold">*(Required)</span></span>
+          <span className="flex items-center gap-1">
+            Telemetry Value Token{" "}
+            <span className="text-red-400 font-sans font-bold">*(Required)</span>
+          </span>
           <div className="flex items-center gap-1">
             {isTouched && !value.trim() ? (
-              <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5"><AlertCircle size={9} /> missing_value</span>
+              <span className="text-[8px] font-mono text-red-400 bg-red-500/5 px-1 rounded border border-red-500/10 lowercase flex items-center gap-0.5">
+                <AlertCircle size={9} /> missing_value
+              </span>
             ) : value.trim() ? (
-              <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/5 px-1 rounded border border-emerald-500/10 lowercase flex items-center gap-0.5"><CheckCircle2 size={9} /> token_ready</span>
+              <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/5 px-1 rounded border border-emerald-500/10 lowercase flex items-center gap-0.5">
+                <CheckCircle2 size={9} /> token_ready
+              </span>
             ) : null}
           </div>
         </label>
@@ -158,15 +165,23 @@ export default function ProjectMetricForm({
           disabled={loading}
         />
         {isTouched && !value.trim() && (
-          <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">⚠️ Field missing: Numeric scale or outcome rank tracking value string required.</p>
+          <p className="text-[10px] font-mono font-medium text-red-400/90 pt-0.5">
+            ⚠️ Field missing: Numeric scale or outcome rank tracking value string required.
+          </p>
         )}
-        <span className={descriptionStyle}>The numeric scale scalar, scalar percentage, or rating rank outcome parameter.</span>
+        <span className={descriptionStyle}>
+          The numeric scale scalar, scalar percentage, or rating rank outcome parameter.
+        </span>
       </div>
 
-      {/* Input Group: Description */}
       <div className="space-y-1 group/input">
         <label className={labelStyle}>
-          <span className="flex items-center gap-1">Impact Analytics Description <span className="text-zinc-600 font-sans font-normal lowercase italic">*(Optional)</span></span>
+          <span className="flex items-center gap-1">
+            Impact Analytics Description{" "}
+            <span className="text-zinc-600 font-sans font-normal lowercase italic">
+              *(Optional)
+            </span>
+          </span>
         </label>
         <textarea
           value={description}
@@ -176,10 +191,11 @@ export default function ProjectMetricForm({
           className={`${inputStyle} resize-none`}
           disabled={loading}
         />
-        <span className={descriptionStyle}>Provide context explaining how you benchmarked and parsed this dataset outcome layer.</span>
+        <span className={descriptionStyle}>
+          Provide context explaining how you benchmarked and parsed this dataset outcome layer.
+        </span>
       </div>
 
-      {/* Button Configuration Desk */}
       <div className="flex gap-2.5 pt-2 border-t border-white/5 font-mono text-xs font-bold uppercase tracking-wider">
         {onCancel && (
           <button

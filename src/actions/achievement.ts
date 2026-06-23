@@ -8,10 +8,7 @@ import {
   getAchievementById as getAchievementByIdService,
 } from "@/services/achievement";
 
-/**
- * Custom uniform error signature returning customer-friendly strings
- * instead of letting infrastructure or database logs leak to the client.
- */
+// Error
 function handleServerError(error: any, fallbackMessage: string) {
   console.error("Server Action Exception caught:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
@@ -23,13 +20,26 @@ function handleServerError(error: any, fallbackMessage: string) {
     return { success: false, error: "Identifier is required to modify this record." };
   }
   if (errorMessage.includes("portfolioId not found")) {
-    return { success: false, error: "Unable to find an active portfolio. Please check your session setup." };
+    return {
+      success: false,
+      error: "Unable to find an active portfolio. Please check your session setup.",
+    };
   }
   if (errorMessage.includes("Network") || errorMessage.includes("fetch")) {
-    return { success: false, error: "Network connection lost. Please verify your connection status." };
+    return {
+      success: false,
+      error: "Network connection lost. Please verify your connection status.",
+    };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
-    return { success: false, error: "Database service failed to complete the request. Please try again." };
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
+    return {
+      success: false,
+      error: "Database service failed to complete the request. Please try again.",
+    };
   }
 
   return { success: false, error: fallbackMessage };
@@ -53,7 +63,6 @@ export async function createAchievement(data: {
       return { success: false, error: "Title is required. Please fill in the achievement title." };
     }
 
-    // fallback system (old frontend OR new system)
     let portfolioId = data.portfolioId;
 
     if (!portfolioId) {
@@ -62,7 +71,10 @@ export async function createAchievement(data: {
     }
 
     if (!portfolioId) {
-      return { success: false, error: "Portfolio connection target not found. Unable to link achievement." };
+      return {
+        success: false,
+        error: "Portfolio connection target not found. Unable to link achievement.",
+      };
     }
 
     const result = await createAchievementService({
@@ -72,7 +84,10 @@ export async function createAchievement(data: {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleServerError(error, "Unable to create achievement. Please review details and try again.");
+    return handleServerError(
+      error,
+      "Unable to create achievement. Please review details and try again."
+    );
   }
 }
 
@@ -99,14 +114,20 @@ export async function updateAchievement(
     const result = await updateAchievementService(id, data);
     return { success: true, data: result };
   } catch (error) {
-    return handleServerError(error, "Unable to save changes to this achievement. Please try again.");
+    return handleServerError(
+      error,
+      "Unable to save changes to this achievement. Please try again."
+    );
   }
 }
 
 export async function deleteAchievement(id: string) {
   try {
     if (!id) {
-      return { success: false, error: "Achievement identification missing. Delete request cancelled." };
+      return {
+        success: false,
+        error: "Achievement identification missing. Delete request cancelled.",
+      };
     }
 
     const result = await deleteAchievementService(id);
@@ -118,7 +139,6 @@ export async function deleteAchievement(id: string) {
 
 export async function getAchievements(portfolioId: string) {
   try {
-    // fallback: auto-resolve if not provided
     let targetPortfolioId = portfolioId;
     if (!targetPortfolioId) {
       const { getPortfolioId } = await import("@/lib/get-portfolio-id");

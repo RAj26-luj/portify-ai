@@ -1,21 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  Cpu, 
-  Edit3, 
-  Trash2, 
-  Loader2, 
+import {
+  Cpu,
+  Edit3,
+  Trash2,
+  Loader2,
   AlertTriangle,
   Award,
   Zap,
-  Tag,
   Image as ImageIcon,
   Code2,
   Terminal,
   Layers,
   Database,
-  Globe
+  Globe,
 } from "lucide-react";
 import { deleteSkill } from "@/actions/skill";
 
@@ -32,7 +31,7 @@ interface Props {
   categoryId?: string;
 
   onRefresh?: () => void;
-  onEditClick?: () => void; 
+  onEditClick?: () => void;
 }
 
 export default function SkillCard({
@@ -55,26 +54,45 @@ export default function SkillCard({
 
   const getDynamicFallbackIcon = () => {
     const checkString = `${name} ${categoryName || ""}`.toLowerCase();
-    
+
     if (checkString.includes("db") || checkString.includes("sql") || checkString.includes("data")) {
       return <Database size={16} className="sm:w-[18px] sm:h-[18px] text-blue-400" />;
     }
-    if (checkString.includes("web") || checkString.includes("front") || checkString.includes("api") || checkString.includes("cloud")) {
+    if (
+      checkString.includes("web") ||
+      checkString.includes("front") ||
+      checkString.includes("api") ||
+      checkString.includes("cloud")
+    ) {
       return <Globe size={16} className="sm:w-[18px] sm:h-[18px] text-emerald-400" />;
     }
-    if (checkString.includes("script") || checkString.includes("code") || checkString.includes("lang")) {
+    if (
+      checkString.includes("script") ||
+      checkString.includes("code") ||
+      checkString.includes("lang")
+    ) {
       return <Code2 size={16} className="sm:w-[18px] sm:h-[18px] text-purple-400" />;
     }
-    if (checkString.includes("style") || checkString.includes("design") || checkString.includes("css")) {
+    if (
+      checkString.includes("style") ||
+      checkString.includes("design") ||
+      checkString.includes("css")
+    ) {
       return <Layers size={16} className="sm:w-[18px] sm:h-[18px] text-pink-400" />;
     }
-    if (checkString.includes("devops") || checkString.includes("linux") || checkString.includes("bash")) {
+    if (
+      checkString.includes("devops") ||
+      checkString.includes("linux") ||
+      checkString.includes("bash")
+    ) {
       return <Terminal size={16} className="sm:w-[18px] sm:h-[18px] text-amber-400" />;
     }
-    
+
     const alternatingIndex = name.length % 3;
-    if (alternatingIndex === 1) return <Code2 size={16} className="sm:w-[18px] sm:h-[18px] text-blue-400/80" />;
-    if (alternatingIndex === 2) return <Terminal size={16} className="sm:w-[18px] sm:h-[18px] text-zinc-400" />;
+    if (alternatingIndex === 1)
+      return <Code2 size={16} className="sm:w-[18px] sm:h-[18px] text-blue-400/80" />;
+    if (alternatingIndex === 2)
+      return <Terminal size={16} className="sm:w-[18px] sm:h-[18px] text-zinc-400" />;
     return <Cpu size={16} className="sm:w-[18px] sm:h-[18px] text-purple-400/80" />;
   };
 
@@ -107,12 +125,8 @@ export default function SkillCard({
   };
 
   return (
-    /* Note: Applied h-full wrapper targeting consistent matching sizes based on the largest card contents */
     <div className="group/skill-card relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] p-4 sm:p-5 shadow-sm transition-all duration-300 sm:hover:-translate-y-[2px] sm:hover:border-zinc-700 sm:hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.6)] w-full max-w-sm mx-auto h-full">
-      
-      {/* Container wrapper configured with flex-1 ensures inner content blocks distribute uniformly to push footer low */}
       <div className="space-y-3 sm:space-y-4 flex-1 flex flex-col justify-start">
-        {/* Core Header Brand Architecture */}
         <div className="flex items-start justify-between gap-2 sm:gap-3 shrink-0">
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
             {hasCustomLogo ? (
@@ -129,7 +143,7 @@ export default function SkillCard({
                 {getDynamicFallbackIcon()}
               </div>
             )}
-            
+
             <div className="min-w-0">
               <h3 className="font-bold text-zinc-100 text-xs sm:text-base tracking-tight truncate group-hover/skill-card:text-white transition-colors">
                 {name}
@@ -143,7 +157,6 @@ export default function SkillCard({
           </div>
         </div>
 
-        {/* Dynamic Optimization Prompt - Hidden on mobile to clean up layout cards density rules */}
         {!hasCustomLogo && (
           <div className="hidden sm:flex items-center gap-1.5 rounded-lg border border-blue-500/10 bg-blue-500/5 px-2.5 py-1.5 text-[11px] text-blue-400/90 animate-fadeIn select-none shrink-0">
             <ImageIcon size={12} className="shrink-0 text-blue-400" />
@@ -151,11 +164,12 @@ export default function SkillCard({
           </div>
         )}
 
-        {/* Technical Competency Matrix Badge Row */}
         {(proficiency || yearsOfExperience !== undefined || tag) && (
           <div className="flex flex-wrap gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] font-mono shrink-0">
             {proficiency && (
-              <span className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-semibold ${getProficiencyStyle(proficiency)}`}>
+              <span
+                className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-semibold ${getProficiencyStyle(proficiency)}`}
+              >
                 <Zap size={9} className="shrink-0 sm:w-[10px] sm:h-[10px]" />
                 <span>{proficiency}</span>
               </span>
@@ -176,15 +190,13 @@ export default function SkillCard({
           </div>
         )}
 
-        {/* Mobile descriptive text container override block - set with mt-auto context to absorb baseline variation */}
         {description && (
-          <p className="text-[11px] sm:text-sm leading-relaxed text-zinc-400 font-sans line-clamp-2 sm:line-clamp-3 border-t border-zinc-900/80 pt-2 sm:pt-3 pl-0.5 xs-compact-desc mt-auto">
+          <p className="text-[11px] sm:text-sm leading-relaxed text-zinc-400 font-sans line-clamp-2 sm:line-clamp-3 border-t border-zinc-900/80 pt-2 sm:pt-3 pl-0.5 mt-auto">
             {description}
           </p>
         )}
       </div>
 
-      {/* Control Action Hub Configuration Footer Dock */}
       <div className="mt-3 sm:mt-4 shrink-0">
         {errorFeedback && (
           <div className="mb-2 flex items-center gap-1.5 rounded-lg border border-red-500/10 bg-red-500/5 p-1.5 text-[10px] sm:text-xs text-red-400 animate-fadeIn">
@@ -194,8 +206,10 @@ export default function SkillCard({
         )}
 
         {showDeleteConfirm ? (
-          <div className="flex flex-col gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950 p-1.5 animate-fadeIn">
-            <p className="text-[10px] font-medium text-zinc-500 px-1 text-center">Purge entry matrix?</p>
+          <div className="flex flex-col gap-1.5 rounded-lg border border-zinc-800 bg-zinc-955 p-1.5 animate-fadeIn">
+            <p className="text-[10px] font-medium text-zinc-500 px-1 text-center">
+              Purge entry matrix?
+            </p>
             <div className="flex gap-1.5">
               <button
                 type="button"
@@ -237,7 +251,6 @@ export default function SkillCard({
           </div>
         )}
       </div>
-
     </div>
   );
 }

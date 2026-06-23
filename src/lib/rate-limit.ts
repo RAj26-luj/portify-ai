@@ -23,23 +23,17 @@ function cleanup() {
     }
   }
 
-  // prevent memory leak explosion
   if (store.size > MAX_KEYS) {
     const firstKey = store.keys().next().value;
     if (firstKey) store.delete(firstKey);
   }
 }
 
-// periodic cleanup
 if (typeof global !== "undefined") {
   setInterval(cleanup, 60_000).unref();
 }
 
-export function rateLimit(
-  key: string,
-  limit = 100,
-  windowMs = 60_000
-): RateLimitResult {
+export function rateLimit(key: string, limit = 100, windowMs = 60_000): RateLimitResult {
   const now = Date.now();
 
   const current = store.get(key);

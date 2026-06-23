@@ -14,41 +14,49 @@ import type { ProfileUpdateDTO } from "@/validators/profile";
 import { createAuditLog, logUserBlocked } from "@/lib/audit-log";
 
 import { prisma } from "@/lib/prisma";
-import {
-  sendBlockedEmail,
-  sendUnblockedEmail,
-} from "@/services/email";
+import { sendBlockedEmail, sendUnblockedEmail } from "@/services/email";
 
-/**
- * Standardized Response Type Interface
- */
 interface ServerActionResponse<T> {
   success: boolean;
   error: string | null;
   data: T | null;
 }
 
-/**
- * Transforms session authorization faults, schema parsing violations, and structural database 
- * validation issues into uniform, user-friendly responses tailored for client-side UI toast flashes.
- */
+// Error
 function handleProfileServerError(error: any, fallbackMessage: string): ServerActionResponse<any> {
   console.error("Profile Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
   if (errorMessage.includes("Unauthorized")) {
-    return { success: false, error: "Access denied. Please sign in to modify or retrieve profile information.", data: null };
-  }
-  if (errorMessage.includes("User not found")) {
-    return { success: false, error: "Profile search failed. The authenticated user record does not exist.", data: null };
-  }
-  if (errorMessage.includes("ZodError") || errorMessage.includes("validation")) {
-    return { success: false, error: "Form verification failed. Please check your data formatting constraints.", data: null };
-  }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
     return {
       success: false,
-      error: "The core identity profile engine is performing maintenance optimizations. Please try again shortly.",
+      error: "Access denied. Please sign in to modify or retrieve profile information.",
+      data: null,
+    };
+  }
+  if (errorMessage.includes("User not found")) {
+    return {
+      success: false,
+      error: "Profile search failed. The authenticated user record does not exist.",
+      data: null,
+    };
+  }
+  if (errorMessage.includes("ZodError") || errorMessage.includes("validation")) {
+    return {
+      success: false,
+      error: "Form verification failed. Please check your data formatting constraints.",
+      data: null,
+    };
+  }
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
+    return {
+      success: false,
+      error:
+        "The core identity profile engine is performing maintenance optimizations. Please try again shortly.",
       data: null,
     };
   }
@@ -56,15 +64,16 @@ function handleProfileServerError(error: any, fallbackMessage: string): ServerAc
   return { success: false, error: fallbackMessage, data: null };
 }
 
-/**
- * GET PROFILE
- */
 export async function getProfile(): Promise<ServerActionResponse<any>> {
   try {
     const session = await auth();
 
     if (!session?.user?.email) {
-      return { success: false, error: "Session validation token is expired or unauthorized.", data: null };
+      return {
+        success: false,
+        error: "Session validation token is expired or unauthorized.",
+        data: null,
+      };
     }
 
     const user = await prisma.user.findUnique({
@@ -72,25 +81,33 @@ export async function getProfile(): Promise<ServerActionResponse<any>> {
     });
 
     if (!user) {
-      return { success: false, error: "Could not retrieve info. User mapping not found.", data: null };
+      return {
+        success: false,
+        error: "Could not retrieve info. User mapping not found.",
+        data: null,
+      };
     }
 
     const data = await getProfileService(user.id);
     return { success: true, error: null, data };
   } catch (error) {
-    return handleProfileServerError(error, "Failed to compile your background metadata configuration layout.");
+    return handleProfileServerError(
+      error,
+      "Failed to compile your background metadata configuration layout."
+    );
   }
 }
 
-/**
- * UPDATE PROFILE
- */
 export async function updateProfile(formData: unknown): Promise<ServerActionResponse<any>> {
   try {
     const session = await auth();
 
     if (!session?.user?.email) {
-      return { success: false, error: "Unauthorized session access credentials. Mutation rejected.", data: null };
+      return {
+        success: false,
+        error: "Unauthorized session access credentials. Mutation rejected.",
+        data: null,
+      };
     }
 
     const user = await prisma.user.findUnique({
@@ -98,12 +115,13 @@ export async function updateProfile(formData: unknown): Promise<ServerActionResp
     });
 
     if (!user) {
-      return { success: false, error: "Target account records do not exist. Profile save aborted.", data: null };
+      return {
+        success: false,
+        error: "Target account records do not exist. Profile save aborted.",
+        data: null,
+      };
     }
 
-    /**
-     * SAFE PARSE
-     */
     let validatedData;
     try {
       validatedData = profileSchema.parse({
@@ -111,12 +129,12 @@ export async function updateProfile(formData: unknown): Promise<ServerActionResp
         email: user.email,
       });
     } catch (parseError) {
-      return handleProfileServerError(parseError, "Failed parsing form parameters. Check required fields constraints.");
+      return handleProfileServerError(
+        parseError,
+        "Failed parsing form parameters. Check required fields constraints."
+      );
     }
 
-    /**
-     * SAFE DTO (NO FALLBACK LOGIC HERE)
-     */
     const safeUserData: ProfileUpdateDTO = {
       name: validatedData.name,
       phone: validatedData.phone,
@@ -175,14 +193,8 @@ export async function updateProfile(formData: unknown): Promise<ServerActionResp
       heroIntroduction: validatedData.heroIntroduction,
     };
 
-    /**
-     * MAIN UPDATE (SINGLE SOURCE OF TRUTH)
-     */
     const result = await updateProfileService(user.id, safeUserData);
 
-    /**
-     * 🔥 SYNC ONLY WHEN VALUE EXISTS (PREVENT OVERWRITE BUG)
-     */
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -194,12 +206,8 @@ export async function updateProfile(formData: unknown): Promise<ServerActionResp
     await prisma.portfolio.update({
       where: { userId: user.id },
       data: {
-        profileImage:
-          validatedData.profileImage ?? validatedData.image ?? undefined,
-        coverImage:
-          validatedData.coverPortfolioImage ??
-          validatedData.coverImage ??
-          undefined,
+        profileImage: validatedData.profileImage ?? validatedData.image ?? undefined,
+        coverImage: validatedData.coverPortfolioImage ?? validatedData.coverImage ?? undefined,
       },
     });
 
@@ -213,13 +221,13 @@ export async function updateProfile(formData: unknown): Promise<ServerActionResp
 
     return { success: true, error: null, data: result };
   } catch (error) {
-    return handleProfileServerError(error, "The configuration save chain encountered an unhandled data fault layer.");
+    return handleProfileServerError(
+      error,
+      "The configuration save chain encountered an unhandled data fault layer."
+    );
   }
 }
 
-/**
- * GET USER BY ID
- */
 export async function getUserById(id: string): Promise<ServerActionResponse<any>> {
   try {
     if (!id) return { success: true, error: null, data: null };
@@ -233,13 +241,13 @@ export async function getUserById(id: string): Promise<ServerActionResponse<any>
     });
     return { success: true, error: null, data };
   } catch (error) {
-    return handleProfileServerError(error, "Failed to cross-reference administrative user credentials trace records.");
+    return handleProfileServerError(
+      error,
+      "Failed to cross-reference administrative user credentials trace records."
+    );
   }
 }
 
-/**
- * GET ALL USERS
- */
 export async function getUsers(): Promise<ServerActionResponse<any[]>> {
   try {
     const data = await prisma.user.findMany({
@@ -248,7 +256,10 @@ export async function getUsers(): Promise<ServerActionResponse<any[]>> {
     });
     return { success: true, error: null, data };
   } catch (error) {
-    console.error("Failed executing quantitative query calculation for administrative user tracking streams:", error);
+    console.error(
+      "Failed executing quantitative query calculation for administrative user tracking streams:",
+      error
+    );
     return {
       success: false,
       error: "Failed to assemble background directory account list feeds configuration.",
@@ -257,13 +268,14 @@ export async function getUsers(): Promise<ServerActionResponse<any[]>> {
   }
 }
 
-/**
- * APPROVE USER
- */
 export async function approveUser(id: string): Promise<ServerActionResponse<any>> {
   try {
     if (!id) {
-      return { success: false, error: "Account unique lookup selector identity criteria token is required.", data: null };
+      return {
+        success: false,
+        error: "Account unique lookup selector identity criteria token is required.",
+        data: null,
+      };
     }
 
     const user = await prisma.user.update({
@@ -281,22 +293,29 @@ export async function approveUser(id: string): Promise<ServerActionResponse<any>
         status: user.status,
       });
     } catch (logError) {
-      console.error("Non-blocking administrative audit trace log sequence allocation exception:", logError);
+      console.error(
+        "Non-blocking administrative audit trace log sequence allocation exception:",
+        logError
+      );
     }
 
     return { success: true, error: null, data: user };
   } catch (error) {
-    return handleProfileServerError(error, "The administrative approval state modifier query tracking failed.");
+    return handleProfileServerError(
+      error,
+      "The administrative approval state modifier query tracking failed."
+    );
   }
 }
 
-/**
- * REJECT USER
- */
 export async function rejectUser(id: string): Promise<ServerActionResponse<any>> {
   try {
     if (!id) {
-      return { success: false, error: "Account unique lookup selector identity criteria token is required.", data: null };
+      return {
+        success: false,
+        error: "Account unique lookup selector identity criteria token is required.",
+        data: null,
+      };
     }
 
     const user = await prisma.user.update({
@@ -313,18 +332,21 @@ export async function rejectUser(id: string): Promise<ServerActionResponse<any>>
         status: user.status,
       });
     } catch (logError) {
-      console.error("Non-blocking administrative audit trace log sequence allocation exception:", logError);
+      console.error(
+        "Non-blocking administrative audit trace log sequence allocation exception:",
+        logError
+      );
     }
 
     return { success: true, error: null, data: user };
   } catch (error) {
-    return handleProfileServerError(error, "The administrative rejection modifier operation parameters failed.");
+    return handleProfileServerError(
+      error,
+      "The administrative rejection modifier operation parameters failed."
+    );
   }
 }
 
-/**
- * UPDATE BASIC USER PROFILE
- */
 export async function updateUserProfile(
   id: string,
   data: {
@@ -339,7 +361,11 @@ export async function updateUserProfile(
 ): Promise<ServerActionResponse<any>> {
   try {
     if (!id) {
-      return { success: false, error: "Distinct user index parameter reference context identification string is required.", data: null };
+      return {
+        success: false,
+        error: "Distinct user index parameter reference context identification string is required.",
+        data: null,
+      };
     }
 
     const result = await prisma.user.update({
@@ -349,23 +375,31 @@ export async function updateUserProfile(
 
     return { success: true, error: null, data: result };
   } catch (error) {
-    return handleProfileServerError(error, "Failed to apply tracking modifications on system level database layers.");
+    return handleProfileServerError(
+      error,
+      "Failed to apply tracking modifications on system level database layers."
+    );
   }
 }
 
-/**
- * DELETE USER
- */
 export async function deleteUser(id: string): Promise<ServerActionResponse<any>> {
   try {
     if (!id) {
-      return { success: false, error: "Identification tracer index string missing. Account wipe sequence dropped.", data: null };
+      return {
+        success: false,
+        error: "Identification tracer index string missing. Account wipe sequence dropped.",
+        data: null,
+      };
     }
 
     const user = await prisma.user.findUnique({ where: { id } });
 
     if (!user) {
-      return { success: false, error: "Account lookup failed. Target entity targeted for removal does not exist.", data: null };
+      return {
+        success: false,
+        error: "Account lookup failed. Target entity targeted for removal does not exist.",
+        data: null,
+      };
     }
 
     try {
@@ -375,7 +409,10 @@ export async function deleteUser(id: string): Promise<ServerActionResponse<any>>
         status: user.status,
       });
     } catch (auditError) {
-      console.error("Non-blocking deletion configuration metrics tracking footprint failed:", auditError);
+      console.error(
+        "Non-blocking deletion configuration metrics tracking footprint failed:",
+        auditError
+      );
     }
 
     const result = await prisma.user.delete({
@@ -384,17 +421,21 @@ export async function deleteUser(id: string): Promise<ServerActionResponse<any>>
 
     return { success: true, error: null, data: result };
   } catch (error) {
-    return handleProfileServerError(error, "The target directory registration record row could not be successfully dropped.");
+    return handleProfileServerError(
+      error,
+      "The target directory registration record row could not be successfully dropped."
+    );
   }
 }
 
-/**
- * BLOCK USER
- */
 export async function blockUser(id: string): Promise<ServerActionResponse<any>> {
   try {
     if (!id) {
-      return { success: false, error: "Target operational block validation key mapping is empty.", data: null };
+      return {
+        success: false,
+        error: "Target operational block validation key mapping is empty.",
+        data: null,
+      };
     }
 
     const user = await prisma.user.update({
@@ -405,7 +446,10 @@ export async function blockUser(id: string): Promise<ServerActionResponse<any>> 
     try {
       await sendBlockedEmail(user.email);
     } catch (mailError) {
-      console.error("Non-blocking security alert suspension transmission notification courier failed:", mailError);
+      console.error(
+        "Non-blocking security alert suspension transmission notification courier failed:",
+        mailError
+      );
     }
 
     try {
@@ -419,17 +463,21 @@ export async function blockUser(id: string): Promise<ServerActionResponse<any>> 
 
     return { success: true, error: null, data: user };
   } catch (error) {
-    return handleProfileServerError(error, "The administrative security block state execution pipeline encountered a datastore error.");
+    return handleProfileServerError(
+      error,
+      "The administrative security block state execution pipeline encountered a datastore error."
+    );
   }
 }
 
-/**
- * UNBLOCK USER
- */
 export async function unblockUser(id: string): Promise<ServerActionResponse<any>> {
   try {
     if (!id) {
-      return { success: false, error: "Target operational reinstatement validation key mapping is empty.", data: null };
+      return {
+        success: false,
+        error: "Target operational reinstatement validation key mapping is empty.",
+        data: null,
+      };
     }
 
     const user = await prisma.user.update({
@@ -440,7 +488,10 @@ export async function unblockUser(id: string): Promise<ServerActionResponse<any>
     try {
       await sendUnblockedEmail(user.email);
     } catch (mailError) {
-      console.error("Non-blocking security reinforcement reactivation courier failed to broadcast:", mailError);
+      console.error(
+        "Non-blocking security reinforcement reactivation courier failed to broadcast:",
+        mailError
+      );
     }
 
     try {
@@ -454,6 +505,9 @@ export async function unblockUser(id: string): Promise<ServerActionResponse<any>
 
     return { success: true, error: null, data: user };
   } catch (error) {
-    return handleProfileServerError(error, "The administrative access restoration sequence tracking criteria failed.");
+    return handleProfileServerError(
+      error,
+      "The administrative access restoration sequence tracking criteria failed."
+    );
   }
 }

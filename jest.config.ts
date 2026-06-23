@@ -8,11 +8,7 @@ const config: Config = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
 
-  testMatch: [
-    "<rootDir>/tests/unit/**/*.test.ts",
-    "<rootDir>/tests/unit/**/*.test.tsx",
-  ],
-
+  testMatch: ["<rootDir>/src/tests/unit/**/*.test.ts", "<rootDir>/src/tests/unit/**/*.test.tsx"],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 };
 

@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Loader2, 
-  Clock, 
-  Inbox, 
-  ShieldAlert, 
-  Terminal, 
-  CheckCircle2, 
-  AlertTriangle, 
-  X, 
-  Check 
+import {
+  Loader2,
+  Clock,
+  Inbox,
+  ShieldAlert,
+  Terminal,
+  CheckCircle2,
+  AlertTriangle,
+  X,
+  Check,
 } from "lucide-react";
 
 type ApprovalRequest = {
@@ -101,8 +101,6 @@ export default function ApprovalsPage() {
 
   return (
     <div className="space-y-6 md:space-y-8 max-w-5xl mx-auto px-3 md:px-4 py-4 md:py-8 text-zinc-300 antialiased">
-      
-      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded bg-blue-500/5 border border-blue-500/10 text-blue-400 font-mono text-[9px] uppercase tracking-widest">
@@ -117,7 +115,6 @@ export default function ApprovalsPage() {
         </div>
       </div>
 
-      {/* PENDING LIST */}
       <div className="space-y-3">
         {pendingRequests.length === 0 ? (
           <div className="text-center py-12 border border-dashed border-white/5 rounded-xl text-xs text-zinc-500 font-mono">
@@ -126,7 +123,10 @@ export default function ApprovalsPage() {
           </div>
         ) : (
           pendingRequests.map((a) => (
-            <div key={a.id} className="border border-white/5 bg-[#111113] rounded-xl p-4 sm:p-5 flex flex-col gap-4">
+            <div
+              key={a.id}
+              className="border border-white/5 bg-[#111113] rounded-xl p-4 sm:p-5 flex flex-col gap-4"
+            >
               <div className="flex justify-between items-start gap-4">
                 <div className="min-w-0">
                   <p className="font-bold text-white truncate">{a.user.name}</p>
@@ -149,14 +149,26 @@ export default function ApprovalsPage() {
                   disabled={processingId === a.id}
                   className="flex-1 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider py-2.5 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 text-red-400 rounded-lg transition-all"
                 >
-                  {processingId === a.id ? <Loader2 size={12} className="animate-spin" /> : <><X size={12} /> Reject</>}
+                  {processingId === a.id ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <>
+                      <X size={12} /> Reject
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={() => action(a.id, "APPROVE")}
                   disabled={processingId === a.id}
                   className="flex-1 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all"
                 >
-                  {processingId === a.id ? <Loader2 size={12} className="animate-spin" /> : <><Check size={12} /> Approve</>}
+                  {processingId === a.id ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Check size={12} /> Approve
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -164,19 +176,25 @@ export default function ApprovalsPage() {
         )}
       </div>
 
-      {/* HISTORY */}
       {processedRequests.length > 0 && (
         <div className="space-y-4 pt-6 border-t border-white/5">
-          <h2 className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-600">Decision Registry</h2>
+          <h2 className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-600">
+            Decision Registry
+          </h2>
           <div className="bg-[#0A0A0B] rounded-lg border border-white/5 divide-y divide-white/5">
             {processedRequests.map((log) => (
-              <div key={log.id} className="flex items-center justify-between px-4 py-3 text-[11px] font-mono">
+              <div
+                key={log.id}
+                className="flex items-center justify-between px-4 py-3 text-[11px] font-mono"
+              >
                 <span className="truncate text-zinc-300">{log.user.name}</span>
-                <span className={`px-2 py-0.5 rounded border uppercase ${
-                  log.status === "APPROVED" 
-                    ? "bg-emerald-500/5 text-emerald-400 border-emerald-500/10" 
-                    : "bg-red-500/5 text-red-400 border-red-500/10"
-                }`}>
+                <span
+                  className={`px-2 py-0.5 rounded border uppercase ${
+                    log.status === "APPROVED"
+                      ? "bg-emerald-500/5 text-emerald-400 border-emerald-500/10"
+                      : "bg-red-500/5 text-red-400 border-red-500/10"
+                  }`}
+                >
                   {log.status}
                 </span>
               </div>

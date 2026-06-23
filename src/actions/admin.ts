@@ -1,16 +1,9 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import {
-  PortfolioStatus,
-  UserRole,
-  UserStatus,
-} from "@prisma/client";
+import { PortfolioStatus, UserRole, UserStatus } from "@prisma/client";
 
-/**
- * Standard server exception handler translating internal infrastructure errors
- * into structured consumer-friendly notifications to ensure client resilience.
- */
+// Error
 function handleAdminServerError(
   error: any,
   fallbackMessage: string
@@ -21,19 +14,25 @@ function handleAdminServerError(
   console.error("Admin Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
-    return { 
-      success: false, 
-      error: "Database management system is currently unavailable. Please verify connection strings." 
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
+    return {
+      success: false,
+      error:
+        "Database management system is currently unavailable. Please verify connection strings.",
     };
   }
   if (errorMessage.includes("unauthorized") || errorMessage.includes("denied")) {
-    return { 
-      success: false, 
-      error: "Access denied. Your current session does not hold structural administrative privileges." 
+    return {
+      success: false,
+      error:
+        "Access denied. Your current session does not hold structural administrative privileges.",
     };
   }
-  
+
   return { success: false, error: fallbackMessage };
 }
 
@@ -94,7 +93,10 @@ export async function getAllUsers() {
     });
     return { success: true, data };
   } catch (error) {
-    return handleAdminServerError(error, "Failed to aggregate complete administrative users record system.");
+    return handleAdminServerError(
+      error,
+      "Failed to aggregate complete administrative users record system."
+    );
   }
 }
 
@@ -162,10 +164,13 @@ export async function getUserStats() {
         adminUsers,
         totalPortfolios,
         publishedPortfolios,
-      }
+      },
     };
   } catch (error) {
-    return handleAdminServerError(error, "Failed to parse system registration and metric counters.");
+    return handleAdminServerError(
+      error,
+      "Failed to parse system registration and metric counters."
+    );
   }
 }
 
@@ -248,7 +253,7 @@ export async function getPlatformStats() {
         totalProjects,
         totalMessages,
         totalReports,
-      }
+      },
     };
   } catch (error) {
     return handleAdminServerError(error, "Failed to compile cross-platform global data analytics.");

@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  GraduationCap, 
-  Calendar, 
-  MapPin, 
-  Award, 
-  Edit3, 
-  Trash2, 
-  Loader2, 
+import {
+  GraduationCap,
+  Calendar,
+  MapPin,
+  Award,
+  Edit3,
+  Trash2,
+  Loader2,
   AlertTriangle,
-  Image as ImageIcon
+  Image as ImageIcon,
 } from "lucide-react";
 
 interface Props {
@@ -32,7 +32,8 @@ interface Props {
   onDelete?: (id: string) => Promise<void> | void;
 }
 
-const DEFAULT_INSTITUTION_IMAGE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
+const DEFAULT_INSTITUTION_IMAGE =
+  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
 
 export default function EducationCard({
   id,
@@ -57,7 +58,9 @@ export default function EducationCard({
 
   const hasInstitutionImage = Boolean(institutionImage?.trim());
   const hasLogoUrl = Boolean(logoUrl?.trim());
-  const activeHeroImage = hasInstitutionImage ? institutionImage!.trim() : DEFAULT_INSTITUTION_IMAGE;
+  const activeHeroImage = hasInstitutionImage
+    ? institutionImage!.trim()
+    : DEFAULT_INSTITUTION_IMAGE;
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -74,14 +77,10 @@ export default function EducationCard({
   };
 
   return (
-    /* Note: Added h-full to make card heights uniform based on the tallest sibling */
     <div className="group/edu-card relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-zinc-700 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.6)] h-full">
-      
-      {/* Container wrapper configured with flex-1 ensures inner content fills up the remaining card space */}
       <div className="flex-1 flex flex-col justify-between">
         <div>
-          {/* Premium Media Block Frame Architecture */}
-          <div className="relative h-40 w-full overflow-hidden bg-zinc-950 border-b border-zinc-900/50">
+          <div className="relative h-44 w-full overflow-hidden bg-zinc-950 border-b border-zinc-900/50">
             <img
               src={activeHeroImage}
               alt={institution}
@@ -89,8 +88,7 @@ export default function EducationCard({
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0C0C0E] via-[#0C0C0E]/30 to-transparent" />
-            
-            {/* Absolute High-Context Interface Elements */}
+
             <div className="absolute top-3 left-3 flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/90 text-zinc-400 backdrop-blur-md shadow-sm transition-colors group-hover/edu-card:text-blue-400">
                 <GraduationCap size={13} />
@@ -103,16 +101,16 @@ export default function EducationCard({
               )}
             </div>
 
-            {/* Contextual Asset Visibility Optimization Warning Prompt */}
             {!hasInstitutionImage && (
               <div className="absolute bottom-3 left-3 right-3 flex items-center gap-1.5 rounded-lg border border-blue-500/10 bg-blue-500/5 px-2.5 py-1.5 text-[11px] text-blue-400/90 backdrop-blur-md">
                 <ImageIcon size={12} className="shrink-0 text-blue-400" />
-                <span className="truncate">We recommend an institution landscape layout for best visibility</span>
+                <span className="truncate">
+                  We recommend an institution landscape layout for best visibility
+                </span>
               </div>
             )}
           </div>
 
-          {/* Structured Content Ecosystem Layer */}
           <div className="p-5 space-y-4">
             <div className="flex items-start gap-3 min-w-0">
               {hasLogoUrl && (
@@ -138,7 +136,6 @@ export default function EducationCard({
               </div>
             </div>
 
-            {/* Core Body Field Narrative Module */}
             {description && (
               <p className="text-xs sm:text-sm leading-relaxed text-zinc-400 line-clamp-3 font-sans">
                 {description}
@@ -147,16 +144,17 @@ export default function EducationCard({
           </div>
         </div>
 
-        {/* Operational Parameters Dashboard Matrix Layout placed outside description zone to lock at the bottom uniformly */}
         {(location || startDate || endDate || grade || cgpa) && (
           <div className="p-5 pt-0 grid grid-cols-2 gap-2 text-xs">
             {(startDate || endDate) && (
               <div className="flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900/30 p-2 col-span-2">
                 <Calendar size={13} className="text-zinc-500 shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Timeline</div>
+                  <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+                    Timeline
+                  </div>
                   <div className="font-medium text-zinc-300 truncate">
-                    {startDate ?? "—"} → {currentlyStudying ? "Present" : endDate ?? "Present"}
+                    {startDate ?? "—"} → {currentlyStudying ? "Present" : (endDate ?? "Present")}
                   </div>
                 </div>
               </div>
@@ -166,7 +164,9 @@ export default function EducationCard({
               <div className="flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900/30 p-2">
                 <MapPin size={13} className="text-zinc-500 shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Location</div>
+                  <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+                    Location
+                  </div>
                   <div className="font-medium text-zinc-300 truncate">{location}</div>
                 </div>
               </div>
@@ -189,7 +189,6 @@ export default function EducationCard({
         )}
       </div>
 
-      {/* Control Actions & Operational Errors Management Interface Base Dock */}
       <div className="p-5 pt-0 shrink-0">
         {errorFeedback && (
           <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-2.5 text-xs text-red-400 animate-fadeIn">
@@ -199,8 +198,10 @@ export default function EducationCard({
         )}
 
         {showDeleteConfirm ? (
-          <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 animate-fadeIn">
-            <p className="text-xs font-medium text-zinc-400 px-1 text-center">Confirm irreversible deletion?</p>
+          <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-955 p-2.5 animate-fadeIn">
+            <p className="text-xs font-medium text-zinc-400 px-1 text-center">
+              Confirm irreversible deletion?
+            </p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -243,7 +244,6 @@ export default function EducationCard({
           </div>
         )}
       </div>
-
     </div>
   );
 }

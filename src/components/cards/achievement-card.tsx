@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  Trophy, 
-  Calendar, 
-  Award, 
-  BarChart2, 
-  Edit3, 
-  Trash2, 
+import {
+  Trophy,
+  Calendar,
+  Award,
+  BarChart2,
+  Edit3,
+  Trash2,
   ExternalLink,
   Image as ImageIcon,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 
 interface Props {
@@ -29,7 +29,8 @@ interface Props {
   onDelete?: (id: string) => Promise<void> | void;
 }
 
-const DEFAULT_ACHIEVEMENT_IMAGE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
+const DEFAULT_ACHIEVEMENT_IMAGE =
+  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
 
 export default function AchievementCard({
   id,
@@ -68,44 +69,39 @@ export default function AchievementCard({
 
   return (
     <>
-      {/* MOBILE OPTIMIZED LIST VIEW VARIANT */}
       <div className="block sm:hidden p-3.5 rounded-xl border border-zinc-950 bg-[#070709] hover:bg-zinc-900/10 transition-all duration-200">
         <div className="flex items-start gap-3 justify-between">
           <div className="flex items-start gap-2.5 min-w-0 flex-1">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-blue-400 shrink-0 mt-0.5">
               <Trophy size={13} />
             </div>
-            
+
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex flex-wrap items-center gap-1.5">
-                <h3 className="text-xs font-bold text-zinc-100 truncate max-w-[180px]">
-                  {title}
-                </h3>
+                <h3 className="text-xs font-bold text-zinc-100 truncate max-w-[180px]">{title}</h3>
                 {featured && (
                   <span className="inline-flex h-3.5 px-1 items-center bg-amber-500/10 border border-amber-500/20 rounded text-[8px] font-bold uppercase text-amber-400 shrink-0">
                     ★
                   </span>
                 )}
               </div>
-              
-              {issuer && (
-                <p className="text-[10px] text-zinc-500 truncate font-medium">
-                  {issuer}
-                </p>
-              )}
+
+              {issuer && <p className="text-[10px] text-zinc-500 truncate font-medium">{issuer}</p>}
 
               {achievementDate && (
                 <p className="text-[10px] font-mono text-zinc-600 flex items-center gap-1">
                   <Calendar size={10} className="shrink-0" />
                   <span>
-                    {new Date(achievementDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short' })}
+                    {new Date(achievementDate).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                    })}
                   </span>
                 </p>
               )}
             </div>
           </div>
 
-          {/* Quick HUD Action Suite */}
           <div className="flex items-center gap-1 shrink-0">
             {certificateUrl && (
               <a
@@ -135,7 +131,6 @@ export default function AchievementCard({
           </div>
         </div>
 
-        {/* Server Action Feedback Architecture for Mobile */}
         {errorFeedback && (
           <div className="mt-2.5 flex items-center gap-1.5 rounded-md border border-red-500/10 bg-red-500/5 p-2 text-[10px] text-red-400">
             <AlertTriangle size={11} className="shrink-0" />
@@ -143,10 +138,11 @@ export default function AchievementCard({
           </div>
         )}
 
-        {/* Mobile Deletion Shield Confirmation Dialog Overlay */}
         {showDeleteConfirm && (
           <div className="mt-3 p-2 rounded-lg border border-zinc-800 bg-zinc-950 flex items-center justify-between gap-3 animate-fadeIn">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-tight">Confirm Purge?</span>
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-tight">
+              Confirm Purge?
+            </span>
             <div className="flex gap-1.5 shrink-0">
               <button
                 type="button"
@@ -169,10 +165,7 @@ export default function AchievementCard({
         )}
       </div>
 
-      {/* DESKTOP FULL PRESENTATION CARD RUNTIME */}
       <div className="hidden sm:flex group/ach-card relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-zinc-700 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.6)]">
-        
-        {/* Premium Media Architecture */}
         <div className="relative h-44 w-full overflow-hidden bg-zinc-950 border-b border-zinc-900/50">
           <img
             src={activeImageSource}
@@ -181,8 +174,7 @@ export default function AchievementCard({
             loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0C0C0E] via-[#0C0C0E]/20 to-transparent" />
-          
-          {/* Absolute High-Context Interface Elements */}
+
           <div className="absolute top-3 left-3 flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/90 text-zinc-400 backdrop-blur-md shadow-sm transition-colors group-hover/ach-card:text-blue-400">
               <Trophy size={13} />
@@ -195,27 +187,23 @@ export default function AchievementCard({
             )}
           </div>
 
-          {/* Dynamic Contextual Optimization Prompt */}
           {!hasCustomImage && (
             <div className="absolute bottom-3 left-3 right-3 flex items-center gap-1.5 rounded-lg border border-blue-500/10 bg-blue-500/5 px-2.5 py-1.5 text-[11px] text-blue-400/90 backdrop-blur-md">
               <ImageIcon size={12} className="shrink-0 text-blue-400" />
-              <span className="truncate">We recommend adding a custom image for better visibility</span>
+              <span className="truncate">
+                We recommend adding a custom image for better visibility
+              </span>
             </div>
           )}
         </div>
 
-        {/* Structured Content Architecture */}
         <div className="flex flex-1 flex-col p-5">
           <div className="flex-1 space-y-3.5">
             <div className="space-y-1">
               <h3 className="text-base font-semibold tracking-tight text-zinc-100 transition-colors group-hover/ach-card:text-white">
                 {title}
               </h3>
-              {issuer && (
-                <p className="text-xs font-medium text-zinc-500 truncate">
-                  {issuer}
-                </p>
-              )}
+              {issuer && <p className="text-xs font-medium text-zinc-500 truncate">{issuer}</p>}
             </div>
 
             {description && (
@@ -224,14 +212,15 @@ export default function AchievementCard({
               </p>
             )}
 
-            {/* Operational Metrics Display Grid */}
             {(rank || position || achievementDate) && (
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {rank && (
                   <div className="flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900/30 p-2">
                     <Award size={13} className="text-zinc-500 shrink-0" />
                     <div className="min-w-0">
-                      <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Rank</div>
+                      <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+                        Rank
+                      </div>
                       <div className="font-medium text-zinc-300 truncate">{rank}</div>
                     </div>
                   </div>
@@ -241,7 +230,9 @@ export default function AchievementCard({
                   <div className="flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900/30 p-2">
                     <BarChart2 size={13} className="text-zinc-500 shrink-0" />
                     <div className="min-w-0">
-                      <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Position</div>
+                      <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+                        Position
+                      </div>
                       <div className="font-medium text-zinc-300 truncate">{position}</div>
                     </div>
                   </div>
@@ -251,9 +242,14 @@ export default function AchievementCard({
                   <div className="flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900/30 p-2 col-span-2">
                     <Calendar size={13} className="text-zinc-500 shrink-0" />
                     <div>
-                      <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Timeline</div>
+                      <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+                        Timeline
+                      </div>
                       <div className="font-medium text-zinc-300">
-                        {new Date(achievementDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}
+                        {new Date(achievementDate).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "long",
+                        })}
                       </div>
                     </div>
                   </div>
@@ -261,7 +257,6 @@ export default function AchievementCard({
               </div>
             )}
 
-            {/* External Verification Links Layer */}
             {(certificateUrl || imageUrl) && (
               <div className="flex flex-wrap gap-1.5 pt-0.5">
                 {certificateUrl && (
@@ -291,7 +286,6 @@ export default function AchievementCard({
             )}
           </div>
 
-          {/* Server Action Feedback Architecture */}
           {errorFeedback && (
             <div className="mt-3 flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-2.5 text-xs text-red-400">
               <AlertTriangle size={13} className="shrink-0" />
@@ -299,10 +293,11 @@ export default function AchievementCard({
             </div>
           )}
 
-          {/* Contextual Confirmation Inline State Panel */}
           {showDeleteConfirm ? (
             <div className="mt-4 flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2.5">
-              <p className="text-xs font-medium text-zinc-400 px-1">Confirm irreversible deletion?</p>
+              <p className="text-xs font-medium text-zinc-400 px-1">
+                Confirm irreversible deletion?
+              </p>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -324,7 +319,6 @@ export default function AchievementCard({
               </div>
             </div>
           ) : (
-            /* High-Integrity Standard Controls Management Dock */
             <div className="mt-4 flex gap-2 border-t border-zinc-900 pt-3.5">
               <button
                 type="button"

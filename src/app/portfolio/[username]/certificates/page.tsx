@@ -8,15 +8,12 @@ interface Props {
 }
 
 export default async function CertificatesPage({ params }: Props) {
-  // 1. Fetch public metadata checking union response envelope paths
   const result = await getPortfolioByUsername(params.username);
 
-  // 🛡️ Discriminated Union Guard: Prevents top-level crashes and verifies profile visibility boundaries
   if (!result || !result.success || !result.data || !result.data.isPublic) {
     return notFound();
   }
 
-  // ✅ Safe Context: Unboxing properties directly from the isolated success branch data payload
   const portfolio = result.data;
   const certifications = (portfolio as any).certifications ?? [];
 
@@ -32,9 +29,7 @@ export default async function CertificatesPage({ params }: Props) {
             <div key={c.id} className="border rounded-xl p-5 space-y-2">
               <p className="font-semibold">{c.name}</p>
 
-              {c.issuer && (
-                <p className="text-sm text-gray-600">{c.issuer}</p>
-              )}
+              {c.issuer && <p className="text-sm text-gray-600">{c.issuer}</p>}
 
               {c.issueDate && (
                 <p className="text-xs text-gray-500">
@@ -49,11 +44,7 @@ export default async function CertificatesPage({ params }: Props) {
               )}
 
               {c.credentialUrl && (
-                <a
-                  href={c.credentialUrl}
-                  target="_blank"
-                  className="text-xs text-blue-600"
-                >
+                <a href={c.credentialUrl} target="_blank" className="text-xs text-blue-600">
                   Verify Certificate
                 </a>
               )}
@@ -61,10 +52,7 @@ export default async function CertificatesPage({ params }: Props) {
               {c.skillsCovered?.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
                   {c.skillsCovered.map((s: string, i: number) => (
-                    <span
-                      key={i}
-                      className="text-[10px] px-2 py-1 bg-gray-100 rounded"
-                    >
+                    <span key={i} className="text-[10px] px-2 py-1 bg-gray-100 rounded">
                       {s}
                     </span>
                   ))}

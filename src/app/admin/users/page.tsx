@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, ShieldAlert, Ban, ShieldCheck, UserX, Terminal, Search, Users } from "lucide-react";
+import {
+  Loader2,
+  ShieldAlert,
+  Ban,
+  ShieldCheck,
+  UserX,
+  Terminal,
+  Search,
+  Users,
+} from "lucide-react";
 
 type User = {
   id: string;
@@ -93,7 +102,7 @@ export default function UsersPage() {
         <p className="font-bold text-white text-xs sm:text-sm truncate">{user.name}</p>
         <p className="text-[10px] sm:text-xs font-mono text-zinc-500 truncate">{user.email}</p>
       </div>
-      
+
       {type === "BLOCK" && (
         <button
           onClick={() => updateUser(user.id, "BLOCK")}
@@ -104,7 +113,9 @@ export default function UsersPage() {
         </button>
       )}
       {type === "REJECT" && (
-        <span className="text-[9px] font-bold uppercase tracking-widest text-red-400">Rejected</span>
+        <span className="text-[9px] font-bold uppercase tracking-widest text-red-400">
+          Rejected
+        </span>
       )}
       {type === "APPROVE" && (
         <button
@@ -129,33 +140,36 @@ export default function UsersPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Approved */}
         <div className="space-y-3">
           <h2 className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-2">
             <ShieldCheck size={12} /> Approved ({approvedUsers.length})
           </h2>
           <div className="space-y-2">
-            {approvedUsers.map((u) => <UserCard key={u.id} user={u} type="BLOCK" />)}
+            {approvedUsers.map((u) => (
+              <UserCard key={u.id} user={u} type="BLOCK" />
+            ))}
           </div>
         </div>
 
-        {/* Blocked */}
         <div className="space-y-3">
           <h2 className="text-[10px] font-bold uppercase tracking-widest text-orange-400 flex items-center gap-2">
             <Ban size={12} /> Blocked ({blockedUsers.length})
           </h2>
           <div className="space-y-2">
-            {blockedUsers.map((u) => <UserCard key={u.id} user={u} type="APPROVE" />)}
+            {blockedUsers.map((u) => (
+              <UserCard key={u.id} user={u} type="APPROVE" />
+            ))}
           </div>
         </div>
 
-        {/* Rejected */}
         <div className="space-y-3">
           <h2 className="text-[10px] font-bold uppercase tracking-widest text-red-400 flex items-center gap-2">
             <UserX size={12} /> Rejected ({rejectedUsers.length})
           </h2>
           <div className="space-y-2">
-            {rejectedUsers.map((u) => <UserCard key={u.id} user={u} type="REJECT" />)}
+            {rejectedUsers.map((u) => (
+              <UserCard key={u.id} user={u} type="REJECT" />
+            ))}
           </div>
         </div>
       </div>

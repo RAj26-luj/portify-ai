@@ -5,26 +5,32 @@ import { getSectionSetting as getSectionSettingService } from "@/services/sectio
 import { updateSectionSetting as updateSectionSettingService } from "@/services/section-setting";
 import { reorderSectionSettings as reorderSectionSettingsService } from "@/services/section-setting";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
-import { prisma } from "@/lib/prisma"; // Importing prisma directly for direct high-performance batch mutations
+import { prisma } from "@/lib/prisma";
 
-/**
- * Transforms layout visibility alterations, list sorting mutations, or batch transaction overrides
- * into streamlined, user-friendly responses optimized for transparent real-time UI flash alerts.
- */
+// Error
 function handleSectionSettingServerError(error: any, fallbackMessage: string) {
   console.error("Section Setting Core Service Server Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("portfolioId required") || errorMessage.includes("portfolioId not found")) {
+  if (
+    errorMessage.includes("portfolioId required") ||
+    errorMessage.includes("portfolioId not found")
+  ) {
     return {
       success: false,
-      error: "Authentication reference token is missing. Could not fetch or re-configure page layout options.",
+      error:
+        "Authentication reference token is missing. Could not fetch or re-configure page layout options.",
     };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
-      error: "The page visibility modifier tool is currently executing database optimizations. Please try again.",
+      error:
+        "The page visibility modifier tool is currently executing database optimizations. Please try again.",
     };
   }
 
@@ -34,11 +40,12 @@ function handleSectionSettingServerError(error: any, fallbackMessage: string) {
 export async function getSectionSettings(portfolioId: string) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
-    
+
     if (!resolvedPortfolioId) {
       return {
         success: false,
-        error: "Unable to find layout settings context. Target portfolio tracking identifier is unverified.",
+        error:
+          "Unable to find layout settings context. Target portfolio tracking identifier is unverified.",
         data: [],
       };
     }
@@ -58,13 +65,20 @@ export async function getSectionSettings(portfolioId: string) {
 export async function getSectionSettingById(sectionSettingId: string) {
   try {
     if (!sectionSettingId) {
-      return { success: false, error: "Unique modular section row token identifier was missing from request.", data: null };
+      return {
+        success: false,
+        error: "Unique modular section row token identifier was missing from request.",
+        data: null,
+      };
     }
 
     const data = await getSectionSettingService(sectionSettingId);
     return { success: true, data };
   } catch (error) {
-    return handleSectionSettingServerError(error, "Failed to track specific profile presentation visibility config rules lines.");
+    return handleSectionSettingServerError(
+      error,
+      "Failed to track specific profile presentation visibility config rules lines."
+    );
   }
 }
 
@@ -79,40 +93,51 @@ export async function updateSectionSetting(
 ) {
   try {
     if (!sectionSettingId) {
-      return { success: false, error: "Unique block layout row trace key signature missing. Re-configuration cancelled." };
+      return {
+        success: false,
+        error: "Unique block layout row trace key signature missing. Re-configuration cancelled.",
+      };
     }
 
     const result = await updateSectionSettingService(sectionSettingId, data);
     return { success: true, data: result };
   } catch (error) {
-    return handleSectionSettingServerError(error, "Failed to save customized component rules configurations onto database layers.");
+    return handleSectionSettingServerError(
+      error,
+      "Failed to save customized component rules configurations onto database layers."
+    );
   }
 }
 
-export async function reorderSectionSettings(
-  portfolioId: string,
-  sectionIds: string[]
-) {
+export async function reorderSectionSettings(portfolioId: string, sectionIds: string[]) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
-    
+
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Portfolio connection target identifier missing. Layout sequencing aborted." };
+      return {
+        success: false,
+        error: "Portfolio connection target identifier missing. Layout sequencing aborted.",
+      };
     }
 
     if (!sectionIds || sectionIds.length === 0) {
-      return { success: true, message: "Empty horizontal sorting layer metrics list stack. Grid order unchanged." };
+      return {
+        success: true,
+        message: "Empty horizontal sorting layer metrics list stack. Grid order unchanged.",
+      };
     }
 
     const result = await reorderSectionSettingsService(resolvedPortfolioId, sectionIds);
-    
-    // Support either standalone objects or map to success object signatures seamlessly
+
     if (result && typeof result === "object" && "success" in result) {
       return result;
     }
     return { success: true, data: result };
   } catch (error) {
-    return handleSectionSettingServerError(error, "Failed to commit layout ordering priority parameters rules back into database store.");
+    return handleSectionSettingServerError(
+      error,
+      "Failed to commit layout ordering priority parameters rules back into database store."
+    );
   }
 }
 
@@ -121,7 +146,10 @@ export async function resetSectionSettings(portfolioId?: string) {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Portfolio tracking identifier trace reference context not resolved. Reset aborted." };
+      return {
+        success: false,
+        error: "Portfolio tracking identifier trace reference context not resolved. Reset aborted.",
+      };
     }
 
     const DEFAULT_SECTIONS = [
@@ -262,6 +290,9 @@ export async function resetSectionSettings(portfolioId?: string) {
 
     return { success: true, data: transactionPayload };
   } catch (error) {
-    return handleSectionSettingServerError(error, "Failed to completely rebuild portfolio display grids to default dashboard settings parameters.");
+    return handleSectionSettingServerError(
+      error,
+      "Failed to completely rebuild portfolio display grids to default dashboard settings parameters."
+    );
   }
 }

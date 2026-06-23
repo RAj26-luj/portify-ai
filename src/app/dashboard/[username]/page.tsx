@@ -17,7 +17,7 @@ import {
   ArrowRight,
   PlusCircle,
   Briefcase,
-  Layers
+  Layers,
 } from "lucide-react";
 
 type DashboardData = {
@@ -66,17 +66,12 @@ export default function DashboardPage() {
         setLoading(true);
         setError(null);
 
-        // 1. Resolve master workspace analytics from response envelope safely
         const result = await loadDashboard(username);
 
-        // 🛡️ Safe Condition Narrowing: Guard checking layout structure payload envelopes
         if (!result || !result.success) {
-          throw new Error(
-            result?.error || "Failed to load dashboard parameters metrics cleanly."
-          );
+          throw new Error(result?.error || "Failed to load dashboard parameters metrics cleanly.");
         }
 
-        // ✅ Safe State Mutation mapping explicitly checked object fields
         setData(result.data as DashboardData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Dashboard error");
@@ -117,50 +112,57 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-5 sm:space-y-10 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto select-none text-white antialiased">
-      
-      {/* Premium Dashboard Header Component Area */}
       <div className="border-b border-zinc-900 pb-4 sm:pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 relative">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded bg-blue-500/5 border border-blue-500/10 w-fit mb-0.5 sm:mb-1">
+          <div className="inline-flex items-center gap-1.5 rounded bg-blue-500/5 border border-blue-500/10 w-fit mb-0.5 sm:mb-1">
             <Activity size={10} className="text-blue-400 animate-pulse" />
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-widest uppercase text-blue-400">Live Workspace Overview</span>
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-widest uppercase text-blue-400">
+              Live Workspace Overview
+            </span>
           </div>
-          
+
           <h1 className="text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-400">
             Welcome back, {data.user?.name ?? "User"}
           </h1>
-          
+
           <p className="text-[11px] sm:text-xs font-mono text-zinc-500 truncate max-w-xs sm:max-w-none">
-            // account_node: <span className="text-zinc-400 underline decoration-white/10">{data.user?.email}</span>
+            // account_node:{" "}
+            <span className="text-zinc-400 underline decoration-white/10">{data.user?.email}</span>
           </p>
         </div>
       </div>
 
-      {/* HERO SECTION: MEGA RESUME ATTRACTION MATRIX */}
       <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-blue-500/20 bg-[#070A14] bg-gradient-to-br from-blue-950/20 via-[#0C0C0E] to-[#0C0C0E] p-4 sm:p-8 lg:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.7)] group">
         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl pointer-events-none transition-opacity group-hover:opacity-80" />
-        
+
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-8 relative z-10">
           <div className="space-y-2 sm:space-y-4 max-w-2xl">
             <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-2 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-amber-400 w-fit">
               <Sparkles size={10} className="animate-pulse" />
               <span>Highly Recommended Workflow</span>
             </div>
-            
+
             <h2 className="text-lg sm:text-3xl lg:text-4xl font-black tracking-tight text-white leading-tight">
               Upload Resume or Build Manually
             </h2>
-            
+
             <p className="text-[11px] sm:text-sm text-zinc-400 leading-relaxed font-sans line-clamp-3 sm:line-clamp-none">
-              Drop your existing PDF resume inside our smart parsing engine to automate section mapping instantly. 
-              The platform extracts core profiles, skills, projects, and experiences directly, creating an absolute 
-              foundation you can tweak, scale, or expand manually.
+              Drop your existing PDF resume inside our smart parsing engine to automate section
+              mapping instantly. The platform extracts core profiles, skills, projects, and
+              experiences directly, creating an absolute foundation you can tweak, scale, or expand
+              manually.
             </p>
 
             <div className="flex-wrap items-center gap-x-4 gap-y-1.5 pt-2 text-[10px] sm:text-[11px] font-mono text-zinc-500 border-t border-zinc-900 hidden sm:flex">
-              <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-blue-400" /> Auto-extract Skills</span>
-              <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-purple-400" /> Parse Showcases</span>
-              <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-emerald-400" /> Preserve Edits</span>
+              <span className="flex items-center gap-1">
+                <span className="w-1 h-1 rounded-full bg-blue-400" /> Auto-extract Skills
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-1 h-1 rounded-full bg-purple-400" /> Parse Showcases
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-1 h-1 rounded-full bg-emerald-400" /> Preserve Edits
+              </span>
             </div>
           </div>
 
@@ -171,7 +173,10 @@ export default function DashboardPage() {
             >
               <Upload size={13} className="text-zinc-700" />
               <span>Launch Resume Engine</span>
-              <ArrowRight size={12} className="text-zinc-400 transition-transform group-hover/btn:translate-x-0.5" />
+              <ArrowRight
+                size={12}
+                className="text-zinc-400 transition-transform group-hover/btn:translate-x-0.5"
+              />
             </button>
 
             <button
@@ -185,7 +190,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* RENDER ENGAGEMENT METRICS CHASSIS */}
       <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center gap-2">
           <Layers size={12} className="text-zinc-500" />
@@ -194,16 +198,16 @@ export default function DashboardPage() {
           </h3>
         </div>
 
-        {/* Mobile Layout Rows fallback */}
         <div className="block sm:hidden space-y-1.5">
-          {/* Portfolio Views List Node */}
           <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#0C0C0E] border border-zinc-900">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-7 h-7 rounded-md bg-blue-500/5 border border-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
                 <Eye size={13} />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">Views</p>
+                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">
+                  Views
+                </p>
                 <p className="text-[9px] font-mono text-zinc-500">Total platform impressions</p>
               </div>
             </div>
@@ -212,14 +216,15 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          {/* Contact Requests List Node */}
           <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#0C0C0E] border border-zinc-900">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-7 h-7 rounded-md bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center text-emerald-400 shrink-0">
                 <MessagesSquare size={13} />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">Requests</p>
+                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">
+                  Requests
+                </p>
                 <p className="text-[9px] font-mono text-zinc-500">Total inbound inquiries</p>
               </div>
             </div>
@@ -229,7 +234,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Tablet & Desktop View Matrix Grid Layout Blocks */}
         <div className="hidden sm:grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
           <div className="group relative rounded-xl bg-[#0C0C0E] border border-zinc-900 p-5 sm:p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-800 overflow-hidden">
             <div className="flex items-center justify-between">
@@ -245,7 +249,9 @@ export default function DashboardPage() {
               <span className="text-3xl font-black tracking-tight text-white group-hover:text-blue-400 transition-colors duration-150 font-mono">
                 {(data.analytics?.totalViews ?? 0).toLocaleString()}
               </span>
-              <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider">Impressions</span>
+              <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider">
+                Impressions
+              </span>
             </div>
           </div>
 
@@ -263,13 +269,14 @@ export default function DashboardPage() {
               <span className="text-3xl font-black tracking-tight text-white group-hover:text-emerald-400 transition-colors duration-150 font-mono">
                 {(data.analytics?.contactRequests ?? 0).toLocaleString()}
               </span>
-              <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider">Inquiries</span>
+              <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider">
+                Inquiries
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* QUICK WORKSPACE ROUTING ACTIONS */}
       <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center gap-2">
           <Briefcase size={12} className="text-zinc-500" />
@@ -324,7 +331,6 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
-
     </div>
   );
 }

@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  Edit3, 
-  Trash2, 
-  ExternalLink, 
-  Paperclip, 
-  Layers, 
+import {
+  Edit3,
+  Trash2,
+  ExternalLink,
+  Paperclip,
+  Layers,
   Image as ImageIcon,
   Loader2,
   AlertTriangle,
   FileText,
-  Globe
+  Globe,
 } from "lucide-react";
 
 interface Props {
@@ -60,9 +60,7 @@ export default function CustomSectionItemCard({
 
   return (
     <div className="group/custom-item relative flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-[#0C0C0E] shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-zinc-700 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.6)]">
-      
       <div>
-        {/* Render Main Image Cover if it exists */}
         {hasCustomImage && (
           <div className="relative h-44 w-full overflow-hidden bg-zinc-950 border-b border-zinc-900/50">
             <img
@@ -75,12 +73,9 @@ export default function CustomSectionItemCard({
           </div>
         )}
 
-        {/* Core Content Layer Area */}
         <div className="p-5 space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3 min-w-0">
-              
-              {/* Render Icon Thumbnail if it exists */}
               {hasIcon ? (
                 <div className="h-10 w-10 shrink-0 rounded-lg border border-zinc-800 bg-zinc-950 p-1.5 flex items-center justify-center shadow-inner transition-colors group-hover/custom-item:border-zinc-700">
                   <img
@@ -91,50 +86,45 @@ export default function CustomSectionItemCard({
                   />
                 </div>
               ) : !hasCustomImage ? (
-                /* Fallback layout slot placeholder graphic asset icon */
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/50 text-zinc-500 transition-colors group-hover/custom-item:text-blue-400 shadow-inner">
                   <Layers size={14} />
                 </div>
               ) : null}
 
               <div className="min-w-0 flex-1">
-                {/* Render Title */}
                 <h3 className="font-bold text-zinc-200 text-sm sm:text-base tracking-tight break-words group-hover/custom-item:text-white transition-colors">
                   {title}
                 </h3>
-                
-                {/* Render Subtitle if it exists */}
+
                 {subtitle && (
-                  <p className="text-xs font-semibold text-zinc-400 mt-1 break-words">
-                    {subtitle}
-                  </p>
+                  <p className="text-xs font-semibold text-zinc-400 mt-1 break-words">{subtitle}</p>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Setup Guide recommendation tooltip if no media exists */}
           {!hasCustomImage && !hasIcon && (
             <div className="flex items-center gap-1.5 rounded-lg border border-blue-500/10 bg-blue-500/5 px-2.5 py-1.5 text-[11px] text-blue-400/90">
               <ImageIcon size={12} className="shrink-0 text-blue-400" />
-              <span className="truncate">We recommend adding an image or asset vector for layout visibility</span>
+              <span className="truncate">
+                We recommend adding an image or asset vector for layout visibility
+              </span>
             </div>
           )}
 
-          {/* Render Full Description without clamping text strings */}
           {description && (
             <div className="text-xs sm:text-sm leading-relaxed text-zinc-400 break-words whitespace-pre-wrap font-sans border-t border-zinc-900 pt-3 mt-2">
               {description}
             </div>
           )}
 
-          {/* External Hyperlink Resources Layer Dock */}
           {(externalUrl || attachmentUrl) && (
             <div className="flex flex-col gap-2 pt-2 border-t border-zinc-900">
-              <span className="text-[9px] font-mono font-bold text-zinc-600 uppercase tracking-wider block">Attached Assets</span>
-              
+              <span className="text-[9px] font-mono font-bold text-zinc-600 uppercase tracking-wider block">
+                Attached Assets
+              </span>
+
               <div className="flex flex-wrap gap-2">
-                {/* Render External Website URL Link */}
                 {externalUrl && (
                   <a
                     href={externalUrl}
@@ -143,12 +133,13 @@ export default function CustomSectionItemCard({
                     className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 text-zinc-400 px-3 py-2 text-xs font-medium transition-colors shadow-sm"
                   >
                     <Globe size={12} className="text-zinc-500" />
-                    <span className="truncate max-w-[180px]">{externalUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                    <span className="truncate max-w-[180px]">
+                      {externalUrl.replace(/^https?:\/\/(www\.)?/, "")}
+                    </span>
                     <ExternalLink size={10} className="text-zinc-600 shrink-0" />
                   </a>
                 )}
 
-                {/* Render Document Attachment File Link */}
                 {attachmentUrl && (
                   <a
                     href={attachmentUrl}
@@ -167,7 +158,6 @@ export default function CustomSectionItemCard({
         </div>
       </div>
 
-      {/* Control Actions and Error Feedback Base Interface Layer */}
       <div className="p-5 pt-0 mt-auto">
         {errorFeedback && (
           <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-2.5 text-xs text-red-400 animate-fadeIn">
@@ -177,8 +167,10 @@ export default function CustomSectionItemCard({
         )}
 
         {showDeleteConfirm ? (
-          <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 animate-fadeIn">
-            <p className="text-xs font-medium text-zinc-400 px-1 text-center">Confirm irreversible deletion sequence?</p>
+          <div className="flex flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-955 p-2.5 animate-fadeIn">
+            <p className="text-xs font-medium text-zinc-400 px-1 text-center">
+              Confirm irreversible deletion sequence?
+            </p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -200,7 +192,6 @@ export default function CustomSectionItemCard({
             </div>
           </div>
         ) : (
-          /* Standard Action Operation Management Panel Dock */
           (onEdit || onDelete) && (
             <div className="flex gap-2 border-t border-zinc-900/80 pt-3.5">
               {onEdit && (
@@ -228,7 +219,6 @@ export default function CustomSectionItemCard({
           )
         )}
       </div>
-
     </div>
   );
 }

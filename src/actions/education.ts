@@ -3,18 +3,19 @@
 import { prisma } from "@/lib/prisma";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
-/**
- * Transforms education data validation or background database storage exceptions
- * into structured, client-friendly feedback models optimized for instant UI alerts.
- */
+// Error
 function handleEducationServerError(error: any, fallbackMessage: string) {
   console.error("Education Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("portfolioId required") || errorMessage.includes("portfolioId not found")) {
+  if (
+    errorMessage.includes("portfolioId required") ||
+    errorMessage.includes("portfolioId not found")
+  ) {
     return {
       success: false,
-      error: "Authentication reference token is missing. Could not link education milestones to a portfolio profile.",
+      error:
+        "Authentication reference token is missing. Could not link education milestones to a portfolio profile.",
     };
   }
   if (errorMessage.includes("Invalid Education id")) {
@@ -23,17 +24,21 @@ function handleEducationServerError(error: any, fallbackMessage: string) {
       error: "The targeted academic record identifier parameter is invalid or empty.",
     };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
-      error: "Academic records storage engine is currently running data sync operations. Please submit details again.",
+      error:
+        "Academic records storage engine is currently running data sync operations. Please submit details again.",
     };
   }
 
   return { success: false, error: fallbackMessage };
 }
 
-/* ---------------- CREATE ---------------- */
 export async function createEducation(data: {
   portfolioId?: string;
 
@@ -60,15 +65,24 @@ export async function createEducation(data: {
     const resolvedPortfolioId = data.portfolioId || (await getPortfolioId());
 
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Portfolio specification profile identification target not found." };
+      return {
+        success: false,
+        error: "Portfolio specification profile identification target not found.",
+      };
     }
 
     if (!data.institution) {
-      return { success: false, error: "School or institution naming descriptor field parameter is required." };
+      return {
+        success: false,
+        error: "School or institution naming descriptor field parameter is required.",
+      };
     }
 
     if (!data.degree) {
-      return { success: false, error: "Degree or certification type classification code label is required." };
+      return {
+        success: false,
+        error: "Degree or certification type classification code label is required.",
+      };
     }
 
     const result = await prisma.education.create({
@@ -98,20 +112,24 @@ export async function createEducation(data: {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleEducationServerError(error, "Failed to initialize new education history logging parameters.");
+    return handleEducationServerError(
+      error,
+      "Failed to initialize new education history logging parameters."
+    );
   }
 }
 
-/* ---------------- UPDATE (FIXED) ---------------- */
 export async function updateEducation(id: string, data: any) {
   try {
     if (!id || typeof id !== "string" || id.trim().length === 0) {
-      return { success: false, error: "Missing distinct track indices parameter identity key context." };
+      return {
+        success: false,
+        error: "Missing distinct track indices parameter identity key context.",
+      };
     }
 
     const cleanId = id.trim();
 
-    // ✅ sanitize payload completely (THIS IS THE FIX)
     const cleanData = {
       institution: data.institution,
       degree: data.degree,
@@ -140,11 +158,13 @@ export async function updateEducation(id: string, data: any) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleEducationServerError(error, "Failed to apply tracking modifications back onto education history fields.");
+    return handleEducationServerError(
+      error,
+      "Failed to apply tracking modifications back onto education history fields."
+    );
   }
 }
 
-/* ---------------- READ ALL ---------------- */
 export async function getEducations(portfolioId: string) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
@@ -152,7 +172,8 @@ export async function getEducations(portfolioId: string) {
     if (!resolvedPortfolioId) {
       return {
         success: false,
-        error: "Unable to sync academic logs. Target portfolio tracking context identifier was not verified.",
+        error:
+          "Unable to sync academic logs. Target portfolio tracking context identifier was not verified.",
         data: [],
       };
     }
@@ -175,7 +196,6 @@ export async function getEducations(portfolioId: string) {
   }
 }
 
-/* ---------------- READ ONE ---------------- */
 export async function getEducationById(id: string) {
   try {
     if (!id || id.trim().length === 0) {
@@ -188,15 +208,21 @@ export async function getEducationById(id: string) {
 
     return { success: true, data };
   } catch (error) {
-    return handleEducationServerError(error, "Failed to track specific profile education context data lines.");
+    return handleEducationServerError(
+      error,
+      "Failed to track specific profile education context data lines."
+    );
   }
 }
 
-/* ---------------- DELETE ---------------- */
 export async function deleteEducation(id: string) {
   try {
     if (!id || id.trim().length === 0) {
-      return { success: false, error: "Academic tracking reference key index definition missing. Deletion sequence aborted." };
+      return {
+        success: false,
+        error:
+          "Academic tracking reference key index definition missing. Deletion sequence aborted.",
+      };
     }
 
     const result = await prisma.education.delete({
@@ -205,6 +231,9 @@ export async function deleteEducation(id: string) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleEducationServerError(error, "The specified education timeline history record could not be successfully removed.");
+    return handleEducationServerError(
+      error,
+      "The specified education timeline history record could not be successfully removed."
+    );
   }
 }

@@ -4,39 +4,46 @@ import { prisma } from "@/lib/prisma";
 import { ThemeType } from "@prisma/client";
 import { getPortfolioId } from "@/lib/get-portfolio-id";
 
-/**
- * Transforms theme history mutation exceptions, transaction failures, or datastore 
- * connection errors into structured, user-friendly responses tailored for UI toasts.
- */
+// Error
 function handleThemeServerError(error: any, fallbackMessage: string) {
   console.error("Theme Preference Service Server Action Exception:", error);
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  if (errorMessage.includes("portfolioId required") || errorMessage.includes("portfolioId not found")) {
+  if (
+    errorMessage.includes("portfolioId required") ||
+    errorMessage.includes("portfolioId not found")
+  ) {
     return {
       success: false,
-      error: "Authentication mapping missing. Could not attach theme configuration metrics to a portfolio profile.",
+      error:
+        "Authentication mapping missing. Could not attach theme configuration metrics to a portfolio profile.",
     };
   }
-  if (errorMessage.includes("Prisma") || errorMessage.includes("database") || errorMessage.includes("Mongo")) {
+  if (
+    errorMessage.includes("Prisma") ||
+    errorMessage.includes("database") ||
+    errorMessage.includes("Mongo")
+  ) {
     return {
       success: false,
-      error: "The custom aesthetic database engine is currently running log updates. Please try again.",
+      error:
+        "The custom aesthetic database engine is currently running log updates. Please try again.",
     };
   }
 
   return { success: false, error: fallbackMessage };
 }
 
-export async function createThemeHistory(
-  portfolioId: string,
-  themeName: ThemeType
-) {
+export async function createThemeHistory(portfolioId: string, themeName: ThemeType) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
-    
+
     if (!resolvedPortfolioId) {
-      return { success: false, error: "Portfolio connection target not found. Unable to archive style modification metadata." };
+      return {
+        success: false,
+        error:
+          "Portfolio connection target not found. Unable to archive style modification metadata.",
+      };
     }
 
     if (!themeName) {
@@ -52,18 +59,22 @@ export async function createThemeHistory(
 
     return { success: true, data: result };
   } catch (error) {
-    return handleThemeServerError(error, "Failed to instantiate new visual skin alteration log context item.");
+    return handleThemeServerError(
+      error,
+      "Failed to instantiate new visual skin alteration log context item."
+    );
   }
 }
 
 export async function getThemeHistory(portfolioId: string) {
   try {
     const resolvedPortfolioId = portfolioId || (await getPortfolioId());
-    
+
     if (!resolvedPortfolioId) {
       return {
         success: false,
-        error: "Unable to find structural metadata parameters. Style configuration tracks lookup aborted.",
+        error:
+          "Unable to find structural metadata parameters. Style configuration tracks lookup aborted.",
         data: [],
       };
     }
@@ -75,7 +86,10 @@ export async function getThemeHistory(portfolioId: string) {
 
     return { success: true, data };
   } catch (error) {
-    console.error("Failed to query skin personalization chronological changes timeline maps:", error);
+    console.error(
+      "Failed to query skin personalization chronological changes timeline maps:",
+      error
+    );
     return {
       success: false,
       error: "Failed to assemble the requested custom visual theme change history logs feed.",
@@ -87,7 +101,11 @@ export async function getThemeHistory(portfolioId: string) {
 export async function deleteThemeHistory(id: string) {
   try {
     if (!id) {
-      return { success: false, error: "Unique track parameters identification trace context key is empty. Deletion aborted." };
+      return {
+        success: false,
+        error:
+          "Unique track parameters identification trace context key is empty. Deletion aborted.",
+      };
     }
 
     const result = await prisma.themeHistory.delete({
@@ -96,6 +114,9 @@ export async function deleteThemeHistory(id: string) {
 
     return { success: true, data: result };
   } catch (error) {
-    return handleThemeServerError(error, "The specified skin configuration timeline record row could not be safely cleared.");
+    return handleThemeServerError(
+      error,
+      "The specified skin configuration timeline record row could not be safely cleared."
+    );
   }
 }
