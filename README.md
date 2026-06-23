@@ -156,26 +156,55 @@ Testing & Quality
 
 ⸻
 
-🏗️ System Architecture
+## 🏗️ System Architecture
 
-Frontend (Next.js + React)
-│
-▼
-React Components
-│
-▼
-Server Actions / API Routes
-│
-▼
-Service Layer
-│
-▼
-Prisma ORM
-│
-▼
-MongoDB
+```text
+┌───────────────────────────────┐
+│     Frontend (Next.js 15)     │
+│       React + TypeScript      │
+└───────────────┬───────────────┘
+                │
+                ▼
+┌───────────────────────────────┐
+│       React Components        │
+│   Forms, Dashboard, Themes    │
+└───────────────┬───────────────┘
+                │
+                ▼
+┌───────────────────────────────┐
+│  Server Actions / API Routes  │
+└───────────────┬───────────────┘
+                │
+                ▼
+┌───────────────────────────────┐
+│        Service Layer          │
+│ Business Logic & Validation   │
+└───────────────┬───────────────┘
+                │
+                ▼
+┌───────────────────────────────┐
+│          Prisma ORM           │
+└───────────────┬───────────────┘
+                │
+                ▼
+┌───────────────────────────────┐
+│           MongoDB             │
+└───────────────────────────────┘
+```
 
-⸻
+### External Integrations
+
+```text
+Cloudinary      → File & Image Storage
+OpenRouter      → Resume Data Extraction
+Auth.js         → Authentication
+SMTP/Nodemailer → Email Delivery
+Cloudflare      → Turnstile Protection
+Docker          → Containerization
+Vercel/VPS      → Deployment
+```
+
+---
 
 🛠️ Tech Stack
 
@@ -318,64 +347,133 @@ This ensures portfolios remain functional even when custom icons are unavailable
 
 ⸻
 
-📂 Environment Variables
+## 📂 Environment Variables
 
-Create a .env file:
+Create a `.env` file in the project root and configure the following variables:
 
+```env
+# Authentication
 AUTH_GOOGLE_ID=
 AUTH_GOOGLE_SECRET=
 AUTH_SECRET=
+AUTH_URL=
+
+# Database
 DATABASE_URL=
+
+# Application
+NEXT_PUBLIC_APP_URL=
+ADMIN_EMAIL=
+
+# Cloudinary
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
+
+# AI & Resume Processing
 OPENROUTER_API_KEY=
 DEFAULT_AI_MODEL=
-AUTH_URL=
-NEXT_PUBLIC_APP_URL=
+
+# Email (SMTP)
 SMTP_HOST=
 SMTP_PORT=
 SMTP_USER=
 SMTP_PASS=
 SMTP_FROM=
-ADMIN_EMAIL=
+
+# Cloudflare Turnstile
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 TURNSTILE_SECRET_KEY=
+```
 
-⸻
+### Environment Variable Descriptions
 
-⚙️ Installation
+| Variable                       | Description                                 |
+| ------------------------------ | ------------------------------------------- |
+| AUTH_GOOGLE_ID                 | Google OAuth Client ID                      |
+| AUTH_GOOGLE_SECRET             | Google OAuth Client Secret                  |
+| AUTH_SECRET                    | Auth.js encryption secret                   |
+| AUTH_URL                       | Base authentication URL                     |
+| DATABASE_URL                   | MongoDB connection string                   |
+| NEXT_PUBLIC_APP_URL            | Public application URL                      |
+| ADMIN_EMAIL                    | Administrator email address                 |
+| CLOUDINARY_CLOUD_NAME          | Cloudinary cloud name                       |
+| CLOUDINARY_API_KEY             | Cloudinary API key                          |
+| CLOUDINARY_API_SECRET          | Cloudinary API secret                       |
+| OPENROUTER_API_KEY             | OpenRouter API key                          |
+| DEFAULT_AI_MODEL               | Default AI model used for resume processing |
+| SMTP_HOST                      | SMTP server host                            |
+| SMTP_PORT                      | SMTP server port                            |
+| SMTP_USER                      | SMTP username                               |
+| SMTP_PASS                      | SMTP password                               |
+| SMTP_FROM                      | Sender email address                        |
+| NEXT_PUBLIC_TURNSTILE_SITE_KEY | Cloudflare Turnstile site key               |
+| TURNSTILE_SECRET_KEY           | Cloudflare Turnstile secret key             |
 
-Clone Repository
+---
 
+## ⚙️ Installation
+
+### 1. Clone Repository
+
+```bash
 git clone https://github.com/RAj26-luj/portify-ai.git
 cd portify-ai
+```
 
-Install Dependencies
+### 2. Install Dependencies
 
+```bash
 npm install
+```
 
-Generate Prisma Client
+### 3. Configure Environment Variables
 
+Create a `.env` file in the project root and configure all required environment variables.
+
+### 4. Generate Prisma Client
+
+```bash
 npx prisma generate
+```
 
-Push Database Schema
+### 5. Push Database Schema
 
+```bash
 npx prisma db push
+```
 
-Seed Database (Optional)
+### 6. (Optional) Seed Database
 
+```bash
 npx prisma db seed
+```
 
-Run Development Server
+### 7. Start Development Server
 
+```bash
 npm run dev
+```
 
-Application runs at:
+Application will be available at:
 
+```text
 http://localhost:3000
+```
 
-⸻
+### 8. Build for Production
+
+```bash
+npm run build
+```
+
+### 9. Start Production Server
+
+```bash
+npm start
+```
+
+---
 
 🧪 Testing
 
@@ -417,27 +515,29 @@ docker-compose up --build
 
 ⸻
 
-📁 Project Structure
+## 📁 Project Structure
 
+```text
 src/
-├── actions/
-├── app/
-├── components/
-├── config/
-├── constants/
-├── hooks/
-├── jobs/
-├── lib/
-├── prompts/
-├── providers/
-├── services/
-├── store/
-├── tests/
-├── themes/
-├── types/
-└── validators/
+├── actions/         # Server actions
+├── app/             # Next.js App Router pages & API routes
+├── components/      # Reusable UI components
+├── config/          # Application configuration
+├── constants/       # Static constants & enums
+├── hooks/           # Custom React hooks
+├── jobs/            # Scheduled jobs & cleanup tasks
+├── lib/             # Shared utilities & integrations
+├── prompts/         # Resume parsing prompts
+├── providers/       # React providers
+├── services/        # Business logic layer
+├── store/           # Zustand state management
+├── tests/           # Unit tests
+├── themes/          # Portfolio themes
+├── types/           # TypeScript types
+└── validators/      # Zod validation schemas
+```
 
-⸻
+---
 
 🎯 Core Goal
 
