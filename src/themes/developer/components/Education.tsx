@@ -2,19 +2,20 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  GraduationCap, 
-  Calendar, 
-  MapPin, 
-  Award, 
-  X, 
+import {
+  GraduationCap,
+  Calendar,
+  MapPin,
+  Award,
+  X,
   BookOpen,
   Terminal,
   Cpu,
-  GitBranch
+  GitBranch,
 } from "lucide-react";
 
-const DEFAULT_CAMPUS_IMAGE = "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=600&auto=format&fit=crop";
+const DEFAULT_CAMPUS_IMAGE =
+  "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=600&auto=format&fit=crop";
 
 interface EducationProps {
   educations?: any[];
@@ -47,8 +48,8 @@ export default function Education({ educations = [], portfolio }: EducationProps
   };
 
   return (
-    <section 
-      id="education" 
+    <section
+      id="education"
       className="relative w-full py-12 md:py-24 overflow-hidden bg-[#0D1117] text-[#C9D1D9] font-mono border-b border-[#30363D] select-none"
     >
       {/* Git Graph Visual Matrix Background Mesh */}
@@ -67,7 +68,7 @@ export default function Education({ educations = [], portfolio }: EducationProps
             <GraduationCap className="w-3.5 h-3.5 text-[#58A6FF]" />
           </div>
         </div>
-        
+
         <div className="p-4 bg-[#161B22]/40 border-x border-b border-[#30363D] rounded-b-lg">
           <p className="text-[11px] text-neutral-400">
             <span className="text-[#F78166]">$</span> graph --timeline path/to/academics
@@ -77,7 +78,6 @@ export default function Education({ educations = [], portfolio }: EducationProps
 
       {/* Git Timeline Core Mapping Infrastructure */}
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-        
         {/* Core Architectural Git Tree Spine Line */}
         <div className="absolute left-4 sm:left-1/2 top-2 bottom-2 w-[2px] bg-[#30363D] -translate-x-1/2 hidden sm:block" />
         <div className="absolute left-8 top-2 bottom-2 w-[2px] bg-[#30363D] block sm:hidden" />
@@ -98,10 +98,10 @@ export default function Education({ educations = [], portfolio }: EducationProps
                 className="relative flex flex-col sm:flex-row items-start sm:justify-between w-full group cursor-pointer"
               >
                 {/* Information Card Container Block */}
-                <div className={`w-full sm:w-[46%] order-2 ${isEven ? "sm:order-1 sm:text-right" : "sm:order-3 sm:text-left"} flex flex-col`}>
-                  
+                <div
+                  className={`w-full sm:w-[46%] order-2 ${isEven ? "sm:order-1 sm:text-right" : "sm:order-3 sm:text-left"} flex flex-col`}
+                >
                   <div className="w-full bg-[#161B22] border border-[#30363D] group-hover:border-[#58A6FF] p-4 rounded-lg transition-all duration-200 relative pl-14 sm:pl-4 space-y-2.5 shadow-sm hover:bg-[#1C2128]">
-                    
                     {/* Corner Identifier Tag */}
                     <div className="text-[9px] text-neutral-500 font-bold tracking-wider uppercase block sm:hidden">
                       COMMIT_0{idx + 1}
@@ -109,10 +109,16 @@ export default function Education({ educations = [], portfolio }: EducationProps
 
                     {/* Mobile Logo Block Element */}
                     <div className="absolute left-3 top-4 w-8 h-8 rounded bg-[#0D1117] border border-[#30363D] overflow-hidden flex items-center justify-center sm:hidden shrink-0">
-                      <img src={logo || DEFAULT_CAMPUS_IMAGE} alt="" className="w-full h-full object-cover filter brightness-90 contrast-110" />
+                      <img
+                        src={logo || DEFAULT_CAMPUS_IMAGE}
+                        alt=""
+                        className="w-full h-full object-cover filter brightness-90 contrast-110"
+                      />
                     </div>
 
-                    <div className={`flex flex-col sm:flex-row sm:items-start justify-between gap-1.5 ${isEven ? "sm:flex-row-reverse" : "sm:flex-row"}`}>
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-start justify-between gap-1.5 ${isEven ? "sm:flex-row-reverse" : "sm:flex-row"}`}
+                    >
                       <div className="flex flex-col truncate text-left sm:text-inherit">
                         <h3 className="text-sm font-bold text-white tracking-tight truncate">
                           {item.degree}
@@ -123,13 +129,16 @@ export default function Education({ educations = [], portfolio }: EducationProps
                       </div>
 
                       <span className="text-[10px] font-bold text-[#7EE787] bg-[#7EE787]/5 border border-[#7EE787]/10 px-1.5 py-0.5 rounded shrink-0 self-start sm:self-auto font-mono">
-                        {getYear(item.startDate)} — {item.currentlyStudying ? "LTS" : getYear(item.endDate)}
+                        {getYear(item.startDate)} —{" "}
+                        {item.currentlyStudying ? "LTS" : getYear(item.endDate)}
                       </span>
                     </div>
 
                     {/* Field of Study & Performance Indexes */}
                     {(item.fieldOfStudy || item.cgpa || item.grade) && (
-                      <div className={`flex flex-wrap gap-1.5 pt-2 border-t border-[#30363D] text-[10px] font-mono ${isEven ? "sm:justify-end" : "sm:justify-start"}`}>
+                      <div
+                        className={`flex flex-wrap gap-1.5 pt-2 border-t border-[#30363D] text-[10px] font-mono ${isEven ? "sm:justify-end" : "sm:justify-start"}`}
+                      >
                         {item.fieldOfStudy && (
                           <span className="text-neutral-400 flex items-center gap-1 bg-[#0D1117] border border-[#30363D] px-2 py-0.5 rounded">
                             <BookOpen className="w-3 h-3 text-neutral-500" />
@@ -145,7 +154,6 @@ export default function Education({ educations = [], portfolio }: EducationProps
                       </div>
                     )}
                   </div>
-
                 </div>
 
                 {/* Git Log Axis Terminal Ring Node Indicator */}
@@ -153,7 +161,6 @@ export default function Education({ educations = [], portfolio }: EducationProps
 
                 {/* Alternating Architectural Spacer Canvas (Desktop Only) */}
                 <div className={`hidden sm:block w-[46%] ${isEven ? "order-3" : "order-1"}`} />
-
               </motion.div>
             );
           })}
@@ -163,14 +170,14 @@ export default function Education({ educations = [], portfolio }: EducationProps
       {/* POPUP MODAL CANVAS */}
       <AnimatePresence>
         {selectedItem && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-[#0D1117]/95 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none"
             onClick={() => setSelectedItem(null)}
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.98, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.98, y: 15 }}
@@ -194,19 +201,23 @@ export default function Education({ educations = [], portfolio }: EducationProps
 
               {/* Cover Layout Panel Frame */}
               <div className="relative h-36 bg-[#0D1117] overflow-hidden border-b border-[#30363D]">
-                <img 
-                  src={selectedItem.logoUrl || selectedItem.institutionImage || DEFAULT_CAMPUS_IMAGE} 
-                  alt="" 
-                  className="w-full h-full object-cover filter brightness-[0.2] blur-xs opacity-50 mix-blend-luminosity" 
+                <img
+                  src={selectedItem.institutionImage || DEFAULT_CAMPUS_IMAGE}
+                  alt=""
+                  className="w-full h-full object-cover filter brightness-[0.2] blur-xs opacity-50 mix-blend-luminosity"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#161B22] to-transparent" />
-                
+
                 <div className="absolute bottom-3 left-4 right-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded border border-[#30363D] bg-[#0D1117] overflow-hidden flex items-center justify-center shrink-0 p-1 bg-neutral-950">
-                    <img 
-                      src={selectedItem.logoUrl || selectedItem.institutionImage || DEFAULT_CAMPUS_IMAGE} 
-                      alt={selectedItem.institution} 
-                      className="w-full h-full object-contain filter brightness-90 opacity-90" 
+                    <img
+                      src={
+                        selectedItem.logoUrl ||
+                        selectedItem.institutionImage ||
+                        DEFAULT_CAMPUS_IMAGE
+                      }
+                      alt={selectedItem.institution}
+                      className="w-full h-full object-contain filter brightness-90 opacity-90"
                     />
                   </div>
 
@@ -228,24 +239,42 @@ export default function Education({ educations = [], portfolio }: EducationProps
               <div className="p-4 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3 rounded bg-[#0D1117] border border-[#30363D]">
                   <div>
-                    <div className="text-[9px] text-neutral-500 uppercase font-bold">Tenure Frame</div>
+                    <div className="text-[9px] text-neutral-500 uppercase font-bold">
+                      Tenure Frame
+                    </div>
                     <div className="text-xs text-[#C9D1D9] mt-0.5 flex items-center gap-1.5 font-bold">
                       <Calendar className="w-3.5 h-3.5 text-neutral-500" />
-                      {getYear(selectedItem.startDate)} — {selectedItem.currentlyStudying ? "LTS" : getYear(selectedItem.endDate)}
+                      {getYear(selectedItem.startDate)} —{" "}
+                      {selectedItem.currentlyStudying ? "LTS" : getYear(selectedItem.endDate)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[9px] text-neutral-500 uppercase font-bold">Field Matrix</div>
-                    <div className="text-xs text-[#C9D1D9] mt-0.5 flex items-center gap-1.5 truncate font-bold" title={selectedItem.fieldOfStudy || "General"}>
+                    <div className="text-[9px] text-neutral-500 uppercase font-bold">
+                      Field Matrix
+                    </div>
+                    <div
+                      className="text-xs text-[#C9D1D9] mt-0.5 flex items-center gap-1.5 truncate font-bold"
+                      title={selectedItem.fieldOfStudy || "General"}
+                    >
                       <BookOpen className="w-3.5 h-3.5 text-neutral-500" />
-                      <span className="truncate">{selectedItem.fieldOfStudy || "General Spec"}</span>
+                      <span className="truncate">
+                        {selectedItem.fieldOfStudy || "General Spec"}
+                      </span>
                     </div>
                   </div>
                   <div>
-                    <div className="text-[9px] text-neutral-500 uppercase font-bold">Performance Value</div>
+                    <div className="text-[9px] text-neutral-500 uppercase font-bold">
+                      Performance Value
+                    </div>
                     <div className="text-xs text-[#7EE787] mt-0.5 flex items-center gap-1.5 font-bold">
                       <Award className="w-3.5 h-3.5 text-neutral-500" />
-                      <span>{selectedItem.cgpa ? `CGPA: ${selectedItem.cgpa}` : selectedItem.grade ? `Grade: ${selectedItem.grade}` : "Passed Cluster"}</span>
+                      <span>
+                        {selectedItem.cgpa
+                          ? `CGPA: ${selectedItem.cgpa}`
+                          : selectedItem.grade
+                            ? `Grade: ${selectedItem.grade}`
+                            : "Passed Cluster"}
+                      </span>
                     </div>
                   </div>
                 </div>

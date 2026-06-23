@@ -1,462 +1,470 @@
-# Portify AI
+#Portify AI
 
-An AI-powered SaaS platform for building professional developer portfolios with customizable themes, analytics, media management, and AI-assisted content generation.
+A full-stack SaaS portfolio builder that enables students, developers, engineers, researchers, designers, freelancers, and professionals to create, manage, and publish modern portfolio websites without writing code.
 
----
+Portify AI transforms resume data into structured portfolio content, allows complete customization, supports multiple themes, provides analytics, manages contact requests, and offers a complete portfolio management experience from a single dashboard.
 
-## Overview
+⸻
 
-Portify AI enables students, developers, and professionals to create modern portfolio websites without manually designing or coding them.
+#Features
 
-Users can build portfolios, manage projects, upload resumes, add media, track analytics, customize themes, and leverage AI-powered content generation to showcase their work professionally.
+Resume-Based Portfolio Creation
 
-The platform is designed as a scalable SaaS application using modern technologies including Next.js, TypeScript, MongoDB, Prisma, Auth.js, Cloudinary, Gemini AI, and industry-standard DevOps practices.
+- Upload PDF resumes
+- Automatic resume information extraction
+- Structured portfolio generation
+- Missing field detection
+- Resume version management
+- Resume download support
+- Manual editing after extraction
+- Resume re-import support
+- Completion score tracking
+- Portfolio data preservation during resume updates
 
----
+Portfolio Management
 
-## Core Features
+- Public portfolio websites
+- Custom username URLs
+- Dynamic portfolio sections
+- Section enable/disable controls
+- Section reordering
+- Custom sections
+- Real-time updates
+- Portfolio publishing
+- Portfolio editing dashboard
+- Section visibility management
 
-### Authentication & Security
+Supported Portfolio Sections
 
-- User Registration
-- Secure Login & Logout
+- Hero
+- About
+- Skills
+- Experience
+- Education
+- Projects
+- Achievements
+- Certifications
+- Publications
+- Open Source
+- Coding Profiles
+- Social Links
+- Testimonials
+- Contact
+- Custom Sections
+
+Theme System
+
+- Default Theme
+- Modern Theme
+- Minimal Theme
+- Dark Theme
+- Developer Theme
+
+Users can switch themes at any time without affecting portfolio data.
+
+Authentication & Security
+
+- Email Registration
+- Google Authentication
 - Email Verification
 - Password Reset
 - Protected Routes
-- Role-Based Access Control (RBAC)
 - Session Management
+- Role-Based Access Control (RBAC)
+- Admin Approval Workflow
+- Cloudflare Turnstile Protection
+- Secure Password Management
 
-### Portfolio Builder
+Contact System
 
-- Public Portfolio Pages
-- Custom Username URLs
-- About Section
-- Education Section
-- Experience Section
-- Projects Section
-- Skills Section
-- Achievements Section
-- Coding Profiles
-- Social Links
-- Custom Portfolio Sections
+Visitors can:
 
-### Resume Management
+- Submit contact requests
+- Include name and email
+- Add optional notes
 
-- Resume Upload
-- Resume Replacement
-- Resume Download
-- AI Resume Parsing
-- AI Resume Enhancement
+Portfolio owners receive:
 
-### Media Management
+- Email notifications
+- Dashboard notifications
+- Contact request history
 
-- Image Uploads
-- Video Uploads
-- Cloudinary Integration
-- Portfolio Galleries
-- Media Optimization
-
-### Themes & Customization
-
-- Multiple Portfolio Themes
-- Theme Switching
-- Custom Color Schemes
-- Responsive Layouts
-- Dark / Light Mode
-
-### Analytics
+Analytics
 
 - Portfolio Views
-- Visitor Tracking
-- Device Statistics
-- Traffic Insights
-- Google Analytics Integration
+- Unique Visitors
+- Resume Downloads
+- Contact Requests
+- Project Click Tracking
 
-### Admin Panel
+Admin Dashboard
 
+- Approval Management
 - User Management
-- Portfolio Approvals
-- Featured Users
-- Platform Analytics
-- Theme Management
+- Platform Statistics
+- Account Moderation
+- User Blocking
+- User Unblocking
+- Portfolio Monitoring
 
-### AI Features
+File & Media Management
 
-- Gemini AI Integration
-- Content Generation
-- Resume Enhancement
-- Portfolio Suggestions
-- Smart Recommendations
+- Resume Uploads
+- Profile Image Uploads
+- Project Image Uploads
+- Cover Image Uploads
+- Cloudinary Storage Integration
+- Image Optimization
 
----
+Email Automation
 
-## Tech Stack
+- Verification Emails
+- Approval Emails
+- Rejection Emails
+- Password Reset Emails
+- Contact Notification Emails
+- Admin Notification Emails
 
-### Frontend
+Testing & Quality
 
-- Next.js 16
-- React 19
+- Unit Testing
+- End-to-End Testing
+- Validation Layer
+- Type Safety
+- Automated Linting
+- Pre-commit Checks
+
+⸻
+
+## Screenshots
+
+### Landing Page
+
+![Landing Page](public/readme/home.png)
+
+### Dashboard
+
+![Dashboard](public/readme/dashboard.png)
+
+### Theme Management
+
+![Themes](public/readme/themes.png)
+
+### Public Portfolio
+
+![Portfolio](public/readme/portfolio.png)
+
+⸻
+
+🏗️ System Architecture
+
+Frontend (Next.js + React)
+│
+▼
+React Components
+│
+▼
+Server Actions / API Routes
+│
+▼
+Service Layer
+│
+▼
+Prisma ORM
+│
+▼
+MongoDB
+
+⸻
+
+🛠️ Tech Stack
+
+Frontend
+
+- Next.js 15
+- React
 - TypeScript
-- Tailwind CSS 4
-- Shadcn UI
+- Tailwind CSS
+- ShadCN UI
 - Framer Motion
 
-### Backend
+Backend
 
-- Next.js App Router
-- Server Actions
-- Route Handlers
+- Next.js Server Actions
+- Next.js API Routes
 
-### Database
+Database
 
-- MongoDB Atlas
+- MongoDB
 - Prisma ORM
 
-### Authentication
+Authentication
 
-- Auth.js
-- Prisma Adapter
+- Auth.js (NextAuth)
 
-### Storage
+Storage
 
 - Cloudinary
 
-### AI
+Resume Processing
 
-- Google Gemini AI
+- OpenRouter
+- PDF Parsing
+- Structured Resume Extraction
 
-### Email Services
+Email Services
 
 - Nodemailer
-- Gmail SMTP
+- SMTP
 
-### Analytics
-
-- Google Analytics 4
-
-### State Management
+State Management
 
 - Zustand
 
-### Validation
+Forms & Validation
 
-- Zod
 - React Hook Form
+- Zod
 
-### Testing
+Testing
 
 - Jest
-- React Testing Library
 - Playwright
 
-### DevOps
+Code Quality
 
-- Docker
-- GitHub Actions
-- CI/CD Pipelines
+- ESLint
+- Commitlint
 - Husky
-- Lint-Staged
-- Vercel
+- Lint Staged
+- TypeScript
 
----
+DevOps & Deployment
 
-## Project Structure
-
-```text
-portify-ai/
-├── .github/
-│   ├── workflows/
-│   ├── ISSUE_TEMPLATE/
-│   └── PULL_REQUEST_TEMPLATE.md
-├── docs/
-├── emails/
-├── monitoring/
-├── prisma/
-├── public/
-├── scripts/
-├── src/
-│   ├── actions/
-│   ├── app/
-│   ├── cache/
-│   ├── components/
-│   ├── config/
-│   ├── constants/
-│   ├── context/
-│   ├── db/
-│   ├── events/
-│   ├── generated/
-│   ├── hooks/
-│   ├── jobs/
-│   ├── lib/
-│   ├── providers/
-│   ├── repositories/
-│   ├── services/
-│   ├── store/
-│   ├── templates/
-│   ├── types/
-│   ├── utils/
-│   └── validators/
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── e2e/
-├── Dockerfile
-├── docker-compose.yml
-├── jest.config.ts
-├── playwright.config.ts
-├── next.config.ts
-├── tsconfig.json
-├── package.json
-└── README.md
-```
-
----
-
-## Architecture Overview
-
-Portify AI follows a scalable layered architecture.
-
-### Presentation Layer
-
-- Next.js App Router
-- React Components
-- Tailwind CSS
-- Shadcn UI
-
-### Application Layer
-
-- Server Actions
-- Route Handlers
-- Feature Modules
-
-### Business Layer
-
-- Services
-- Repositories
-- Domain Logic
-
-### Data Layer
-
-- Prisma ORM
-- MongoDB Atlas
-
-### Infrastructure Layer
-
-- Cloudinary
-- Gemini AI
-- Gmail SMTP
 - Docker
-- GitHub Actions
+- Docker Compose
 - Vercel
 
----
+⸻
 
-## Installation
+🔄 User Workflow
 
-### Clone Repository
+1. Registration
 
-```bash
+- Create account
+- Verify email
+- Wait for admin approval
+
+2. Approval Process
+
+Admin can:
+
+- Approve users
+- Reject users
+- Manage platform access
+
+3. Resume Upload
+
+Users upload a PDF resume.
+
+The system extracts:
+
+- Personal Information
+- Education
+- Experience
+- Projects
+- Skills
+- Certifications
+- Publications
+- Coding Profiles
+- Social Links
+
+4. Missing Field Detection
+
+Portify AI identifies incomplete portfolio information and asks users to complete missing fields manually.
+
+5. Portfolio Customization
+
+Users can:
+
+- Edit extracted information
+- Add new entries
+- Remove entries
+- Manage sections
+- Change themes
+
+6. Portfolio Publishing
+
+A public portfolio URL is generated:
+
+/portfolio/username
+
+⸻
+
+🖼️ Custom Icons
+
+Portify AI does not maintain an internal icon library.
+
+Users can:
+
+- Upload custom icons
+- Provide icon image URLs
+
+If no icon is provided:
+
+- Default icons are displayed automatically
+
+This ensures portfolios remain functional even when custom icons are unavailable.
+
+⸻
+
+📂 Environment Variables
+
+Create a .env file:
+
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+AUTH_SECRET=
+DATABASE_URL=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+OPENROUTER_API_KEY=
+DEFAULT_AI_MODEL=
+AUTH_URL=
+NEXT_PUBLIC_APP_URL=
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
+ADMIN_EMAIL=
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
+
+⸻
+
+⚙️ Installation
+
+Clone Repository
+
 git clone https://github.com/RAj26-luj/portify-ai.git
-
 cd portify-ai
-```
 
-### Install Dependencies
+Install Dependencies
 
-```bash
 npm install
-```
 
-### Required Services
+Generate Prisma Client
 
-- MongoDB Atlas
-- Cloudinary
-- Google Gemini API
-- Gmail SMTP
-- Vercel
+npx prisma generate
 
-### Environment Variables
+Push Database Schema
 
-```bash
-cp .env.example .env
-```
+npx prisma db push
 
-Configure all required environment variables.
+Seed Database (Optional)
 
-### Start Development Server
+npx prisma db seed
 
-```bash
+Run Development Server
+
 npm run dev
-```
 
-Application will be available at:
+Application runs at:
 
-```text
 http://localhost:3000
-```
 
----
+⸻
 
-## Quality Checks
+🧪 Testing
 
-### Build
+Unit Tests
 
-```bash
+npm test
+
+Watch Mode
+
+npm run test:watch
+
+Playwright E2E Tests
+
+npx playwright test
+
+Build Validation
+
 npm run build
-```
 
-### Lint
+Lint
 
-```bash
 npm run lint
-```
 
-### Unit Tests
+⸻
 
-```bash
-npm run test
-```
+🐳 Docker
 
-### End-to-End Tests
+Build Image
 
-```bash
-npm run e2e
-```
+docker build -t portify-ai .
 
----
+Run Container
 
-## CI/CD Pipeline
+docker run -p 3000:3000 portify-ai
 
-The project includes automated workflows for:
+Docker Compose
 
-- Build Validation
-- Lint Checks
-- Automated Testing
-- Deployment Automation
-- Pull Request Verification
-
-GitHub Actions are configured inside:
-
-```text
-.github/workflows/
-```
-
----
-
-## Deployment
-
-### Vercel
-
-Production deployments are automatically triggered from the `main` branch.
-
-### Docker
-
-```bash
 docker-compose up --build
-```
 
----
+⸻
 
-## Roadmap
+📁 Project Structure
 
-### Phase 1
+src/
+├── actions/
+├── app/
+├── components/
+├── config/
+├── constants/
+├── hooks/
+├── jobs/
+├── lib/
+├── prompts/
+├── providers/
+├── services/
+├── store/
+├── tests/
+├── themes/
+├── types/
+└── validators/
 
-- Infrastructure Setup
-- CI/CD Configuration
-- Testing Framework
+⸻
 
-### Phase 2
+🎯 Core Goal
 
-- Database Architecture
-- Prisma Models
-- MongoDB Integration
+Portify AI helps users transform resume data into structured portfolio content, complete missing information, customize portfolio sections, switch themes, publish professional portfolio websites, receive contact requests, monitor portfolio engagement analytics, and maintain a professional online presence from a single unified dashboard.
 
-### Phase 3
+⸻
 
-- Authentication System
+👨‍💻 Author
 
-### Phase 4
+Raj Kumar Nath Sharma
 
-- Portfolio Management
-
-### Phase 5
-
-- Resume & Media Management
-
-### Phase 6
-
-- AI-Powered Features
-
-### Phase 7
-
-- Analytics Dashboard
-
-### Phase 8
-
-- Admin Approval Workflow
-
-### Phase 9
-
-- Production Release
-
----
-
-## Status
-
-**Current Version:** `v0.1.0-infra`
-
-Infrastructure setup completed successfully.
-
-### Completed
-
-- Next.js 16 Setup
-- TypeScript Configuration
-- Project Architecture
-- GitHub Repository Setup
-- GitHub Actions Workflows
-- Docker Configuration
-- Jest Configuration
-- Playwright Configuration
-- Vercel Deployment
-- Initial E2E Testing
-- Repository Documentation
-
-### Next Milestone
-
-- Database Design
-- Prisma Schema Creation
-- MongoDB Atlas Integration
-- Authentication System
-- Portfolio CRUD Operations
-
----
-
-## Contributing
-
-Contributions, suggestions, and feature requests are welcome.
-
-Please create an issue or submit a pull request.
-
----
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
-## Author
-
-**Raj Kumar Nath Sharma**
-
-B.Tech, Electrical Engineering  
+B.Tech, Electrical Engineering
 National Institute of Technology Rourkela
 
 - Full Stack Development
-- MERN Stack
-- AI Applications
+- Next.js
+- TypeScript
+- MongoDB
+- Cloud Computing
 - Competitive Programming
 
----
+⸻
+
+📜 License
+
+This project is licensed under the MIT License.
+
+⸻
 
 ⭐ If you found this project useful, consider giving it a star.

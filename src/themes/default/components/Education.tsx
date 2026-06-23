@@ -2,17 +2,10 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  GraduationCap, 
-  Calendar, 
-  MapPin, 
-  Award, 
-  X, 
-  Workflow,
-  BookOpen
-} from "lucide-react";
+import { GraduationCap, Calendar, MapPin, Award, X, Workflow, BookOpen } from "lucide-react";
 
-const DEFAULT_CAMPUS_IMAGE = "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=600&auto=format&fit=crop";
+const DEFAULT_CAMPUS_IMAGE =
+  "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=600&auto=format&fit=crop";
 
 interface EducationProps {
   educations?: any[];
@@ -45,8 +38,8 @@ export default function Education({ educations = [], portfolio }: EducationProps
   };
 
   return (
-    <section 
-      id="education" 
+    <section
+      id="education"
       className="relative w-full py-16 md:py-36 overflow-hidden bg-black text-white selection:bg-purple-500/30"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(139,92,246,0.04),transparent_50%)] pointer-events-none" />
@@ -68,7 +61,6 @@ export default function Education({ educations = [], portfolio }: EducationProps
 
       {/* Timeline Core Mapping Area Container */}
       <div className="relative max-w-5xl mx-auto px-4 sm:px-8 lg:px-12 z-10">
-        
         {/* Core Architectural Vertical Spine Vector Line */}
         <div className="absolute left-4 sm:left-1/2 top-2 bottom-2 w-[1px] bg-gradient-to-b from-purple-500/40 via-neutral-800 to-transparent -translate-x-1/2 hidden sm:block" />
         <div className="absolute left-8 top-2 bottom-2 w-[1px] bg-gradient-to-b from-purple-500/40 via-neutral-800 to-transparent block sm:hidden" />
@@ -89,22 +81,30 @@ export default function Education({ educations = [], portfolio }: EducationProps
                 className="relative flex flex-col sm:flex-row items-start sm:justify-between w-full group cursor-pointer"
               >
                 {/* Left Block / Right Block Alternating Structural Grid Alignment Logic */}
-                <div className={`w-full sm:w-[46%] order-2 ${isEven ? "sm:order-1 sm:text-right" : "sm:order-3 sm:text-left"} flex flex-col`}>
-                  
+                <div
+                  className={`w-full sm:w-[46%] order-2 ${isEven ? "sm:order-1 sm:text-right" : "sm:order-3 sm:text-left"} flex flex-col`}
+                >
                   {/* Clean Card UI */}
                   <div className="w-full bg-[#07070b]/90 border border-white/5 md:hover:border-purple-500/40 p-4 md:p-5 rounded-2xl backdrop-blur-xl transition-all duration-300 shadow-xl md:hover:-translate-y-0.5 relative overflow-hidden pl-14 sm:pl-5 space-y-3">
-                    
                     <div className="absolute -right-16 -top-16 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
 
                     {/* Left Frame Border Accent Line */}
-                    <div className={`absolute top-0 bottom-0 w-[2px] bg-purple-500/30 group-hover:bg-purple-500 ${isEven ? "sm:right-0 sm:left-auto" : "sm:left-0 sm:right-auto"} hidden sm:block`} />
+                    <div
+                      className={`absolute top-0 bottom-0 w-[2px] bg-purple-500/30 group-hover:bg-purple-500 ${isEven ? "sm:right-0 sm:left-auto" : "sm:left-0 sm:right-auto"} hidden sm:block`}
+                    />
 
                     {/* Mobile Logo Absolute Override */}
                     <div className="absolute left-3 top-4.5 w-8 h-8 rounded-lg border border-white/10 bg-neutral-900/60 overflow-hidden flex items-center justify-center sm:hidden shrink-0 shadow-md">
-                      <img src={logo || DEFAULT_CAMPUS_IMAGE} alt="" className="w-full h-full object-cover" />
+                      <img
+                        src={logo || DEFAULT_CAMPUS_IMAGE}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
                     </div>
 
-                    <div className={`flex flex-col sm:flex-row sm:items-start justify-between gap-1.5 ${isEven ? "sm:flex-row-reverse" : "sm:flex-row"}`}>
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-start justify-between gap-1.5 ${isEven ? "sm:flex-row-reverse" : "sm:flex-row"}`}
+                    >
                       <div className="flex flex-col truncate text-left sm:text-inherit">
                         <h3 className="text-base sm:text-lg font-bold text-white tracking-wide truncate">
                           {item.degree}
@@ -115,13 +115,16 @@ export default function Education({ educations = [], portfolio }: EducationProps
                       </div>
 
                       <span className="text-[10px] sm:text-[11px] font-mono font-medium text-purple-400 bg-purple-500/5 border border-purple-500/20 px-2 py-0.5 rounded shrink-0 self-start sm:self-auto">
-                        {getYear(item.startDate)} — {item.currentlyStudying ? "Present" : getYear(item.endDate)}
+                        {getYear(item.startDate)} —{" "}
+                        {item.currentlyStudying ? "Present" : getYear(item.endDate)}
                       </span>
                     </div>
 
                     {/* Field of Study & Grade Parameters */}
                     {(item.fieldOfStudy || item.cgpa || item.grade) && (
-                      <div className={`flex flex-wrap gap-1.5 pt-2 border-t border-white/5 text-[10px] sm:text-[11px] font-mono ${isEven ? "sm:justify-end" : "sm:justify-start"}`}>
+                      <div
+                        className={`flex flex-wrap gap-1.5 pt-2 border-t border-white/5 text-[10px] sm:text-[11px] font-mono ${isEven ? "sm:justify-end" : "sm:justify-start"}`}
+                      >
                         {item.fieldOfStudy && (
                           <span className="text-neutral-300 flex items-center gap-1 bg-white/5 border border-white/5 px-2 py-0.5 rounded">
                             <BookOpen className="w-3 h-3 text-purple-400" />
@@ -137,7 +140,6 @@ export default function Education({ educations = [], portfolio }: EducationProps
                       </div>
                     )}
                   </div>
-
                 </div>
 
                 {/* Central Interlocking Axis Timeline Center Dot */}
@@ -145,7 +147,6 @@ export default function Education({ educations = [], portfolio }: EducationProps
 
                 {/* Alternating Empty Spacer Column Frame (Desktop Only) */}
                 <div className={`hidden sm:block w-[46%] ${isEven ? "order-3" : "order-1"}`} />
-
               </motion.div>
             );
           })}
@@ -155,14 +156,14 @@ export default function Education({ educations = [], portfolio }: EducationProps
       {/* POPUP MODAL CANVAS */}
       <AnimatePresence>
         {selectedItem && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-3 sm:p-6 select-none"
             onClick={() => setSelectedItem(null)}
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.96, y: 10 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.96, y: 10 }}
@@ -170,7 +171,7 @@ export default function Education({ educations = [], portfolio }: EducationProps
               className="w-full max-w-2xl bg-neutral-950 border border-white/10 rounded-2xl overflow-y-auto max-h-[90vh] sm:max-h-[85vh] text-left shadow-2xl relative scrollbar-none pb-6"
               onClick={(e) => e.stopPropagation()}
             >
-              <button 
+              <button
                 onClick={() => setSelectedItem(null)}
                 className="absolute top-3 right-3 z-40 p-2 rounded-full bg-black/70 border border-white/10 text-neutral-400 hover:text-white transition-colors backdrop-blur-md active:scale-95"
               >
@@ -178,19 +179,23 @@ export default function Education({ educations = [], portfolio }: EducationProps
               </button>
 
               <div className="relative h-44 bg-neutral-900 overflow-hidden">
-                <img 
-                  src={selectedItem.logoUrl || selectedItem.institutionImage || DEFAULT_CAMPUS_IMAGE} 
-                  alt="" 
-                  className="w-full h-full object-cover blur-xs brightness-[0.35] scale-102 select-none" 
+                <img
+                  src={selectedItem.institutionImage || DEFAULT_CAMPUS_IMAGE}
+                  alt=""
+                  className="w-full h-full object-cover blur-xs brightness-[0.35] scale-102 select-none"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
-                
+
                 <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 flex items-center gap-4">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-white/10 bg-neutral-900 overflow-hidden flex items-center justify-center shrink-0 shadow-lg p-1.5 bg-neutral-950">
-                    <img 
-                      src={selectedItem.logoUrl || selectedItem.institutionImage || DEFAULT_CAMPUS_IMAGE} 
-                      alt={selectedItem.institution} 
-                      className="w-full h-full object-contain" 
+                    <img
+                      src={
+                        selectedItem.logoUrl ||
+                        selectedItem.institutionImage ||
+                        DEFAULT_CAMPUS_IMAGE
+                      }
+                      alt={selectedItem.institution}
+                      className="w-full h-full object-contain"
                     />
                   </div>
 
@@ -211,31 +216,51 @@ export default function Education({ educations = [], portfolio }: EducationProps
               <div className="p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-white/[0.01] border border-white/5 font-sans">
                   <div>
-                    <div className="text-[9px] font-medium text-neutral-500 uppercase tracking-wider font-mono">Enrollment Tenure</div>
+                    <div className="text-[9px] font-medium text-neutral-500 uppercase tracking-wider font-mono">
+                      Enrollment Tenure
+                    </div>
                     <div className="text-xs font-medium text-neutral-200 mt-0.5 flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-purple-400" />
-                      {getYear(selectedItem.startDate)} — {selectedItem.currentlyStudying ? "Present" : getYear(selectedItem.endDate)}
+                      {getYear(selectedItem.startDate)} —{" "}
+                      {selectedItem.currentlyStudying ? "Present" : getYear(selectedItem.endDate)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[9px] font-medium text-neutral-500 uppercase tracking-wider font-mono">Field Matrix</div>
-                    <div className="text-xs font-medium text-neutral-200 mt-0.5 flex items-center gap-1.5 truncate" title={selectedItem.fieldOfStudy || "General Spec"}>
+                    <div className="text-[9px] font-medium text-neutral-500 uppercase tracking-wider font-mono">
+                      Field Matrix
+                    </div>
+                    <div
+                      className="text-xs font-medium text-neutral-200 mt-0.5 flex items-center gap-1.5 truncate"
+                      title={selectedItem.fieldOfStudy || "General Spec"}
+                    >
                       <BookOpen className="w-3.5 h-3.5 text-purple-400" />
-                      <span className="truncate">{selectedItem.fieldOfStudy || "General Spec"}</span>
+                      <span className="truncate">
+                        {selectedItem.fieldOfStudy || "General Spec"}
+                      </span>
                     </div>
                   </div>
                   <div>
-                    <div className="text-[9px] font-medium text-neutral-500 uppercase tracking-wider font-mono">Performance Grade</div>
+                    <div className="text-[9px] font-medium text-neutral-500 uppercase tracking-wider font-mono">
+                      Performance Grade
+                    </div>
                     <div className="text-xs font-medium text-purple-400 mt-0.5 flex items-center gap-1.5">
                       <Award className="w-3.5 h-3.5" />
-                      <span>{selectedItem.cgpa ? `CGPA: ${selectedItem.cgpa}` : selectedItem.grade ? `Grade: ${selectedItem.grade}` : "Class Passed Status"}</span>
+                      <span>
+                        {selectedItem.cgpa
+                          ? `CGPA: ${selectedItem.cgpa}`
+                          : selectedItem.grade
+                            ? `Grade: ${selectedItem.grade}`
+                            : "Class Passed Status"}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {selectedItem.description && (
                   <div className="space-y-1.5">
-                    <h4 className="text-[10px] font-semibold text-neutral-500 tracking-wider uppercase font-mono">Syllabus Scope</h4>
+                    <h4 className="text-[10px] font-semibold text-neutral-500 tracking-wider uppercase font-mono">
+                      Syllabus Scope
+                    </h4>
                     <p className="text-xs sm:text-sm leading-relaxed text-neutral-300 font-light whitespace-pre-line bg-white/[0.01] p-4 rounded-xl border border-white/5 max-h-[220px] overflow-y-auto scrollbar-none">
                       {selectedItem.description}
                     </p>

@@ -1,9 +1,7 @@
+"use server";
 import { sendEmail } from "@/lib/nodemailer";
 
-export async function sendAdminNotification(
-  subject: string,
-  message: string
-) {
+export async function sendAdminNotification(subject: string, message: string) {
   const adminEmail = process.env.ADMIN_EMAIL;
 
   if (!adminEmail) {
