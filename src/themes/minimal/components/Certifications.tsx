@@ -1,156 +1,150 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { 
-  Award, 
-  ExternalLink, 
-  FileText, 
-  Calendar, 
-  X, 
-  Sparkles
-} from "lucide-react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Award, ExternalLink, FileText, Calendar, X, Sparkles } from "lucide-react";
 
 const DEFAULT_CERT_IMAGES = [
   "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop"
+  "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop",
 ];
 
+export interface CertificationItem {
+  id: string | number; // Required strict unique identification key
+  name?: string;
+  title?: string;
+  issuer?: string;
+  issueDate?: string;
+  expiryDate?: string;
+  credentialId?: string;
+  credentialUrl?: string;
+  certificatePdf?: string;
+  certificateImage?: string;
+  featured?: boolean;
+  skillsCovered?: string[];
+}
+
 interface CertificationsProps {
-  certifications?: any[];
+  certifications?: CertificationItem[];
 }
 
 export default function Certifications({ certifications = [] }: CertificationsProps) {
-  const rawCerts = certifications && certifications.length > 0 ? certifications : [];
-  const isScrollable = rawCerts.length >= 4;
-  const isMobileScrollable = rawCerts.length > 1;
+  const rawCerts = useMemo(
+    () => (certifications && certifications.length > 0 ? certifications : []),
+    [certifications]
+  );
 
-  const mobileMarqueeCerts = React.useMemo(() => {
-    if (rawCerts.length === 0) return [];
-    if (!isMobileScrollable) return rawCerts;
-    let items = [...rawCerts];
-    while (items.length < 8) {
-      items = [...items, ...rawCerts];
-    }
-    return items;
-  }, [rawCerts, isMobileScrollable]);
+  // Absolute server hydration fence protecting runtime layout evaluation limits
+  const [isMounted, setIsMounted] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
 
-  const marqueeCerts = React.useMemo(() => {
-    if (rawCerts.length === 0) return [];
-    if (!isScrollable) return rawCerts;
-    let items = [...rawCerts];
-    while (items.length < 6) {
-      items = [...items, ...rawCerts];
-    }
-    return items;
-  }, [rawCerts, isScrollable]);
+  const [selectedCert, setSelectedCert] = useState<CertificationItem | null>(null);
+  const [isDragged, setIsDragged] = useState(false);
+  const [dragX, setDragX] = useState(0);
 
-  const [selectedCert, setSelectedCert] = useState<any | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0 });
 
-  // Animation Controls & Refs for Mobile and Desktop Interactive Infinite Marquee Tracks
-  const mobileControls = useAnimation();
-  const currentMobileX = useRef<number>(0);
-  const isDraggingMobile = useRef<boolean>(false);
-
-  const deskControls = useAnimation();
-  const currentDeskX = useRef<number>(0);
-  const isDraggingDesk = useRef<boolean>(false);
-
-  const isMountedRef = useRef<boolean>(true);
-
-  // Constant speed calculations for uniform velocity tracking
-  const MOBILE_SPEED = 1000 / 45; // Target distance over duration (X-axis pixels per second)
-  const DESK_SPEED = 2000 / 55; // Target distance over duration (X-axis pixels per second)
-
-  const startMobileMarquee = async (fromX: number) => {
-    if (isDraggingMobile.current || selectedCert || !isMountedRef.current) return;
-
-    const targetX = -1000;
-    if (fromX <= targetX || fromX > 0) {
-      fromX = 0;
-      await mobileControls.set({ x: 0 });
-    }
-
-    const remainingDistance = Math.abs(targetX - fromX);
-    const dynamicDuration = remainingDistance / MOBILE_SPEED;
-
-    await mobileControls.start({
-      x: targetX,
-      transition: {
-        duration: dynamicDuration,
-        ease: "linear"
-      }
-    });
-
-    if (!isDraggingMobile.current && !selectedCert && isMountedRef.current) {
-      requestAnimationFrame(() => {
-        startMobileMarquee(0);
-      });
-    }
-  };
-
-  const startDeskMarquee = async (fromX: number) => {
-    if (isDraggingDesk.current || selectedCert || !isMountedRef.current) return;
-
-    const targetX = -2000;
-    if (fromX <= targetX || fromX > 0) {
-      fromX = 0;
-      await deskControls.set({ x: 0 });
-    }
-
-    const remainingDistance = Math.abs(targetX - fromX);
-    const dynamicDuration = remainingDistance / DESK_SPEED;
-
-    await deskControls.start({
-      x: targetX,
-      transition: {
-        duration: dynamicDuration,
-        ease: "linear"
-      }
-    });
-
-    if (!isDraggingDesk.current && !selectedCert && isMountedRef.current) {
-      requestAnimationFrame(() => {
-        startDeskMarquee(0);
-      });
-    }
-  };
-
+  // Handle cross-device viewports and mount isolation securely
   useEffect(() => {
-    isMountedRef.current = true;
-
-    if (isMobileScrollable && !selectedCert) {
-      startMobileMarquee(currentMobileX.current);
-    } else {
-      mobileControls.stop();
-    }
-
-    if (isScrollable && !selectedCert) {
-      startDeskMarquee(currentDeskX.current);
-    } else {
-      deskControls.stop();
-    }
-
-    return () => {
-      mobileControls.stop();
-      deskControls.stop();
-      isMountedRef.current = false;
+    setIsMounted(true);
+    const checkViewport = () => {
+      setIsMobileViewport(window.innerWidth < 768);
     };
-  }, [isMobileScrollable, isScrollable, selectedCert]);
+    checkViewport();
+    window.addEventListener("resize", checkViewport);
+    return () => window.removeEventListener("resize", checkViewport);
+  }, []);
 
-  if (!rawCerts.length) return null;
+  // Structural threshold rules: Scroll if > 1 item on mobile, or > 3 items on desktop
+  const shouldAutoScroll = useMemo(() => {
+    if (isMobileViewport) return rawCerts.length > 1;
+    return rawCerts.length > 3;
+  }, [rawCerts, isMobileViewport]);
 
-  const getCertImage = (cert: any, idx: number) => {
-    return cert?.certificateImage || DEFAULT_CERT_IMAGES[idx % DEFAULT_CERT_IMAGES.length];
+  // Safeguard array allocation logic: completely bypass track cloning if item thresholds are low
+  const paddedCerts = useMemo(() => {
+    if (rawCerts.length === 0) return [];
+    if (!shouldAutoScroll) return rawCerts;
+
+    const targetFloor = isMobileViewport ? 6 : 10;
+    if (rawCerts.length >= targetFloor) return rawCerts;
+
+    let items: CertificationItem[] = [];
+    while (items.length < targetFloor) {
+      items = [...items, ...rawCerts];
+    }
+    return items;
+  }, [rawCerts, isMobileViewport, shouldAutoScroll]);
+
+  // Final rendering array mapping sets cleanly onto visible UI elements
+  const displayCerts = useMemo(() => {
+    return shouldAutoScroll ? [...paddedCerts, ...paddedCerts] : rawCerts;
+  }, [paddedCerts, shouldAutoScroll, rawCerts]);
+
+  // Throttled container layout boundaries calculating limits safely via state checkers
+  useEffect(() => {
+    if (!isMounted || displayCerts.length === 0) return;
+
+    const calculateBounds = () => {
+      if (!containerRef.current || !trackRef.current) return;
+      const containerWidth = containerRef.current.offsetWidth;
+
+      const operationalTrackWidth = shouldAutoScroll
+        ? trackRef.current.scrollWidth / 2
+        : trackRef.current.scrollWidth;
+
+      const maxLeftDrag = Math.min(0, containerWidth - operationalTrackWidth);
+
+      setDragConstraints((prev) =>
+        prev.left === maxLeftDrag ? prev : { left: maxLeftDrag, right: 0 }
+      );
+    };
+
+    const observer = new ResizeObserver(() => {
+      requestAnimationFrame(calculateBounds);
+    });
+
+    if (containerRef.current) observer.observe(containerRef.current);
+    if (trackRef.current) observer.observe(trackRef.current);
+
+    calculateBounds();
+    return () => observer.disconnect();
+  }, [displayCerts, isMounted, shouldAutoScroll]);
+
+  if (!rawCerts.length || !isMounted) return null;
+
+  // Stable numeric hashing fallback providing balanced imagery selection paths
+  const getCertImage = (cert: CertificationItem) => {
+    if (cert?.certificateImage) return cert.certificateImage;
+    const stringId = String(cert.id);
+    let hash = 0;
+    for (let i = 0; i < stringId.length; i++) {
+      hash = stringId.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return DEFAULT_CERT_IMAGES[Math.abs(hash) % DEFAULT_CERT_IMAGES.length];
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string) => {
     if (!dateStr) return "";
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      year: "numeric"
-    });
+    const date = new Date(dateStr);
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    return `${months[date.getMonth()]} ${date.getFullYear()}`;
   };
 
   return (
@@ -158,6 +152,20 @@ export default function Certifications({ certifications = [] }: CertificationsPr
       id="certifications"
       className="relative w-full py-16 md:py-24 overflow-hidden bg-white text-[#111827] selection:bg-gray-200 select-none"
     >
+      {/* Declarative CSS keyframe loop layer running completely on GPU threads */}
+      <style>{`
+        @keyframes swiss-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
+        }
+        .animate-marquee-run {
+          animation: swiss-marquee 45s linear infinite;
+        }
+        .marquee-paused {
+          animation-play-state: paused !important;
+        }
+      `}</style>
+
       <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 z-10 mb-12 md:mb-16">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-gray-100 pb-6 text-left">
           <div>
@@ -172,112 +180,69 @@ export default function Certifications({ certifications = [] }: CertificationsPr
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* 1. MOBILE RESPONSIVE VIEW: SWISS MINIMAL LIST ROWS */}
-      {/* ========================================== */}
-      <div className="block md:hidden w-full overflow-hidden py-1">
-        <motion.div 
-          className="flex gap-4 px-6 w-max touch-none"
-          drag={isMobileScrollable ? "x" : false}
-          dragConstraints={{ left: -1000, right: 0 }}
-          animate={mobileControls}
-          onUpdate={(latest) => {
-            currentMobileX.current = typeof latest.x === "number" ? latest.x : 0;
-          }}
-          onDragStart={() => {
-            isDraggingMobile.current = true;
-            mobileControls.stop();
-          }}
-          onDragEnd={() => {
-            isDraggingMobile.current = false;
-            startMobileMarquee(currentMobileX.current);
-          }}
-          onMouseEnter={() => {
-            isDraggingMobile.current = true;
-            mobileControls.stop();
-          }}
-          onMouseLeave={() => {
-            isDraggingMobile.current = false;
-            startMobileMarquee(currentMobileX.current);
-          }}
-        >
-          {mobileMarqueeCerts.map((cert: any, idx: number) => {
-            const certTitle = cert?.name || cert?.title || "Credential Item";
-            return (
-              <div
-                key={`mob-${cert.id || idx}-${idx}`}
-                onClick={() => setSelectedCert(cert)}
-                className="w-[260px] bg-[#FAFAFA] border border-gray-200 rounded-none p-4 flex items-center gap-4 cursor-pointer shrink-0 text-left transition-colors hover:bg-gray-50"
-              >
-                <div className="w-12 h-12 rounded-none overflow-hidden bg-white shrink-0 relative border border-gray-200">
-                  <img 
-                    src={getCertImage(cert, idx)} 
-                    alt="" 
-                    className="w-full h-full object-cover select-none"
-                  />
-                </div>
-                <div className="flex-1 min-w-0 space-y-0.5">
-                  <h3 className="font-extrabold text-sm text-[#111827] truncate font-sans uppercase">
-                    {certTitle}
-                  </h3>
-                  <p className="text-[11px] font-mono text-gray-500 truncate font-semibold">
-                    {cert?.issuer || "Authority Issuer"}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </motion.div>
-      </div>
+      {/* Unified Drag-Supportive Track Canvas Wrapper Container */}
+      <div
+        ref={containerRef}
+        className="w-full overflow-hidden py-4 relative group/container touch-pan-y"
+      >
+        {/* Blended horizontal edge gradients - Only activated when auto-scroll triggers */}
+        {shouldAutoScroll && (
+          <>
+            <div className="absolute left-0 top-0 bottom-0 w-16 md:w-48 bg-gradient-to-r from-white to-transparent z-20 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 md:w-48 bg-gradient-to-l from-white to-transparent z-20 pointer-events-none" />
+          </>
+        )}
 
-      {/* ========================================== */}
-      {/* 2. DESKTOP VIEW: INFINITE EDITORIAL STRIP */}
-      {/* ========================================== */}
-      <div className="hidden md:block relative w-full overflow-hidden py-2">
-        <motion.div 
-          className={
-            isScrollable
-              ? "flex gap-8 whitespace-nowrap min-w-full w-max px-6 touch-none"
-              : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center"
-          }
-          drag={isScrollable ? "x" : false}
-          dragConstraints={{ left: -2000, right: 0 }}
-          animate={deskControls}
-          onUpdate={(latest) => {
-            currentDeskX.current = typeof latest.x === "number" ? latest.x : 0;
-          }}
+        <motion.div
+          ref={trackRef}
+          drag={shouldAutoScroll ? "x" : false}
+          dragConstraints={dragConstraints}
+          dragElastic={0.15}
+          style={isDragged ? { x: dragX } : undefined}
           onDragStart={() => {
-            isDraggingDesk.current = true;
-            deskControls.stop();
+            if (shouldAutoScroll) setIsDragged(true);
           }}
-          onDragEnd={() => {
-            isDraggingDesk.current = false;
-            startDeskMarquee(currentDeskX.current);
+          onDrag={(event, info) => {
+            if (!shouldAutoScroll || !trackRef.current) return;
+            const halfWidth = trackRef.current.scrollWidth / 2;
+            let computedX = info.point.x;
+
+            if (computedX <= -halfWidth) {
+              computedX = computedX % halfWidth;
+            } else if (computedX > 0) {
+              computedX = -halfWidth + (computedX % halfWidth);
+            }
+            setDragX(computedX);
           }}
-          onMouseEnter={() => {
-            isDraggingDesk.current = true;
-            deskControls.stop();
-          }}
-          onMouseLeave={() => {
-            isDraggingDesk.current = false;
-            startDeskMarquee(currentDeskX.current);
-          }}
+          onDragEnd={() => setIsDragged(false)}
+          className={`flex gap-6 md:gap-8 px-6 mx-auto w-max ${
+            shouldAutoScroll ? "cursor-grab active:cursor-grabbing" : "justify-center"
+          } ${
+            shouldAutoScroll && !(selectedCert || isDragged)
+              ? "animate-marquee-run group-hover/container:marquee-paused"
+              : "marquee-paused"
+          }`}
         >
-          {marqueeCerts.map((cert: any, idx: number) => {
+          {displayCerts.map((cert, idx) => {
             const certTitle = cert?.name || cert?.title || "Credential Item";
+            const itemKey = `track-node-${idx}-${cert.id}`;
+
             return (
               <div
-                key={`desk-${cert.id || idx}-${idx}`}
-                onClick={() => setSelectedCert(cert)}
-                className="w-[360px] shrink-0 inline-block bg-white border-b-2 border-gray-100 hover:border-[#111827] rounded-none p-2 cursor-pointer relative transition-all duration-300"
+                key={itemKey}
+                onClick={() => {
+                  if (!isDragged) setSelectedCert(cert);
+                }}
+                className="w-[260px] md:w-[360px] shrink-0 inline-block bg-white border-b-2 border-gray-100 hover:border-[#111827] rounded-none p-2 cursor-pointer relative transition-all duration-300 text-left group/card"
               >
-                <div className="w-full h-56 rounded-none overflow-hidden bg-[#FAFAFA] relative mb-4 border border-gray-100">
-                  <img 
-                    src={getCertImage(cert, idx)} 
-                    alt={certTitle} 
-                    className="w-full h-full object-cover select-none transition-transform duration-500 hover:scale-[1.02]"
+                <div className="w-full h-36 md:h-56 rounded-none overflow-hidden bg-[#FAFAFA] relative mb-4 border border-gray-100 pointer-events-none">
+                  <img
+                    src={getCertImage(cert)}
+                    alt={`Verification token display artwork representing ${certTitle}`}
+                    loading="lazy"
+                    className="w-full h-full object-cover select-none transition-transform duration-500 group-hover/card:scale-[1.02]"
                   />
-                  
+
                   {cert?.featured && (
                     <span className="absolute top-3 left-3 px-2 py-1 rounded-none text-[9px] font-mono font-bold bg-[#111827] text-white uppercase tracking-widest">
                       FEATURED
@@ -285,7 +250,7 @@ export default function Certifications({ certifications = [] }: CertificationsPr
                   )}
 
                   <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between truncate">
-                    <span className="text-[11px] font-mono font-bold text-gray-700 bg-white/95 px-2 py-0.5 border border-gray-200 max-w-[70%] text-left truncate">
+                    <span className="text-[11px] font-mono font-bold text-gray-700 bg-white/95 px-2 py-0.5 border border-gray-200 max-w-[70%] truncate">
                       {cert?.issuer || "Authority Issuer"}
                     </span>
                     {cert?.issueDate && (
@@ -296,11 +261,11 @@ export default function Certifications({ certifications = [] }: CertificationsPr
                   </div>
                 </div>
 
-                <div className="space-y-1 w-full truncate text-left px-1 pb-2">
-                  <h3 className="font-extrabold text-base tracking-tight text-[#111827] truncate font-sans uppercase">
+                <div className="space-y-1 w-full truncate px-1 pb-2 pointer-events-none">
+                  <h3 className="font-extrabold text-xs md:text-base tracking-tight text-[#111827] truncate font-sans uppercase">
                     {certTitle}
                   </h3>
-                  <span className="text-xs font-mono font-bold text-gray-400 group-hover/marquee:text-gray-600 transition-colors block">
+                  <span className="text-xs font-mono font-bold text-gray-400 group-hover/card:text-gray-600 transition-colors block">
                     INSPECT VERIFICATION LOGS →
                   </span>
                 </div>
@@ -330,6 +295,7 @@ export default function Certifications({ certifications = [] }: CertificationsPr
             >
               <button
                 onClick={() => setSelectedCert(null)}
+                aria-label="Dismiss asset credential layer"
                 className="absolute top-4 right-4 z-40 p-2 rounded-none bg-[#FAFAFA] border border-gray-200 text-gray-400 hover:text-[#111827] transition-colors"
               >
                 <X className="w-4 h-4" />
@@ -337,8 +303,8 @@ export default function Certifications({ certifications = [] }: CertificationsPr
 
               <div className="w-full h-48 sm:h-64 bg-[#FAFAFA] relative border-b border-gray-200">
                 <img
-                  src={getCertImage(selectedCert, rawCerts.indexOf(selectedCert))}
-                  alt={selectedCert?.name || selectedCert?.title}
+                  src={getCertImage(selectedCert)}
+                  alt={`Sourced validation credential artwork image backing ${selectedCert?.name || selectedCert?.title}`}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
@@ -354,30 +320,49 @@ export default function Certifications({ certifications = [] }: CertificationsPr
               <div className="p-6 sm:p-8 space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-[#FAFAFA] border border-gray-200 font-sans">
                   <div>
-                    <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">Authority</div>
-                    <div className="text-xs font-bold text-gray-800 mt-1">{selectedCert?.issuer || "N/A"}</div>
+                    <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">
+                      Authority
+                    </div>
+                    <div className="text-xs font-bold text-gray-800 mt-1">
+                      {selectedCert?.issuer || "N/A"}
+                    </div>
                   </div>
                   <div>
-                    <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">Credential ID</div>
-                    <div className="text-xs font-mono font-bold text-gray-600 mt-1 truncate max-w-[95%]" title={selectedCert?.credentialId}>
+                    <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">
+                      Credential ID
+                    </div>
+                    <div
+                      className="text-xs font-mono font-bold text-gray-600 mt-1 truncate max-w-[95%]"
+                      title={selectedCert?.credentialId}
+                    >
                       {selectedCert?.credentialId || "Generic Token Key"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">Lifespan</div>
+                    <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">
+                      Lifespan
+                    </div>
                     <div className="text-xs font-bold text-[#111827] mt-1 flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-gray-400" /> 
-                      {formatDate(selectedCert?.issueDate)} {selectedCert?.expiryDate ? `- ${formatDate(selectedCert.expiryDate)}` : " (No Expiry)"}
+                      <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                      {formatDate(selectedCert?.issueDate)}{" "}
+                      {selectedCert?.expiryDate
+                        ? `- ${formatDate(selectedCert.expiryDate)}`
+                        : " (No Expiry)"}
                     </div>
                   </div>
                 </div>
 
-                {selectedCert?.skillsCovered?.length > 0 && (
+                {selectedCert?.skillsCovered && selectedCert.skillsCovered.length > 0 && (
                   <div className="space-y-2">
-                    <h4 className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-wider">Skills Metrics</h4>
+                    <h4 className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-wider">
+                      Skills Metrics
+                    </h4>
                     <div className="flex flex-wrap gap-2">
-                      {selectedCert.skillsCovered.map((skill: string, i: number) => (
-                        <span key={i} className="px-2.5 py-1 rounded-none bg-[#FAFAFA] border border-gray-200 text-xs font-medium text-gray-700 font-mono">
+                      {selectedCert.skillsCovered.map((skill, i) => (
+                        <span
+                          key={`skill-${i}`}
+                          className="px-2.5 py-1 rounded-none bg-[#FAFAFA] border border-gray-200 text-xs font-medium text-gray-700 font-mono"
+                        >
                           {skill}
                         </span>
                       ))}

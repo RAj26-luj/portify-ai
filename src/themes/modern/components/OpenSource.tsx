@@ -20,7 +20,7 @@ import {
 const DEFAULT_OS_COVERS = [
   "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop"
+  "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop",
 ];
 
 interface OpenSourceProps {
@@ -87,7 +87,7 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
           if (itemElement) {
             verticalScrollContainerRef.current.scrollTo({
               top: itemElement.offsetTop - verticalScrollContainerRef.current.offsetTop - 12,
-              behavior: "smooth"
+              behavior: "smooth",
             });
           }
         }
@@ -102,13 +102,12 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
 
   const startMobileMarquee = async (fromY: number) => {
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-    
+
     if (!isMounted.current || isDraggingMobile.current || selectedItem || !isMobileScrollable) {
       return;
     }
 
     const totalDistance = -420;
-    // Handle bounds cleanup gracefully
     const targetY = totalDistance;
     let baseFromY = fromY;
 
@@ -117,13 +116,12 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
     }
 
     const remainingDistance = Math.abs(targetY - baseFromY);
-    const totalDuration = 25; // Constant speed matched to 25s for full loop length
+    const totalDuration = 25;
     const dynamicDuration = (remainingDistance / Math.abs(totalDistance)) * totalDuration;
 
     try {
-      // Force set to current layout position reference safely before sliding
       await mobileControls.set({ y: baseFromY });
-      
+
       await mobileControls.start({
         y: targetY,
         transition: {
@@ -134,13 +132,12 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
 
       if (isMounted.current && !isDraggingMobile.current) {
         currentMobileY.current = 0;
-        // Recursive jump execution safely postponed out of animation promise loop stack
         animationTimeoutRef.current = setTimeout(() => {
           startMobileMarquee(0);
         }, 0);
       }
     } catch (e) {
-      // Catch framework interruptions due to layout modifications or unmount cleanly
+      // Catch layout interruptions cleanly
     }
   };
 
@@ -149,7 +146,6 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
     isMounted.current = true;
 
     if (isMobileScrollable && !selectedItem) {
-      // Re-initiate loop from current position or starting clean
       startMobileMarquee(currentMobileY.current);
     } else {
       mobileControls.stop();
@@ -193,11 +189,9 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
       </div>
 
       {/* ========================================== */}
-      {/* 1. MOBILE RESPONSIVE VIEW: SAAS MARQUEE CARD COMPONENT */}
+      {/* 1. MOBILE RESPONSIVE VIEW */}
       {/* ========================================== */}
-      <div 
-        className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative"
-      >
+      <div className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative">
         <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#0A0A0B] to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0A0A0B] to-transparent z-20 pointer-events-none" />
 
@@ -205,10 +199,7 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
           className="flex flex-col gap-3 touch-pan-y select-none"
           animate={mobileControls}
           drag={isMobileScrollable ? "y" : false}
-          dragConstraints={{
-            top: -420,
-            bottom: 0
-          }}
+          dragConstraints={{ top: -420, bottom: 0 }}
           dragElastic={0.05}
           onUpdate={(latest) => {
             currentMobileY.current = Number(latest.y) || 0;
@@ -230,10 +221,12 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
               className="w-full bg-[#111113] border border-[#18181B] active:border-[#8B5CF6]/50 rounded-xl p-4 flex items-center gap-4 shadow-xl shrink-0 cursor-pointer text-left"
             >
               <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#18181B] border border-[#18181B] shrink-0 flex items-center justify-center font-mono text-xs font-bold text-[#8B5CF6] shadow-inner">
-                {String((sortedOS.indexOf(item) % sortedOS.length) + 1).padStart(2, '0')}
+                {String((sortedOS.indexOf(item) % sortedOS.length) + 1).padStart(2, "0")}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-sm text-white truncate font-sans">{item.repositoryName}</h3>
+                <h3 className="font-bold text-sm text-white truncate font-sans">
+                  {item.repositoryName}
+                </h3>
                 <p className="text-[11px] font-sans text-[#71717A] truncate mt-1">
                   {item.contributionTitle || item.pullRequestTitle || "Upstream Repository Log"}
                 </p>
@@ -246,14 +239,88 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
       {/* ========================================== */}
       {/* 2. DESKTOP VIEW: PREMIUM SAAS SPLIT WORKSPACE */}
       {/* ========================================== */}
-      <div className="hidden md:block relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        
-        {/* Left Side Track: Programmatic Stream Registry */}
-        <div className="lg:col-span-5 w-full space-y-4">
+      <div className="hidden md:grid relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 z-10 lg:grid-cols-12 gap-12 items-center">
+        {/* Main Telemetry Display Widget (LEFT COLUMN - 50% Width) */}
+        <div className="order-1 lg:order-1 lg:col-span-6 w-full h-full min-h-[500px]">
+          <AnimatePresence mode="wait">
+            {activeOS && (
+              <motion.div
+                key={activeOS.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                onClick={() => setSelectedItem(activeOS)}
+                className="w-full bg-[#111113]/80 border border-[#18181B] rounded-3xl p-6 relative flex flex-col justify-between overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.02)] min-h-[500px] cursor-pointer group"
+              >
+                <div>
+                  <div className="w-full h-68 rounded-2xl overflow-hidden bg-[#18181B] relative mb-6 border border-[#18181B] shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
+                    <img
+                      src={getCoverImage(activeOS, activeIndex)}
+                      alt={activeOS.repositoryName}
+                      className="w-full h-full object-cover select-none transition-transform duration-700 group-hover:scale-[1.02]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#111113] via-transparent to-transparent opacity-90" />
+
+                    <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between">
+                      <div className="space-y-1.5 truncate max-w-[75%] text-left">
+                        <h3 className="text-2xl font-extrabold text-white tracking-tight font-sans">
+                          {activeOS.repositoryName}
+                        </h3>
+                        {activeOS.contributionType && (
+                          <p className="text-[11px] font-mono font-semibold text-[#8B5CF6] uppercase tracking-wider">
+                            TYPE: {activeOS.contributionType}
+                          </p>
+                        )}
+                      </div>
+
+                      {activeOS.status && (
+                        <span className="text-[10px] font-mono font-bold text-white bg-[#111113]/90 border border-[#18181B] rounded-lg px-3 py-1 backdrop-blur-md shrink-0 uppercase tracking-wide shadow-sm">
+                          {activeOS.status}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {activeOS.description && (
+                    <p className="text-sm text-[#D4D4D8] font-normal leading-relaxed line-clamp-3 font-sans text-left text-justify md:text-left [text-wrap:balance]">
+                      {activeOS.description}
+                    </p>
+                  )}
+                </div>
+
+                <div
+                  className="pt-6 mt-6 border-t border-[#18181B] flex items-center justify-end gap-3.5"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {activeOS.linesChanged && (
+                    <span className="text-xs font-semibold text-[#71717A] font-mono mr-auto flex items-center gap-1.5 bg-[#18181B] px-2.5 py-1 rounded-lg border border-[#18181B]">
+                      <Diff className="w-3.5 h-3.5 text-[#6366F1]" /> {activeOS.linesChanged}
+                    </span>
+                  )}
+                  {activeOS.repositoryUrl && (
+                    <a
+                      href={activeOS.repositoryUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] hover:opacity-95 text-white text-xs font-bold tracking-wide transition-all shadow-[0_4px_15px_rgba(99,102,241,0.2)] border border-white/10"
+                    >
+                      Repository <ExternalLink className="w-3.5 h-3.5 text-white/80" />
+                    </a>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Repository Sidebar List (RIGHT COLUMN - 50% Width) */}
+        <div className="order-2 lg:order-2 lg:col-span-6 w-full space-y-4">
           <div className="flex items-center justify-between px-2 text-[11px] text-[#71717A] tracking-wider font-mono uppercase font-semibold">
             <span>Repository Array ({sortedOS.length})</span>
             <span className="flex items-center gap-1.5 text-[#6366F1] font-bold">
-              <Workflow className="w-3 h-3 animate-spin" style={{ animationDuration: '4s' }} /> Pipeline Synced
+              <Workflow className="w-3 h-3 animate-spin" style={{ animationDuration: "4s" }} />{" "}
+              Pipeline Synced
             </span>
           </div>
 
@@ -291,15 +358,21 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
                   <div className="flex items-center justify-between gap-4">
                     <div className="space-y-1 truncate w-full">
                       <div className="flex items-center gap-2.5">
-                        <span className={`text-xs font-mono font-bold ${isCurrent ? "text-[#8B5CF6]" : "text-[#71717A]"}`}>
-                          {String(idx + 1).padStart(2, '0')}
+                        <span
+                          className={`text-xs font-mono font-bold ${isCurrent ? "text-[#8B5CF6]" : "text-[#71717A]"}`}
+                        >
+                          {String(idx + 1).padStart(2, "0")}
                         </span>
-                        <h3 className={`font-bold text-base tracking-tight truncate font-sans ${isCurrent ? "text-white" : "text-[#71717A] group-hover:text-[#D4D4D8]"}`}>
+                        <h3
+                          className={`font-bold text-base tracking-tight truncate font-sans ${isCurrent ? "text-white" : "text-[#71717A] group-hover:text-[#D4D4D8]"}`}
+                        >
                           {item.repositoryName}
                         </h3>
                       </div>
                       <p className="text-xs text-[#71717A] truncate max-w-[95%] font-medium">
-                        {item.contributionTitle || item.pullRequestTitle || "Core Upstream Addition Log."}
+                        {item.contributionTitle ||
+                          item.pullRequestTitle ||
+                          "Core Upstream Addition Log."}
                       </p>
                     </div>
                     <span className="text-xs font-medium text-[#71717A] font-mono shrink-0 group-hover:text-[#06B6D4] transition-colors">
@@ -310,78 +383,6 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
               );
             })}
           </div>
-        </div>
-
-        {/* Right Side Frame: Premium Telemetry Display Widget */}
-        <div className="lg:col-span-7 w-full h-full min-h-[500px]">
-          <AnimatePresence mode="wait">
-            {activeOS && (
-              <motion.div
-                key={activeOS.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                onClick={() => setSelectedItem(activeOS)}
-                className="w-full bg-[#111113]/80 border border-[#18181B] rounded-3xl p-6 relative flex flex-col justify-between overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.02)] min-h-[500px] cursor-pointer group"
-              >
-                <div>
-                  {/* Dashboard Header Banner Layout */}
-                  <div className="w-full h-68 rounded-2xl overflow-hidden bg-[#18181B] relative mb-6 border border-[#18181B] shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
-                    <img
-                      src={getCoverImage(activeOS, activeIndex)}
-                      alt={activeOS.repositoryName}
-                      className="w-full h-full object-cover select-none transition-transform duration-700 group-hover:scale-[1.02]"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#111113] via-transparent to-transparent opacity-90" />
-                    
-                    <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between">
-                      <div className="space-y-1.5 truncate max-w-[75%] text-left">
-                        <h3 className="text-2xl font-extrabold text-white tracking-tight font-sans">
-                          {activeOS.repositoryName}
-                        </h3>
-                        {activeOS.contributionType && (
-                          <p className="text-[11px] font-mono font-semibold text-[#8B5CF6] uppercase tracking-wider">
-                            TYPE: {activeOS.contributionType}
-                          </p>
-                        )}
-                      </div>
-                      
-                      {activeOS.status && (
-                        <span className="text-[10px] font-mono font-bold text-white bg-[#111113]/90 border border-[#18181B] rounded-lg px-3 py-1 backdrop-blur-md shrink-0 uppercase tracking-wide shadow-sm">
-                          {activeOS.status}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {activeOS.description && (
-                    <p className="text-sm text-[#D4D4D8] font-normal leading-relaxed line-clamp-3 font-sans text-left text-justify md:text-left [text-wrap:balance]">
-                      {activeOS.description}
-                    </p>
-                  )}
-                </div>
-
-                <div className="pt-6 mt-6 border-t border-[#18181B] flex items-center justify-end gap-3.5" onClick={(e) => e.stopPropagation()}>
-                  {activeOS.linesChanged && (
-                    <span className="text-xs font-semibold text-[#71717A] font-mono mr-auto flex items-center gap-1.5 bg-[#18181B] px-2.5 py-1 rounded-lg border border-[#18181B]">
-                      <Diff className="w-3.5 h-3.5 text-[#6366F1]" /> {activeOS.linesChanged}
-                    </span>
-                  )}
-                  {activeOS.repositoryUrl && (
-                    <a
-                      href={activeOS.repositoryUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] hover:opacity-95 text-white text-xs font-bold tracking-wide transition-all shadow-[0_4px_15px_rgba(99,102,241,0.2)] border border-white/10"
-                    >
-                      Repository <ExternalLink className="w-3.5 h-3.5 text-white/80" />
-                    </a>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </div>
 
@@ -397,7 +398,7 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
         </div>
       )}
 
-      {/* MODAL REDESIGN: FULL MODULE COMPILATION PREVIEW HUD */}
+      {/* COMPREHENSIVE MODAL OVERLAY */}
       <AnimatePresence>
         {selectedItem && (
           <motion.div
@@ -429,7 +430,7 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111113] via-[#111113]/30 to-transparent" />
-                
+
                 <div className="absolute bottom-5 left-5 right-5 sm:bottom-8 sm:left-8 sm:right-8">
                   <span className="px-2.5 py-1 rounded-md bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/20 text-[10px] font-bold tracking-wider uppercase mb-2 inline-block font-mono">
                     {selectedItem.contributionType || "Ecosystem Kernel Contribution"}
@@ -443,21 +444,29 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
               <div className="p-5 sm:p-8 space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-[#0A0A0B]/60 border border-[#18181B] shadow-inner">
                   <div>
-                    <div className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider font-mono">Telemetry Status</div>
+                    <div className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider font-mono">
+                      Telemetry Status
+                    </div>
                     <div className="text-sm font-bold text-[#D4D4D8] mt-1 flex items-center gap-2 font-sans">
-                      <GitBranch className="w-4 h-4 text-[#8B5CF6]" /> 
+                      <GitBranch className="w-4 h-4 text-[#8B5CF6]" />
                       {selectedItem.status || "Merged Pipeline"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider font-mono">System Footprint</div>
+                    <div className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider font-mono">
+                      System Footprint
+                    </div>
                     <div className="text-sm font-bold text-[#D4D4D8] mt-1 flex items-center gap-2 truncate font-sans">
                       <Diff className="w-4 h-4 text-[#6366F1] shrink-0" />
-                      <span className="truncate">{selectedItem.linesChanged || "0 Lines Adjusted"}</span>
+                      <span className="truncate">
+                        {selectedItem.linesChanged || "0 Lines Adjusted"}
+                      </span>
                     </div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider font-mono">Display Pipeline</div>
+                    <div className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider font-mono">
+                      Display Pipeline
+                    </div>
                     <div className="text-sm font-bold text-[#06B6D4] mt-1 flex items-center gap-2 font-mono">
                       <Calendar className="w-4 h-4" />
                       IDX_NODE_#0{selectedItem.displayOrder ?? 0}
@@ -465,24 +474,35 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
                   </div>
                 </div>
 
-                {(selectedItem.contributionTitle || selectedItem.pullRequestTitle || selectedItem.issueTitle) && (
+                {(selectedItem.contributionTitle ||
+                  selectedItem.pullRequestTitle ||
+                  selectedItem.issueTitle) && (
                   <div className="p-4 rounded-xl border border-[#18181B] bg-[#0A0A0B]/40 space-y-2.5 font-mono text-xs">
                     {selectedItem.contributionTitle && (
                       <div className="flex items-start gap-2.5 text-[#D4D4D8]">
                         <Sparkles className="w-4 h-4 text-[#8B5CF6] mt-0.5 shrink-0" />
-                        <span><span className="text-[#71717A] font-semibold">OBJECTIVE:</span> {selectedItem.contributionTitle}</span>
+                        <span>
+                          <span className="text-[#71717A] font-semibold">OBJECTIVE:</span>{" "}
+                          {selectedItem.contributionTitle}
+                        </span>
                       </div>
                     )}
                     {selectedItem.pullRequestTitle && (
                       <div className="flex items-start gap-2.5 text-[#D4D4D8]">
                         <GitPullRequest className="w-4 h-4 text-[#06B6D4] mt-0.5 shrink-0" />
-                        <span><span className="text-[#71717A] font-semibold">PR_TARGET:</span> {selectedItem.pullRequestTitle}</span>
+                        <span>
+                          <span className="text-[#71717A] font-semibold">PR_TARGET:</span>{" "}
+                          {selectedItem.pullRequestTitle}
+                        </span>
                       </div>
                     )}
                     {selectedItem.issueTitle && (
                       <div className="flex items-start gap-2.5 text-[#D4D4D8]">
                         <CircleDot className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
-                        <span><span className="text-[#71717A] font-semibold">RESOLVES_ISSUE:</span> {selectedItem.issueTitle}</span>
+                        <span>
+                          <span className="text-[#71717A] font-semibold">RESOLVES_ISSUE:</span>{" "}
+                          {selectedItem.issueTitle}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -490,7 +510,9 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
 
                 {selectedItem.description && (
                   <div className="space-y-2 text-left">
-                    <h4 className="text-[11px] font-bold text-[#71717A] tracking-wider uppercase font-mono">Functional Engineering Breakdown</h4>
+                    <h4 className="text-[11px] font-bold text-[#71717A] tracking-wider uppercase font-mono">
+                      Functional Engineering Breakdown
+                    </h4>
                     <p className="text-xs sm:text-sm leading-relaxed text-[#D4D4D8] font-normal font-sans bg-[#0A0A0B]/40 p-4 rounded-xl border border-[#18181B]">
                       {selectedItem.description}
                     </p>
@@ -499,10 +521,15 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
 
                 {selectedItem.impactMetrics?.length > 0 && (
                   <div className="space-y-2.5 text-left">
-                    <h4 className="text-[11px] font-bold text-[#71717A] tracking-wider uppercase font-mono">Telemetry Impact Analytics</h4>
+                    <h4 className="text-[11px] font-bold text-[#71717A] tracking-wider uppercase font-mono">
+                      Telemetry Impact Analytics
+                    </h4>
                     <div className="flex flex-wrap gap-2">
                       {selectedItem.impactMetrics.map((metric: string, index: number) => (
-                        <span key={index} className="px-3 py-1 rounded-md bg-[#8B5CF6]/5 border border-[#8B5CF6]/10 text-xs font-semibold text-[#8B5CF6] font-mono shadow-sm">
+                        <span
+                          key={index}
+                          className="px-3 py-1 rounded-md bg-[#8B5CF6]/5 border border-[#8B5CF6]/10 text-xs font-semibold text-[#8B5CF6] font-mono shadow-sm"
+                        >
                           {metric}
                         </span>
                       ))}
@@ -512,15 +539,28 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
 
                 {selectedItem.timeline?.length > 0 && (
                   <div className="space-y-2.5 text-left">
-                    <h4 className="text-[11px] font-bold text-[#71717A] tracking-wider uppercase font-mono">Development Trace Progress</h4>
+                    <h4 className="text-[11px] font-bold text-[#71717A] tracking-wider uppercase font-mono">
+                      Development Trace Progress
+                    </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {selectedItem.timeline.map((item: any, index: number) => (
-                        <div key={item.id || index} className="border border-[#18181B] bg-[#0A0A0B]/20 p-3.5 rounded-xl space-y-1.5 font-sans">
+                        <div
+                          key={item.id || index}
+                          className="border border-[#18181B] bg-[#0A0A0B]/20 p-3.5 rounded-xl space-y-1.5 font-sans"
+                        >
                           <div className="flex items-center justify-between gap-4">
-                            <strong className="text-xs sm:text-sm font-bold text-white truncate">{item.milestone}</strong>
-                            <span className="text-[10px] font-mono font-bold text-[#8B5CF6] bg-[#8B5CF6]/5 px-2 py-0.5 rounded border border-[#8B5CF6]/10">{item.progress}%</span>
+                            <strong className="text-xs sm:text-sm font-bold text-white truncate">
+                              {item.milestone}
+                            </strong>
+                            <span className="text-[10px] font-mono font-bold text-[#8B5CF6] bg-[#8B5CF6]/5 px-2 py-0.5 rounded border border-[#8B5CF6]/10">
+                              {item.progress}%
+                            </span>
                           </div>
-                          {item.description && <p className="text-xs text-[#71717A] font-medium leading-normal line-clamp-2">{item.description}</p>}
+                          {item.description && (
+                            <p className="text-xs text-[#71717A] font-medium leading-normal line-clamp-2">
+                              {item.description}
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -534,8 +574,15 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
                     </h4>
                     <div className="flex flex-wrap gap-3">
                       {selectedItem.architectureDiagrams.map((image: string, index: number) => (
-                        <div key={index} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-[#18181B] bg-[#0A0A0B] overflow-hidden relative shadow-inner group/img">
-                          <img src={image} alt="" className="w-full h-full object-cover select-none" />
+                        <div
+                          key={index}
+                          className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-[#18181B] bg-[#0A0A0B] overflow-hidden relative shadow-inner group/img"
+                        >
+                          <img
+                            src={image}
+                            alt=""
+                            className="w-full h-full object-cover select-none"
+                          />
                         </div>
                       ))}
                     </div>
@@ -549,8 +596,15 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
                     </h4>
                     <div className="flex flex-wrap gap-3">
                       {selectedItem.contributionScreenshots.map((image: string, index: number) => (
-                        <div key={index} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-[#18181B] bg-[#0A0A0B] overflow-hidden relative shadow-inner group/img">
-                          <img src={image} alt="" className="w-full h-full object-cover select-none" />
+                        <div
+                          key={index}
+                          className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-[#18181B] bg-[#0A0A0B] overflow-hidden relative shadow-inner group/img"
+                        >
+                          <img
+                            src={image}
+                            alt=""
+                            className="w-full h-full object-cover select-none"
+                          />
                         </div>
                       ))}
                     </div>
@@ -579,7 +633,6 @@ export default function OpenSource({ openSource = [], username }: OpenSourceProp
                     </a>
                   )}
                 </div>
-
               </div>
             </motion.div>
           </motion.div>

@@ -4,7 +4,8 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Layers, ExternalLink, Download, HelpCircle, X, Workflow } from "lucide-react";
 
-const DEFAULT_CUSTOM_IMAGE = "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop";
+const DEFAULT_CUSTOM_IMAGE =
+  "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop";
 
 interface CustomSectionProps {
   sections?: any[];
@@ -88,8 +89,8 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
       y: targetY,
       transition: {
         duration: dynamicDuration,
-        ease: "linear"
-      }
+        ease: "linear",
+      },
     });
 
     if (!isDraggingMobile.current && !selectedItem && isMountedRef.current) {
@@ -115,8 +116,8 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
       x: targetX,
       transition: {
         duration: dynamicDuration,
-        ease: "linear"
-      }
+        ease: "linear",
+      },
     });
 
     if (!isDraggingDesk.current && !selectedItem && isMountedRef.current) {
@@ -129,8 +130,8 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   useEffect(() => {
     isMountedRef.current = true;
 
-    const hasScrollableMobileSection = processedSections.some(s => s.isMobileScrollable);
-    const hasScrollableDeskSection = processedSections.some(s => s.isScrollable);
+    const hasScrollableMobileSection = processedSections.some((s) => s.isMobileScrollable);
+    const hasScrollableDeskSection = processedSections.some((s) => s.isScrollable);
 
     if (hasScrollableMobileSection && !selectedItem) {
       startMobileMarquee(currentMobileY.current);
@@ -171,7 +172,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                 <div>
                   <div className="inline-flex items-center gap-2 text-xs font-mono font-bold text-gray-400 tracking-widest uppercase mb-2">
                     <Layers className="w-3.5 h-3.5" />
-                    Extension Block // {String(section.sectionIdx + 1).padStart(2, '0')}
+                    Extension Block // {String(section.sectionIdx + 1).padStart(2, "0")}
                   </div>
                   <h2 className="text-3xl md:text-5xl font-black tracking-tight text-[#111827] font-sans uppercase">
                     {section.title}.
@@ -181,7 +182,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             </div>
 
             {/* ========================================== */}
-            {/* 1. MOBILE RESPONSIVE VIEW: SWISS MINIMAL LIST ROWS */}
+            {/* 1. MOBILE RESPONSIVE VIEW */}
             {/* ========================================== */}
             <div className="block md:hidden w-full max-w-md mx-auto px-6 h-[260px] overflow-hidden relative">
               {/* Fade masks overlay to smooth scrolling edge transitions */}
@@ -220,16 +221,20 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                     className="w-full bg-[#FAFAFA] border border-gray-200 rounded-none p-4 flex items-center gap-4 cursor-pointer shrink-0 text-left transition-colors hover:bg-gray-50"
                   >
                     <div className="w-10 h-10 rounded-none overflow-hidden bg-white border border-gray-200 shrink-0 flex items-center justify-center">
-                      <img 
-                        src={item.iconUrl || item.imageUrl || DEFAULT_CUSTOM_IMAGE} 
-                        alt="" 
+                      <img
+                        src={item.iconUrl || item.imageUrl || DEFAULT_CUSTOM_IMAGE}
+                        alt=""
                         className="w-full h-full object-cover select-none"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-extrabold text-sm text-[#111827] truncate font-sans uppercase">{item.title}</h3>
+                      <h3 className="font-extrabold text-sm text-[#111827] truncate font-sans uppercase">
+                        {item.title}
+                      </h3>
                       {item.subtitle && (
-                        <p className="text-[11px] font-mono text-gray-500 truncate mt-1 uppercase tracking-wider font-semibold">{item.subtitle}</p>
+                        <p className="text-[11px] font-mono text-gray-500 truncate mt-1 uppercase tracking-wider font-semibold">
+                          {item.subtitle}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -240,12 +245,14 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             {/* 2. DESKTOP VIEW: HORIZONTAL TIMELINE RIBBON */}
             {/* ========================================== */}
-            <div className={`hidden md:block relative w-full overflow-hidden py-2 ${section.isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}>
+            <div
+              className={`hidden md:block relative w-full overflow-hidden py-2 ${section.isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}
+            >
               <motion.div
                 className={
-                  section.isScrollable 
-                    ? "flex gap-8 whitespace-nowrap min-w-full w-max px-6 touch-none" 
-                    : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center"
+                  section.isScrollable
+                    ? "flex gap-8 whitespace-nowrap min-w-full w-max px-6 touch-none"
+                    : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                 }
                 drag={section.isScrollable ? "x" : false}
                 dragConstraints={{ left: -2000, right: 0 }}
@@ -254,31 +261,37 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                   currentDeskX.current = typeof latest.x === "number" ? latest.x : 0;
                 }}
                 onDragStart={() => {
+                  if (!section.isScrollable) return;
                   isDraggingDesk.current = true;
                   deskControls.stop();
                 }}
                 onDragEnd={() => {
+                  if (!section.isScrollable) return;
                   isDraggingDesk.current = false;
                   startDeskMarquee(currentDeskX.current);
                 }}
                 onMouseEnter={() => {
+                  if (!section.isScrollable) return;
                   isDraggingDesk.current = true;
                   deskControls.stop();
                 }}
                 onMouseLeave={() => {
+                  if (!section.isScrollable) return;
                   isDraggingDesk.current = false;
                   startDeskMarquee(currentDeskX.current);
                 }}
               >
                 {section.marqueeItems.map((item: any, idx: number) => (
                   <div
-                    key={`desk-${item.id}-${idx}`}
+                    key={`desk-${item.id || idx}-${idx}`}
                     onClick={() => setSelectedItem(item)}
-                    className={`bg-white border-b-2 border-gray-100 hover:border-[#111827] p-5 rounded-none transition-all duration-300 cursor-pointer text-left ${
-                      section.isScrollable ? "w-[340px] shrink-0 inline-block" : "w-full"
+                    className={`bg-white border-b-2 border-gray-100 hover:border-[#111827] p-5 rounded-none transition-all duration-300 cursor-pointer text-left h-[420px] flex flex-col ${
+                      section.isScrollable
+                        ? "w-[400px] min-w-[400px] max-w-[400px] shrink-0"
+                        : "w-full min-h-[420px]"
                     }`}
                   >
-                    <div className="w-full h-44 rounded-none overflow-hidden bg-[#FAFAFA] mb-4 border border-gray-100">
+                    <div className="w-full h-44 rounded-none overflow-hidden bg-[#FAFAFA] mb-4 border border-gray-100 shrink-0">
                       <img
                         src={item.imageUrl || DEFAULT_CUSTOM_IMAGE}
                         alt={item.title}
@@ -286,16 +299,20 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                       />
                     </div>
 
-                    <div className="flex items-start gap-4.5 w-full px-1">
+                    <div className="flex items-start gap-4.5 w-full px-1 shrink-0">
                       <div className="w-11 h-11 rounded-none border border-gray-200 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-sm p-1.5">
                         {item.iconUrl ? (
-                          <img src={item.iconUrl} alt="" className="w-full h-full object-cover select-none" />
+                          <img
+                            src={item.iconUrl}
+                            alt=""
+                            className="w-full h-full object-cover select-none"
+                          />
                         ) : (
                           <HelpCircle className="w-5 h-5 text-gray-400" />
                         )}
                       </div>
 
-                      <div className="truncate space-y-0.5 flex-1">
+                      <div className="flex-1 min-w-0 space-y-0.5">
                         <h3 className="text-base font-extrabold text-[#111827] font-sans uppercase truncate">
                           {item.title}
                         </h3>
@@ -308,7 +325,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                     </div>
 
                     {item.description && (
-                      <p className="text-xs md:text-sm text-gray-500 font-normal mt-4 whitespace-normal leading-relaxed line-clamp-2 px-1 font-sans">
+                      <p className="text-xs md:text-sm text-gray-500 font-normal mt-4 whitespace-normal leading-relaxed line-clamp-3 px-1 font-sans flex-1">
                         {item.description}
                       </p>
                     )}
@@ -349,7 +366,11 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                 <div className="flex items-center gap-4 text-left">
                   <div className="w-14 h-14 rounded-none border border-gray-200 bg-white overflow-hidden flex items-center justify-center shrink-0 p-2 shadow-sm">
                     {selectedItem.iconUrl ? (
-                      <img src={selectedItem.iconUrl} alt={selectedItem.title} className="w-full h-full object-cover" />
+                      <img
+                        src={selectedItem.iconUrl}
+                        alt={selectedItem.title}
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <HelpCircle className="w-6 h-6 text-gray-400" />
                     )}
@@ -374,7 +395,9 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
               <div className="p-6 sm:p-8 space-y-6">
                 {selectedItem.description && (
                   <div className="space-y-2 text-left">
-                    <h4 className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-wider">Registry Specifications</h4>
+                    <h4 className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-wider">
+                      Registry Specifications
+                    </h4>
                     <p className="text-xs sm:text-sm leading-relaxed text-gray-600 font-normal font-sans bg-[#FAFAFA] p-4 border border-gray-200/60 max-h-[220px] overflow-y-auto scrollbar-none">
                       {selectedItem.description}
                     </p>
@@ -382,7 +405,10 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                 )}
 
                 <div className="pt-4 border-t border-gray-200 flex items-center justify-between text-xs font-mono text-gray-400">
-                  <div className="flex flex-wrap items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="flex flex-wrap items-center gap-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {selectedItem.externalUrl && (
                       <a
                         href={selectedItem.externalUrl}
@@ -404,7 +430,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                       </a>
                     )}
                   </div>
-                  
+
                   <span className="opacity-40 flex items-center gap-1.5 font-semibold text-[10px]">
                     <Workflow className="w-3.5 h-3.5" /> CUST_SYNC_OK
                   </span>

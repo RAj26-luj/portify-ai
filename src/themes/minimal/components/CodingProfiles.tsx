@@ -4,7 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Terminal, ExternalLink, Flame, Trophy, Award, X, Workflow, Code } from "lucide-react";
 
-const DEFAULT_PLATFORM_ICON = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop";
+const DEFAULT_PLATFORM_ICON =
+  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop";
 
 interface CodingProfilesProps {
   codingProfiles?: any[];
@@ -32,7 +33,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
     return [...codingProfiles].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
   }, [codingProfiles]);
 
-  const isScrollable = sortedProfiles.length >= 4;
+  const isScrollable = sortedProfiles.length >= 3;
   const isMobileScrollable = sortedProfiles.length > 1;
 
   // Duplicate mobile items to maintain smooth rolling bounds on loop tracks
@@ -79,8 +80,8 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
       x: targetX,
       transition: {
         duration: dynamicDuration,
-        ease: "linear"
-      }
+        ease: "linear",
+      },
     });
 
     if (!isDraggingMobile.current && !selectedItem && isMountedRef.current) {
@@ -106,8 +107,8 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
       x: targetX,
       transition: {
         duration: dynamicDuration,
-        ease: "linear"
-      }
+        ease: "linear",
+      },
     });
 
     if (!isDraggingDesk.current && !selectedItem && isMountedRef.current) {
@@ -166,7 +167,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
         {/* 1. MOBILE RESPONSIVE VIEW: SWISS MINIMAL LIST ROWS */}
         {/* ========================================== */}
         <div className="block md:hidden w-full overflow-hidden py-1">
-          <motion.div 
+          <motion.div
             className="flex gap-4 px-6 w-max touch-none"
             drag={isMobileScrollable ? "x" : false}
             dragConstraints={{ left: -1000, right: 0 }}
@@ -199,14 +200,22 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
               >
                 <div className="w-10 h-10 rounded-none overflow-hidden bg-white border border-gray-200 flex items-center justify-center p-1.5 shrink-0">
                   {item.iconUrl ? (
-                    <img src={item.iconUrl} alt="" className="w-full h-full object-contain select-none" />
+                    <img
+                      src={item.iconUrl}
+                      alt=""
+                      className="w-full h-full object-contain select-none"
+                    />
                   ) : (
                     <Code className="w-4 h-4 text-gray-400" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-extrabold text-sm text-[#111827] truncate font-sans uppercase">{item.platform}</h3>
-                  <p className="text-[11px] font-mono text-gray-500 truncate font-semibold">@{item.username}</p>
+                  <h3 className="font-extrabold text-sm text-[#111827] truncate font-sans uppercase">
+                    {item.platform}
+                  </h3>
+                  <p className="text-[11px] font-mono text-gray-500 truncate font-semibold">
+                    @{item.username}
+                  </p>
                 </div>
                 {item.currentRating !== undefined && item.currentRating !== null && (
                   <div className="text-xs font-mono font-bold text-[#111827] bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-none">
@@ -224,9 +233,9 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
         <div className="hidden md:block relative w-full overflow-hidden py-2">
           <motion.div
             className={
-              isScrollable 
-                ? "flex gap-8 whitespace-nowrap min-w-full w-max px-6 touch-none" 
-                : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center"
+              isScrollable
+                ? "flex gap-8 whitespace-nowrap min-w-full w-max px-6 touch-none"
+                : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-2 gap-8 justify-center"
             }
             drag={isScrollable ? "x" : false}
             dragConstraints={{ left: -2000, right: 0 }}
@@ -235,18 +244,22 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
               currentDeskX.current = typeof latest.x === "number" ? latest.x : 0;
             }}
             onDragStart={() => {
+              if (!isScrollable) return;
               isDraggingDesk.current = true;
               deskControls.stop();
             }}
             onDragEnd={() => {
+              if (!isScrollable) return;
               isDraggingDesk.current = false;
               startDeskMarquee(currentDeskX.current);
             }}
             onMouseEnter={() => {
+              if (!isScrollable) return;
               isDraggingDesk.current = true;
               deskControls.stop();
             }}
             onMouseLeave={() => {
+              if (!isScrollable) return;
               isDraggingDesk.current = false;
               startDeskMarquee(currentDeskX.current);
             }}
@@ -255,11 +268,13 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
               <div
                 key={`desk-${item.id}-${idx}`}
                 onClick={() => setSelectedItem(item)}
-                className={`bg-white border-b-2 border-gray-100 hover:border-[#111827] p-55 rounded-none transition-all duration-300 cursor-pointer text-left ${
-                  isScrollable ? "w-[340px] shrink-0 inline-block" : "w-full"
+                className={`bg-white border-b-2 border-gray-100 hover:border-[#111827] p-5 rounded-none transition-all duration-300 cursor-pointer text-left h-[280px] flex flex-col ${
+                  isScrollable
+                    ? "basis-[400px] min-w-[400px] max-w-[400px] flex-shrink-0"
+                    : "w-full"
                 }`}
               >
-                <div className="w-full h-32 rounded-none bg-[#FAFAFA] mb-4 border border-gray-100 relative flex items-center justify-center p-6">
+                <div className="w-full h-32 rounded-none bg-[#FAFAFA] mb-4 border border-gray-100 relative flex items-center justify-center p-6 shrink-0">
                   <img
                     src={item.iconUrl || DEFAULT_PLATFORM_ICON}
                     alt={item.platform}
@@ -274,8 +289,8 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
                   )}
                 </div>
 
-                <div className="flex items-center justify-between gap-4 w-full px-1">
-                  <div className="truncate space-y-0.5">
+                <div className="grid grid-cols-2 gap-4 w-full px-1 flex-1 items-center">
+                  <div className="truncate space-y-0.5 flex-1 min-w-0 text-left">
                     <h3 className="text-base font-extrabold text-[#111827] font-sans uppercase truncate">
                       {item.platform}
                     </h3>
@@ -285,14 +300,14 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
                   </div>
 
                   {item.currentRating !== undefined && item.currentRating !== null && (
-                    <span className="text-xs font-mono font-bold text-[#111827] bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-none shrink-0 flex items-center gap-1.5">
+                    <span className="justify-self-end text-xs font-mono font-bold text-[#111827] bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-none shrink-0 flex items-center gap-1.5">
                       <Flame className="w-3.5 h-3.5 text-gray-400" /> {item.currentRating}
                     </span>
                   )}
                 </div>
 
                 {(item.problemsSolved !== undefined || item.globalRank || item.rank) && (
-                  <div className="flex flex-wrap gap-2 pt-3 mt-4 border-t border-gray-100 text-[11px] font-mono font-bold justify-start px-1">
+                  <div className="flex flex-wrap gap-2 pt-3 mt-auto border-t border-gray-100 text-[11px] font-mono font-bold justify-start px-1">
                     {item.problemsSolved !== undefined && item.problemsSolved !== null && (
                       <span className="text-gray-600 bg-[#FAFAFA] border border-gray-200 px-2 py-0.5 rounded-none">
                         SOLVED: {item.problemsSolved}
@@ -314,14 +329,14 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
       {/* SWISS TYPOGRAPHY POPUP DETAILS OVERLAY MODAL */}
       <AnimatePresence>
         {selectedItem && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-[#111827]/40 backdrop-blur-md z-50 flex items-center justify-center p-4 sm:p-6 select-none"
             onClick={() => setSelectedItem(null)}
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.98, y: 8 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.98, y: 8 }}
@@ -329,7 +344,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
               className="w-full max-w-xl bg-white border border-gray-200 rounded-none overflow-y-auto max-h-[85vh] text-left shadow-2xl relative scrollbar-none"
               onClick={(e) => e.stopPropagation()}
             >
-              <button 
+              <button
                 onClick={() => setSelectedItem(null)}
                 className="absolute top-4 right-4 z-40 p-2 rounded-none bg-[#FAFAFA] border border-gray-200 text-gray-400 hover:text-[#111827] transition-colors"
               >
@@ -340,7 +355,11 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
                 <div className="flex items-center gap-4 text-left">
                   <div className="w-14 h-14 rounded-none border border-gray-200 bg-white flex items-center justify-center shrink-0 p-2 shadow-sm">
                     {selectedItem.iconUrl ? (
-                      <img src={selectedItem.iconUrl} alt={selectedItem.platform} className="w-full h-full object-contain grayscale" />
+                      <img
+                        src={selectedItem.iconUrl}
+                        alt={selectedItem.platform}
+                        className="w-full h-full object-contain grayscale"
+                      />
                     ) : (
                       <Terminal className="w-6 h-6 text-gray-400" />
                     )}
@@ -362,45 +381,64 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
 
               <div className="p-6 sm:p-8 space-y-6">
                 <div className="grid grid-cols-2 gap-4 font-sans">
-                  {selectedItem.currentRating !== undefined && selectedItem.currentRating !== null && (
-                    <div className="p-4 bg-[#FAFAFA] border border-gray-200 flex items-center gap-3 text-left">
-                      <Flame className="w-5 h-5 text-gray-400 shrink-0" />
-                      <div>
-                        <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">Rating</div>
-                        <div className="text-sm font-extrabold text-[#111827] mt-0.5">{selectedItem.currentRating}</div>
+                  {selectedItem.currentRating !== undefined &&
+                    selectedItem.currentRating !== null && (
+                      <div className="p-4 bg-[#FAFAFA] border border-gray-200 flex items-center gap-3 text-left">
+                        <Flame className="w-5 h-5 text-gray-400 shrink-0" />
+                        <div>
+                          <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">
+                            Rating
+                          </div>
+                          <div className="text-sm font-extrabold text-[#111827] mt-0.5">
+                            {selectedItem.currentRating}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   {selectedItem.maxRating !== undefined && selectedItem.maxRating !== null && (
                     <div className="p-4 bg-[#FAFAFA] border border-gray-200 flex items-center gap-3 text-left">
                       <Trophy className="w-5 h-5 text-gray-400 shrink-0" />
                       <div>
-                        <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">Peak</div>
-                        <div className="text-sm font-extrabold text-[#111827] mt-0.5">{selectedItem.maxRating}</div>
+                        <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">
+                          Peak
+                        </div>
+                        <div className="text-sm font-extrabold text-[#111827] mt-0.5">
+                          {selectedItem.maxRating}
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  {selectedItem.problemsSolved !== undefined && selectedItem.problemsSolved !== null && (
-                    <div className="p-4 bg-[#FAFAFA] border border-gray-200 flex items-center gap-3 text-left">
-                      <Terminal className="w-5 h-5 text-gray-400 shrink-0" />
-                      <div>
-                        <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">Solved</div>
-                        <div className="text-sm font-extrabold text-[#111827] mt-0.5">{selectedItem.problemsSolved}</div>
+                  {selectedItem.problemsSolved !== undefined &&
+                    selectedItem.problemsSolved !== null && (
+                      <div className="p-4 bg-[#FAFAFA] border border-gray-200 flex items-center gap-3 text-left">
+                        <Terminal className="w-5 h-5 text-gray-400 shrink-0" />
+                        <div>
+                          <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">
+                            Solved
+                          </div>
+                          <div className="text-sm font-extrabold text-[#111827] mt-0.5">
+                            {selectedItem.problemsSolved}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {selectedItem.contestsAttended !== undefined && selectedItem.contestsAttended !== null && (
-                    <div className="p-4 bg-[#FAFAFA] border border-gray-200 flex items-center gap-3 text-left">
-                      <Award className="w-5 h-5 text-gray-400 shrink-0" />
-                      <div>
-                        <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">Contests</div>
-                        <div className="text-sm font-extrabold text-[#111827] mt-0.5">{selectedItem.contestsAttended}</div>
+                  {selectedItem.contestsAttended !== undefined &&
+                    selectedItem.contestsAttended !== null && (
+                      <div className="p-4 bg-[#FAFAFA] border border-gray-200 flex items-center gap-3 text-left">
+                        <Award className="w-5 h-5 text-gray-400 shrink-0" />
+                        <div>
+                          <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-wider">
+                            Contests
+                          </div>
+                          <div className="text-sm font-extrabold text-[#111827] mt-0.5">
+                            {selectedItem.contestsAttended}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
 
                 {(selectedItem.globalRank || selectedItem.rank || selectedItem.activeSince) && (
@@ -429,7 +467,7 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
                 <div className="pt-4 border-t border-gray-200 flex items-center justify-between text-xs font-mono text-gray-400">
                   <div onClick={(e) => e.stopPropagation()}>
                     {selectedItem.profileUrl && (
-                      <a 
+                      <a
                         href={selectedItem.profileUrl}
                         target="_blank"
                         rel="noreferrer"
@@ -443,7 +481,6 @@ export default function CodingProfiles({ codingProfiles = [] }: CodingProfilesPr
                     <Workflow className="w-3.5 h-3.5" /> CODE_SYNC_OK
                   </span>
                 </div>
-
               </div>
             </motion.div>
           </motion.div>

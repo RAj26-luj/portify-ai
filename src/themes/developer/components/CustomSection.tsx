@@ -1,10 +1,20 @@
 "use client";
 
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { Layers, ExternalLink, Download, HelpCircle, X, Terminal, Cpu, GitBranch } from "lucide-react";
+import {
+  Layers,
+  ExternalLink,
+  Download,
+  HelpCircle,
+  X,
+  Terminal,
+  Cpu,
+  GitBranch,
+} from "lucide-react";
 
-const DEFAULT_CUSTOM_IMAGE = "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop";
+const DEFAULT_CUSTOM_IMAGE =
+  "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop";
 
 interface CustomSectionProps {
   sections?: any[];
@@ -14,6 +24,14 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   // 1. Initialize all React Hooks unconditionally at the top level
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+
+  // React 19 State Bounds for Drag Constraints
+  const [mobileMaxScroll, setMobileMaxScroll] = useState<number>(0);
+  const [desktopMaxScroll, setDesktopMaxScroll] = useState<number>(0);
+
+  // Dynamic DOM metric tracking nodes mapped per responsive tier
+  const mobileTrackRef = useRef<HTMLDivElement>(null);
+  const deskTrackRef = useRef<HTMLDivElement>(null);
 
   // Animation Controls & Refs for Mobile and Desktop Interactive Infinite Marquee Tracks
   const mobileControls = useAnimation();
@@ -68,6 +86,28 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
       });
   }, [sections]);
 
+  // --- Track Dimension Synchronizer (ResizeObserver Equipped) ---
+  useLayoutEffect(() => {
+    const updateBounds = () => {
+      if (mobileTrackRef.current) {
+        setMobileMaxScroll(-(mobileTrackRef.current.scrollHeight / 2));
+      }
+
+      if (deskTrackRef.current) {
+        setDesktopMaxScroll(-(deskTrackRef.current.scrollWidth / 2));
+      }
+    };
+
+    updateBounds();
+
+    const observer = new ResizeObserver(updateBounds);
+
+    if (mobileTrackRef.current) observer.observe(mobileTrackRef.current);
+    if (deskTrackRef.current) observer.observe(deskTrackRef.current);
+
+    return () => observer.disconnect();
+  }, [validSections]);
+
   // Constant speed calculations for uniform velocity tracking
   const MOBILE_SPEED = 400 / 25; // Target distance over duration (Y-axis pixels per second)
   const DESK_SPEED = 2000 / 50; // Target distance over duration (X-axis pixels per second)
@@ -75,7 +115,10 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   const startMobileMarquee = async (fromY: number) => {
     if (isDraggingMobile.current || selectedItem || !isMountedRef.current) return;
 
-    const targetY = -400;
+    // Dynamically query target boundary limits from real layout metrics
+    const targetY = -((mobileTrackRef.current?.scrollHeight || 0) / 2);
+    if (targetY >= 0) return;
+
     if (fromY <= targetY || fromY > 0) {
       fromY = 0;
       await mobileControls.set({ y: 0 });
@@ -88,11 +131,18 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
       y: targetY,
       transition: {
         duration: dynamicDuration,
-        ease: "linear"
-      }
+        ease: "linear",
+      },
     });
 
-    if (!isDraggingMobile.current && !selectedItem && isMountedRef.current) {
+    const isSectionStillMobileScrollable = validSections.some((s) => s.isMobileScrollable);
+
+    if (
+      !isDraggingMobile.current &&
+      !selectedItem &&
+      isMountedRef.current &&
+      isSectionStillMobileScrollable
+    ) {
       requestAnimationFrame(() => {
         startMobileMarquee(0);
       });
@@ -102,7 +152,10 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   const startDeskMarquee = async (fromX: number) => {
     if (isDraggingDesk.current || selectedItem || !isMountedRef.current) return;
 
-    const targetX = -2000;
+    // Dynamically query target boundary limits from real layout metrics
+    const targetX = -((deskTrackRef.current?.scrollWidth || 0) / 2);
+    if (targetX >= 0) return;
+
     if (fromX <= targetX || fromX > 0) {
       fromX = 0;
       await deskControls.set({ x: 0 });
@@ -115,11 +168,18 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
       x: targetX,
       transition: {
         duration: dynamicDuration,
-        ease: "linear"
-      }
+        ease: "linear",
+      },
     });
 
-    if (!isDraggingDesk.current && !selectedItem && isMountedRef.current) {
+    const isSectionStillDeskScrollable = validSections.some((s) => s.isScrollable);
+
+    if (
+      !isDraggingDesk.current &&
+      !selectedItem &&
+      isMountedRef.current &&
+      isSectionStillDeskScrollable
+    ) {
       requestAnimationFrame(() => {
         startDeskMarquee(0);
       });
@@ -129,22 +189,26 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
   useEffect(() => {
     isMountedRef.current = true;
 
-    const hasScrollableMobileSection = validSections.some(s => s.isMobileScrollable);
-    const hasScrollableDeskSection = validSections.some(s => s.isScrollable);
+    const hasScrollableMobileSection = validSections.some((s) => s.isMobileScrollable);
+    const hasScrollableDeskSection = validSections.some((s) => s.isScrollable);
 
-    if (hasScrollableMobileSection && !selectedItem) {
-      startMobileMarquee(currentMobileY.current);
-    } else {
-      mobileControls.stop();
-    }
+    // Yield macro task framework processing runtime clearance parameters to assemble sizing profiles
+    const timer = setTimeout(() => {
+      if (hasScrollableMobileSection && !selectedItem) {
+        startMobileMarquee(currentMobileY.current);
+      } else {
+        mobileControls.stop();
+      }
 
-    if (hasScrollableDeskSection && !isPaused && !selectedItem) {
-      startDeskMarquee(currentDeskX.current);
-    } else {
-      deskControls.stop();
-    }
+      if (hasScrollableDeskSection && !isPaused && !selectedItem) {
+        startDeskMarquee(currentDeskX.current);
+      } else {
+        deskControls.stop();
+      }
+    }, 50);
 
     return () => {
+      clearTimeout(timer);
       mobileControls.stop();
       deskControls.stop();
       isMountedRef.current = false;
@@ -167,15 +231,19 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
           >
             {/* Grid Pattern Background */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#30363d12_1px,transparent_1px),linear-gradient(to_bottom,#30363d12_1px,transparent_1px)] bg-[size:2rem_2rem] pointer-events-none" />
-            
+
             {/* IDE Header Interface */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mb-8">
               <div className="flex items-center justify-between w-full bg-[#161B22] border border-[#30363D] rounded-t-lg px-4 py-2.5 text-xs text-neutral-400">
                 <div className="flex items-center gap-2">
                   <Terminal size={14} className="text-[#58A6FF]" />
-                  <span className="font-bold text-[#C9D1D9]">{section.title || "Custom Extension"}</span>
+                  <span className="font-bold text-[#C9D1D9]">
+                    {section.title || "Custom Extension"}
+                  </span>
                   <span className="text-neutral-600">/</span>
-                  <span className="text-[11px] text-[#7EE787]">submodule_0{section.sectionIdx + 1}.log</span>
+                  <span className="text-[11px] text-[#7EE787]">
+                    submodule_0{section.sectionIdx + 1}.log
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Layers className="w-3.5 h-3.5 text-neutral-500" />
@@ -191,37 +259,48 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             {/* 1. MOBILE RESPONSIVE VIEW: AUTOMATED VERTICAL LOOP MARQUEE */}
             {/* ========================================== */}
-            <div className="block md:hidden w-full max-w-md mx-auto px-4 h-[240px] overflow-hidden relative">
+            <div className="block md:hidden w-full overflow-hidden max-w-md mx-auto px-4 h-[240px] relative">
               {/* Fade masks overlay to smooth scrolling edge transitions */}
               <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#0D1117] to-transparent z-20 pointer-events-none" />
               <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0D1117] to-transparent z-20 pointer-events-none" />
 
               <motion.div
+                ref={mobileTrackRef}
                 className="flex flex-col gap-2.5 touch-none"
                 drag={section.isMobileScrollable ? "y" : false}
-                dragConstraints={{ top: -400, bottom: 0 }}
-                animate={mobileControls}
+                dragConstraints={{
+                  top: mobileMaxScroll,
+                  bottom: 0,
+                }}
+                animate={section.isMobileScrollable ? mobileControls : undefined}
                 onUpdate={(latest) => {
                   currentMobileY.current = typeof latest.y === "number" ? latest.y : 0;
                 }}
                 onDragStart={() => {
+                  if (!section.isMobileScrollable) return;
                   isDraggingMobile.current = true;
                   mobileControls.stop();
                 }}
                 onDragEnd={() => {
+                  if (!section.isMobileScrollable) return;
                   isDraggingMobile.current = false;
                   startMobileMarquee(currentMobileY.current);
                 }}
                 onMouseEnter={() => {
+                  if (!section.isMobileScrollable) return;
                   isDraggingMobile.current = true;
                   mobileControls.stop();
                 }}
                 onMouseLeave={() => {
+                  if (!section.isMobileScrollable) return;
                   isDraggingMobile.current = false;
                   startMobileMarquee(currentMobileY.current);
                 }}
               >
-                {section.mobileMarqueeItems.map((item: any, idx: number) => (
+                {(section.isMobileScrollable
+                  ? [...section.mobileMarqueeItems, ...section.mobileMarqueeItems]
+                  : section.mobileMarqueeItems
+                ).map((item: any, idx: number) => (
                   <div
                     key={`mob-${item.id || idx}-${idx}`}
                     onClick={() => setSelectedItem(item)}
@@ -229,9 +308,9 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                   >
                     {/* Compact Image/Icon Placement Frame */}
                     <div className="w-10 h-10 rounded bg-[#0D1117] border border-[#30363D] shrink-0 flex items-center justify-center overflow-hidden">
-                      <img 
-                        src={item.iconUrl || item.imageUrl || DEFAULT_CUSTOM_IMAGE} 
-                        alt="" 
+                      <img
+                        src={item.iconUrl || item.imageUrl || DEFAULT_CUSTOM_IMAGE}
+                        alt=""
                         className="w-full h-full object-cover select-none filter opacity-80"
                       />
                     </div>
@@ -239,7 +318,9 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                     <div className="flex-1 min-w-0 text-left">
                       <h3 className="font-bold text-xs text-white truncate">{item.title}</h3>
                       {item.subtitle && (
-                        <p className="text-[10px] text-neutral-500 truncate mt-0.5">{item.subtitle}</p>
+                        <p className="text-[10px] text-neutral-500 truncate mt-0.5">
+                          {item.subtitle}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -250,7 +331,9 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
             {/* ========================================== */}
             {/* 2. DESKTOP VIEW: HORIZONTAL TIMELINE RIBBON */}
             {/* ========================================== */}
-            <div className={`hidden md:block relative w-full overflow-hidden py-2 ${section.isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}>
+            <div
+              className={`hidden md:block relative w-full overflow-hidden py-2 ${section.isScrollable ? "group/marquee cursor-grab active:cursor-grabbing" : ""}`}
+            >
               {section.isScrollable && (
                 <>
                   <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#0D1117] to-transparent z-20 pointer-events-none" />
@@ -259,40 +342,51 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
               )}
 
               <motion.div
+                ref={deskTrackRef}
                 className={
-                  section.isScrollable 
-                    ? "flex gap-4 whitespace-nowrap min-w-full w-max px-4 touch-none" 
-                    : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-center"
+                  section.isScrollable
+                    ? "flex gap-4 whitespace-nowrap min-w-full w-max px-4 touch-none"
+                    : "max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex flex-wrap gap-4 justify-center"
                 }
                 drag={section.isScrollable ? "x" : false}
-                dragConstraints={{ left: -2000, right: 0 }}
-                animate={deskControls}
+                dragConstraints={{
+                  left: desktopMaxScroll,
+                  right: 0,
+                }}
+                animate={section.isScrollable ? deskControls : undefined}
                 onUpdate={(latest) => {
                   currentDeskX.current = typeof latest.x === "number" ? latest.x : 0;
                 }}
                 onDragStart={() => {
+                  if (!section.isScrollable) return;
                   isDraggingDesk.current = true;
                   deskControls.stop();
                 }}
                 onDragEnd={() => {
+                  if (!section.isScrollable) return;
                   isDraggingDesk.current = false;
                   startDeskMarquee(currentDeskX.current);
                 }}
                 onMouseEnter={() => {
+                  if (!section.isScrollable) return;
                   isDraggingDesk.current = true;
                   deskControls.stop();
                 }}
                 onMouseLeave={() => {
+                  if (!section.isScrollable) return;
                   isDraggingDesk.current = false;
                   startDeskMarquee(currentDeskX.current);
                 }}
               >
-                {section.marqueeItems.map((item: any, idx: number) => (
+                {(section.isScrollable
+                  ? [...section.marqueeItems, ...section.marqueeItems]
+                  : section.marqueeItems
+                ).map((item: any, idx: number) => (
                   <div
-                    key={`desk-${item.id}-${idx}`}
+                    key={`desk-${item.id || idx}-${idx}`}
                     onClick={() => setSelectedItem(item)}
-                    className={`bg-[#161B22] border border-[#30363D] hover:border-[#58A6FF] p-4 rounded-lg transition-all duration-200 shadow-md cursor-pointer hover:bg-[#1C2128] overflow-hidden ${
-                      section.isScrollable ? "w-[340px] shrink-0 inline-block" : "w-full"
+                    className={`bg-[#161B22] border border-[#30363D] hover:border-[#58A6FF] p-4 rounded-lg transition-all duration-200 shadow-md cursor-pointer hover:bg-[#1C2128] overflow-hidden w-[340px] shrink-0 ${
+                      section.isScrollable ? "inline-block" : "mx-auto"
                     }`}
                   >
                     <div className="w-full h-36 rounded border border-[#30363D] overflow-hidden bg-[#0D1117] mb-3 relative">
@@ -307,7 +401,11 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                     <div className="flex items-start gap-3 w-full">
                       <div className="w-9 h-9 rounded border border-[#30363D] bg-[#0D1117] overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
                         {item.iconUrl ? (
-                          <img src={item.iconUrl} alt="" className="w-full h-full object-cover select-none filter brightness-90" />
+                          <img
+                            src={item.iconUrl}
+                            alt=""
+                            className="w-full h-full object-cover select-none filter brightness-90"
+                          />
                         ) : (
                           <HelpCircle className="w-4 h-4 text-[#58A6FF]" />
                         )}
@@ -318,9 +416,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                           {item.title}
                         </h3>
                         {item.subtitle && (
-                          <p className="text-xs text-neutral-500 truncate">
-                            {item.subtitle}
-                          </p>
+                          <p className="text-xs text-neutral-500 truncate">{item.subtitle}</p>
                         )}
                       </div>
                     </div>
@@ -377,11 +473,15 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                   className="w-full h-full object-cover filter brightness-[0.25] blur-xs select-none"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#161B22] to-transparent" />
-                
+
                 <div className="absolute bottom-3 left-4 right-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded border border-[#30363D] bg-[#0D1117] overflow-hidden flex items-center justify-center shrink-0 p-1">
                     {selectedItem.iconUrl ? (
-                      <img src={selectedItem.iconUrl} alt={selectedItem.title} className="w-full h-full object-cover filter brightness-90" />
+                      <img
+                        src={selectedItem.iconUrl}
+                        alt={selectedItem.title}
+                        className="w-full h-full object-cover filter brightness-90"
+                      />
                     ) : (
                       <HelpCircle className="w-5 h-5 text-[#58A6FF]" />
                     )}
@@ -395,9 +495,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                       {selectedItem.title}
                     </h3>
                     {selectedItem.subtitle && (
-                      <p className="text-xs text-neutral-400 truncate">
-                        {selectedItem.subtitle}
-                      </p>
+                      <p className="text-xs text-neutral-400 truncate">{selectedItem.subtitle}</p>
                     )}
                   </div>
                 </div>
@@ -416,7 +514,10 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                 )}
 
                 <div className="pt-4 border-t border-[#30363D] flex items-center justify-between text-xs">
-                  <div className="flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="flex flex-wrap items-center gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {selectedItem.externalUrl && (
                       <a
                         href={selectedItem.externalUrl}
@@ -438,7 +539,7 @@ export default function CustomSection({ sections = [] }: CustomSectionProps) {
                       </a>
                     )}
                   </div>
-                  
+
                   <span className="text-neutral-500 hidden sm:flex items-center gap-1">
                     <GitBranch className="w-3 h-3 text-neutral-600" /> structural_sync
                   </span>
