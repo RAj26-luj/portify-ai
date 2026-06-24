@@ -24,42 +24,25 @@ export default function DefaultTheme({ portfolio }: any) {
 
   // Determine actual visibility from configuration sectionSettings arrays
   const isExperienceEnabled = data?.sectionSettings?.length
-    ? data.sectionSettings.some((s: any) => s.sectionKey?.toLowerCase() === "experience" && s.isEnabled)
+    ? data.sectionSettings.some(
+        (s: any) => s.sectionKey?.toLowerCase() === "experience" && s.isEnabled
+      )
     : true;
 
   const isEducationEnabled = data?.sectionSettings?.length
-    ? data.sectionSettings.some((s: any) => s.sectionKey?.toLowerCase() === "education" && s.isEnabled)
+    ? data.sectionSettings.some(
+        (s: any) => s.sectionKey?.toLowerCase() === "education" && s.isEnabled
+      )
     : true;
 
   const sectionMap: Record<string, React.ReactNode> = {
-    hero: (
-      <Hero
-        portfolio={data}
-        key="hero"
-      />
-    ),
+    hero: <Hero portfolio={data} key="hero" />,
 
-    about: (
-      <About
-        portfolio={data}
-        key="about"
-      />
-    ),
+    about: <About portfolio={data} key="about" />,
 
-    skills: (
-      <Skills
-        portfolio={data}
-        key="skills"
-      />
-    ),
+    skills: <Skills portfolio={data} key="skills" />,
 
-    projects: (
-      <Projects
-        key="projects"
-        projects={data?.projects || []}
-        username={data?.username}
-      />
-    ),
+    projects: <Projects key="projects" projects={data?.projects || []} username={data?.username} />,
 
     career: (
       <Career
@@ -73,27 +56,18 @@ export default function DefaultTheme({ portfolio }: any) {
     ),
 
     certifications: (
-      <Certifications
-        key="certifications"
-        certifications={data?.certifications || []}
-      />
+      <Certifications key="certifications" certifications={data?.certifications || []} />
     ),
 
-    publications: (
-      <Publications
-        key="publications"
-        publications={data?.publications || []}
-      />
-    ),
+    publications: <Publications key="publications" publications={data?.publications || []} />,
 
-    openSource: (
+    opensource: (
       <OpenSource
-        key="openSource"
+        key="opensource"
         openSource={data?.openSourceProjects || []}
         username={data?.username}
       />
     ),
-
     "open-source": (
       <OpenSource
         key="open-source"
@@ -102,33 +76,17 @@ export default function DefaultTheme({ portfolio }: any) {
       />
     ),
 
-    codingProfiles: (
-      <CodingProfiles
-        key="codingProfiles"
-        codingProfiles={data?.codingProfiles || []}
-      />
+    codingprofiles: (
+      <CodingProfiles key="codingprofiles" codingProfiles={data?.codingProfiles || []} />
     ),
 
     "coding-profiles": (
-      <CodingProfiles
-        key="coding-profiles"
-        codingProfiles={data?.codingProfiles || []}
-      />
+      <CodingProfiles key="coding-profiles" codingProfiles={data?.codingProfiles || []} />
     ),
 
-    testimonials: (
-      <Testimonials
-        key="testimonials"
-        testimonials={data?.testimonials || []}
-      />
-    ),
+    testimonials: <Testimonials key="testimonials" testimonials={data?.testimonials || []} />,
 
-    contact: (
-      <Contact
-        key="contact"
-        portfolio={data}
-      />
-    ),
+    contact: <Contact key="contact" portfolio={data} />,
   };
 
   const enabledSections = data?.sectionSettings?.length
@@ -187,10 +145,7 @@ export default function DefaultTheme({ portfolio }: any) {
               return (
                 <React.Fragment key={section.id}>
                   {(data?.customSections || []).map((customSection: any) => (
-                    <CustomSection
-                      key={customSection.id}
-                      sections={[customSection]}
-                    />
+                    <CustomSection key={customSection.id} sections={[customSection]} />
                   ))}
                 </React.Fragment>
               );
@@ -201,19 +156,10 @@ export default function DefaultTheme({ portfolio }: any) {
               const customSection =
                 data?.customSections?.filter((item: any) => item.id === customId) || [];
 
-              return (
-                <CustomSection
-                  key={section.id}
-                  sections={customSection}
-                />
-              );
+              return <CustomSection key={section.id} sections={customSection} />;
             }
 
-            return (
-              <React.Fragment key={section.id}>
-                {sectionMap[key]}
-              </React.Fragment>
-            );
+            return <React.Fragment key={section.id}>{sectionMap[key]}</React.Fragment>;
           })}
         </main>
 
