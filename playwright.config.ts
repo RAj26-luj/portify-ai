@@ -5,27 +5,19 @@ export default defineConfig({
 
   timeout: 30000,
 
-  fullyParallel: true,
+  fullyParallel: false,
 
-  retries:
-    process.env.CI ? 2 : 0,
+  workers: 1,
 
-  reporter: [
-    ["html"],
-  ],
+  retries: process.env.CI ? 2 : 0,
+
+  reporter: [["html"]],
 
   use: {
-    baseURL:
-      "http://localhost:3000",
-
-    trace:
-      "on-first-retry",
-
-    screenshot:
-      "only-on-failure",
-
-    video:
-      "retain-on-failure",
+    baseURL: "http://localhost:3000",
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
 
   projects: [
@@ -35,14 +27,12 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
       },
     },
-
     {
       name: "firefox",
       use: {
         ...devices["Desktop Firefox"],
       },
     },
-
     {
       name: "webkit",
       use: {
@@ -52,13 +42,9 @@ export default defineConfig({
   ],
 
   webServer: {
-    command:
-      "npm run dev",
-
-    url:
-      "http://localhost:3000",
-
-    reuseExistingServer:
-      true,
+    command: "npm run dev",
+    url: "http://localhost:3000",
+    reuseExistingServer: true,
+    timeout: 120000,
   },
 });
