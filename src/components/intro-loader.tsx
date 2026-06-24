@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
 import * as THREE from "three";
 
@@ -190,10 +192,13 @@ export default function IntroLoader() {
     } else {
       planetGroup.position.set(2.4, -0.4, 0);
     }
-    const animate = (time: number) => {
-      requestAnimationFrame(animate);
 
-      const elapsedTime = time * 0.001; // milliseconds → seconds
+    let animationFrameId: number;
+
+    const animate = (time: number) => {
+      animationFrameId = requestAnimationFrame(animate);
+
+      const elapsedTime = time * 0.001;
 
       planetGroup.rotation.y = elapsedTime * 0.06;
       planetGroup.rotation.x = elapsedTime * 0.02;
@@ -203,7 +208,7 @@ export default function IntroLoader() {
       renderer.render(scene, camera);
     };
 
-    requestAnimationFrame(animate);
+    animationFrameId = requestAnimationFrame(animate);
 
     const handleResize = () => {
       if (!containerRef.current) return;
@@ -224,16 +229,20 @@ export default function IntroLoader() {
     window.addEventListener("resize", handleResize);
 
     return () => {
+      cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
+
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
+
       scene.clear();
       coreGeometry.dispose();
       coreMaterial.dispose();
       atmosphereGeometry.dispose();
       atmosphereMaterial.dispose();
       particleGeometry.dispose();
+      pointTexture.dispose();
       particleMaterial.dispose();
       renderer.dispose();
     };
