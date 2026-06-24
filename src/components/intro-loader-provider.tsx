@@ -18,9 +18,11 @@ export default function IntroLoaderProvider({ children }: { children: React.Reac
       return;
     }
 
+    const isPlaywright = navigator.webdriver || window.location.search.includes("e2e=true");
+
     const seen = sessionStorage.getItem("portify-intro-seen");
 
-    if (!seen) {
+    if (!seen && !isPlaywright) {
       setShowLoader(true);
 
       const timer = setTimeout(() => {
